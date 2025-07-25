@@ -3,6 +3,7 @@ using System;
 using InfalibleRealEstate.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace InfalibleRealEstate.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250725003344_AgregaLasTablas2")]
+    partial class AgregaLasTablas2
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -114,7 +117,7 @@ namespace InfalibleRealEstate.Migrations
 
                     b.HasKey("CategoriaId");
 
-                    b.ToTable("Categorias");
+                    b.ToTable("Categoria");
                 });
 
             modelBuilder.Entity("InfalibleRealEstate.Models.EstadoPropiedad", b =>
@@ -135,7 +138,7 @@ namespace InfalibleRealEstate.Migrations
 
                     b.HasKey("EstadoPropiedadId");
 
-                    b.ToTable("EstadosPropiedad");
+                    b.ToTable("EstadoPropiedad");
                 });
 
             modelBuilder.Entity("InfalibleRealEstate.Models.ImagenPropiedad", b =>
@@ -161,7 +164,7 @@ namespace InfalibleRealEstate.Migrations
 
                     b.HasIndex("PropiedadId");
 
-                    b.ToTable("ImagenesPropiedad");
+                    b.ToTable("ImagenPropiedad");
                 });
 
             modelBuilder.Entity("InfalibleRealEstate.Models.Propiedad", b =>
@@ -203,7 +206,7 @@ namespace InfalibleRealEstate.Migrations
                         .HasColumnType("character varying(10)");
 
                     b.Property<decimal>("Precio")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(18, 2)");
 
                     b.Property<string>("TipoTransaccion")
                         .IsRequired()
@@ -223,7 +226,7 @@ namespace InfalibleRealEstate.Migrations
 
                     b.HasIndex("EstadoPropiedadId");
 
-                    b.ToTable("Propiedades");
+                    b.ToTable("Propiedad");
                 });
 
             modelBuilder.Entity("InfalibleRealEstate.Models.PropiedadDetalle", b =>
@@ -249,7 +252,7 @@ namespace InfalibleRealEstate.Migrations
 
                     b.HasKey("PropiedadId");
 
-                    b.ToTable("PropiedadDetalles");
+                    b.ToTable("PropiedadDetalle");
                 });
 
             modelBuilder.Entity("InfalibleRealEstate.Models.SuscripcionNoticia", b =>
@@ -279,7 +282,7 @@ namespace InfalibleRealEstate.Migrations
 
                     b.HasIndex("UsuarioId");
 
-                    b.ToTable("SuscripcionesNoticia");
+                    b.ToTable("SuscripcionNoticia");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -429,8 +432,7 @@ namespace InfalibleRealEstate.Migrations
                 {
                     b.HasOne("InfalibleRealEstate.Data.ApplicationUser", "Administrador")
                         .WithMany("PropiedadesPublicadas")
-                        .HasForeignKey("AdministradorId")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .HasForeignKey("AdministradorId");
 
                     b.HasOne("InfalibleRealEstate.Models.Categoria", "Categoria")
                         .WithMany("Propiedades")
@@ -466,8 +468,7 @@ namespace InfalibleRealEstate.Migrations
                 {
                     b.HasOne("InfalibleRealEstate.Data.ApplicationUser", "Usuario")
                         .WithMany("Suscripciones")
-                        .HasForeignKey("UsuarioId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .HasForeignKey("UsuarioId");
 
                     b.Navigation("Usuario");
                 });
