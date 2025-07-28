@@ -1,0 +1,396 @@
+﻿@page "/Propiedad/Catalogo"
+@inject CategoriaServices CategoriaServices
+@inject PropiedadService PropiedadesServices
+@using Microsoft.AspNetCore.Components.Forms
+@rendermode InteractiveServer
+
+<EditForm Model="filtros">
+    <div class="catalog-container">
+        <button class="btn btn-primary filter-toggle d-md-none mb-2" @onclick="ToggleFilters">
+            @(showFilters ? "Ocultar Filtros" : "Mostrar Filtros")
+        </button>
+
+        <nav class="filter-sidebar @(showFilters ? "" : "collapsed d-md-block")">
+            <div class="mb-3 mt-3">
+                <h6 class="form-label">Tipo de Propiedad</h6>
+                <InputSelect @bind-Value="filtros.CategoriaId" class="form-select" @onchange="AplicarFiltros">
+                    <option value="">Todas</option>
+                    @foreach (var categoria in categorias)
+                    {
+                        <option value="@categoria.CategoriaId">@categoria.NombreCategoria</option>
+                    }
+                </InputSelect>
+            </div>
+
+            <div class="mb-3">
+                <h6>Tipo de Servicio</h6>
+                <div class="btn-group w-100" role="group" aria-label="Tipo de Servicio">
+                    <input type="radio" class="btn-check" name="tipoServicio" id="serv-todos"
+                           @onchange="@(() => FiltrarPorTransaccion(null))" checked="@(filtros.TipoTransaccion == null)">
+                    <label class="btn btn-outline-secondary" for="serv-todos">Todos</label>
+
+                    <input type="radio" class="btn-check" name="tipoServicio" id="serv-compra"
+                           @onchange="@(() => FiltrarPorTransaccion("Venta"))" checked="@(filtros.TipoTransaccion == "Venta")">
+                    <label class="btn btn-outline-secondary" for="serv-compra">Compra</label>
+
+                    <input type="radio" class="btn-check" name="tipoServicio" id="serv-alquiler"
+                           @onchange="@(() => FiltrarPorTransaccion("Renta"))" checked="@(filtros.TipoTransaccion == "Renta")">
+                    <label class="btn btn-outline-secondary" for="serv-alquiler">Alquiler</label>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <h6>Rango de Precio</h6>
+                <div class="mb-1">
+                    <input type="range" class="form-range" min="0" max="40000000" step="1000000"
+                           value="@filtros.PrecioMaximo" @onchange="@((ChangeEventArgs e) => ActualizarPrecioMaximo(e))" />
+                </div>
+                <div class="mb-3 text-center">
+                    <small class="text-muted">RD$ 0 hasta RD$ @filtros.PrecioMaximo.ToString("N0")</small>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <h6>Habitaciones:</h6>
+                <div class="btn-group w-100" role="group" aria-label="Habitaciones">
+                    @for (int i = 1; i <= 5; i++)
+                    {
+                        var habitacion = i;
+                        <input type="radio" class="btn-check" name="habitaciones" id="hab-@habitacion"
+                               @onchange="@(() => FiltrarPorHabitaciones(habitacion))" checked="@(filtros.Habitaciones == habitacion)">
+                        <label class="btn btn-outline-secondary" for="hab-@habitacion">@habitacion</label>
+                    }
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <h6>Baños:</h6>
+                <div class="btn-group w-100" role="group" aria-label="Baños">
+                    @for (int i = 1; i <= 5; i++)
+                    {
+                        var banos = i;
+                        <input type="radio" class="btn-check" name="banos" id="ban-@banos"
+                               @onchange="@(() => FiltrarPorBanos(banos))" checked="@(filtros.Banos == banos)">
+                        <label class="btn btn-outline-secondary" for="ban-@banos">@banos+</label>
+                    }
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <h6>Parqueos:</h6>
+                <div class="btn-group w-100" role="group" aria-label="Parqueos">
+                    @for (int i = 1; i <= 5; i++)
+                    {
+                        var parqueo = i;
+                        <input type="radio" class="btn-check" name="parqueos" id="par-@parqueo"
+                               @onchange="@(() => FiltrarPorParqueos(parqueo))" checked="@(filtros.Parqueos == parqueo)">
+                        <label class="btn btn-outline-secondary" for="par-@parqueo">@parqueo+</label>
+                    }
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <button type="button" class="btn btn-primary w-100" @onclick="LimpiarFiltros">
+                    Limpiar Filtros
+                </button>
+            </div>
+        </nav>
+
+        <main class="property-content">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h3 class="text-secondary mx-2"></h3>
+                @if (totalResultados > 0)
+                {
+                    <span class=""><strong>@totalResultados</strong> Resultados</span>
+                }
+            </div>
+
+            @if (propiedadesPaginadas is null)
+            {
+                <div class="text-center my-5">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Cargando...</span>
+                    </div>
+                    <p class="mt-2">Cargando propiedades...</p>
+                </div>
+            }
+            else if (!propiedadesPaginadas.Any())
+            {
+                <div class="alert alert-info" role="alert">
+                    <i class="bi bi-info-circle me-2"></i> No hay propiedades que coincidan con los filtros seleccionados.
+                </div>
+            }
+            else
+            {
+                <div class="row row-properties">
+                    @foreach (var propiedad in propiedadesPaginadas)
+                    {
+                        <div class="col-10 col-sm-6 col-md-4 col-lg-4 col-xl-4 mb-4 ultimas-card-col">
+                            <a href="/Propiedades/Details/@propiedad.PropiedadId">
+                                <div class="card ultimas-card h-100">
+                                    @if (propiedad.Imagenes?.Any() == true)
+                                    {
+                                        <img src="@propiedad.Imagenes.FirstOrDefault()?.UrlImagen"
+                                             class="card-img-top ultimas-card-img"
+                                             alt="@propiedad.Titulo">
+                                    }
+                                    else
+                                    {
+                                        <div class="card-img-top ultimas-card-img bg-light d-flex align-items-center justify-content-center">
+                                            <i class="bi bi-house text-muted" style="font-size: 3rem;"></i>
+                                        </div>
+                                    }
+                                    <button type="button"
+                                            class="btn btn-fav position-absolute top-0 end-0 m-2"
+                                            title="Guardar en favoritos">
+                                        <i class="bi bi-bookmark"></i>
+                                    </button>
+                                    <div class="card-body p-3">
+                                        <div class="d-flex justify-content-between mb-3">
+                                            <small class="text-secondary">@propiedad.TipoTransaccion</small>
+                                            <small class="text-muted">@propiedad.Ciudad</small>
+                                        </div>
+                                        <h5 class="card-title ultimas-card-title">@propiedad.Titulo</h5>
+                                    </div>
+                                    <div class="card-footer bg-white border-0 d-flex flex-column align-items-center">
+                                        <div class="d-flex justify-content-center align-items-center mb-2 gap-3">
+                                            @if (propiedad.Detalle != null)
+                                            {
+                                                @if (propiedad.Detalle?.MetrosCuadrados.HasValue == true && propiedad.Detalle.MetrosCuadrados != 0)
+                                                {
+                                                    <span class="text-secondary d-flex align-items-center">
+                                                        <i class="bi bi-fullscreen" style="font-size: 13px; vertical-align: middle;"></i>
+                                                        <span class="ms-1" style="font-size: 13px;">@propiedad.Detalle.MetrosCuadrados m²</span>
+                                                    </span>
+                                                }
+
+                                                @if (propiedad.Detalle?.Habitaciones.HasValue == true && propiedad.Detalle.Habitaciones > 0)
+                                                {
+                                                    <span class="text-secondary d-flex align-items-center">
+                                                        <span class="material-symbols-outlined"
+                                                              style="font-variation-settings: 'wght' 100; font-size: 30px; vertical-align: middle;">
+                                                            airline_seat_flat
+                                                        </span>
+                                                        <span class="ms-1" style="font-size: 13px;">@propiedad.Detalle?.Habitaciones</span>
+                                                    </span>
+                                                }
+
+                                                @if (propiedad.Detalle?.Banos.HasValue == true && propiedad.Detalle.Banos > 0)
+                                                {
+                                                    <span class="text-secondary d-flex align-items-center">
+                                                        <span class="material-symbols-outlined"
+                                                              style="font-variation-settings: 'wght' 100; font-size: 20px; vertical-align: middle;">
+                                                            shower
+                                                        </span>
+                                                        <span class="ms-1" style="font-size: 13px;">@propiedad.Detalle.Banos</span>
+                                                    </span>
+                                                }
+
+                                                @if (propiedad.Detalle?.Parqueo.HasValue == true && propiedad.Detalle.Parqueo > 0)
+                                                {
+                                                    <span class="text-secondary d-flex align-items-center">
+                                                        <span class="material-symbols-outlined"
+                                                              style="font-variation-settings: 'wght' 100; font-size: 20px; vertical-align: middle;">
+                                                            directions_car
+                                                        </span>
+                                                        <span class="ms-1" style="font-size: 13px;">@propiedad.Detalle.Parqueo</span>
+                                                    </span>
+                                                }
+                                            }
+                                        </div>
+                                        <span class="ultimas-card-price">
+                                            @(propiedad.Moneda == "Dolar" ? "USD$" : "DOP$") @propiedad.Precio.ToString("N2")
+                                        </span>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                    }
+                </div>
+                <!-- Paginación -->
+                <nav aria-label="Page navigation" class="mt-4">
+                    <ul class="pagination justify-content-center">
+                        <li class="page-item @(currentPage == 1 ? "disabled" : "")">
+                            <button class="page-link" @onclick="PrevPage">Anterior</button>
+                        </li>
+                        @for (int i = 1; i <= totalPages; i++)
+                        {
+                            <li class="page-item @(currentPage == i ? "active" : "")">
+                                <button class="page-link" @onclick="() => GoToPage(i)">@i</button>
+                            </li>
+                        }
+                        <li class="page-item @(currentPage == totalPages ? "disabled" : "")">
+                            <button class="page-link" @onclick="NextPage">Siguiente</button>
+                        </li>
+                    </ul>
+                </nav>
+            }
+        </main>
+    </div>
+</EditForm>
+
+@code {
+    private List<Categoria> categorias = new();
+    private List<Propiedad>? propiedades = new();
+    private List<Propiedad>? propiedadesPaginadas = new();
+    private bool showFilters = true;
+
+    private FiltrosPropiedades filtros = new();
+
+    private int currentPage = 1;
+    private int pageSize = 18;
+    private int totalPages = 1;
+    private int totalResultados = 0;
+
+    protected override async Task OnInitializedAsync()
+    {
+        categorias = await CategoriaServices.Listar(c => true);
+        filtros.PrecioMaximo = 40000000;
+        await CargarPropiedades();
+    }
+    private async Task ActualizarPrecioMaximo(ChangeEventArgs e)
+    {
+        if (decimal.TryParse(e.Value?.ToString(), out decimal precio))
+        {
+            filtros.PrecioMaximo = precio;
+            currentPage = 1;
+            await CargarPropiedades();
+        }
+    }
+    private async Task AplicarFiltros()
+    {
+        currentPage = 1;
+        await CargarPropiedades();
+    }
+
+    private async Task FiltrarPorTransaccion(string? tipoTransaccion)
+    {
+        filtros.TipoTransaccion = tipoTransaccion;
+        currentPage = 1;
+        await CargarPropiedades();
+    }
+
+    private async Task FiltrarPorHabitaciones(int? habitaciones)
+    {
+        filtros.Habitaciones = habitaciones;
+        currentPage = 1;
+        await CargarPropiedades();
+    }
+
+    private async Task FiltrarPorBanos(int? banos)
+    {
+        filtros.Banos = banos;
+        currentPage = 1;
+        await CargarPropiedades();
+    }
+
+    private async Task FiltrarPorParqueos(int? parqueos)
+    {
+        filtros.Parqueos = parqueos;
+        currentPage = 1;
+        await CargarPropiedades();
+    }
+
+    private async Task LimpiarFiltros()
+    {
+        filtros = new FiltrosPropiedades
+        {
+            PrecioMaximo = 40000000
+        };
+        currentPage = 1;
+        await CargarPropiedades();
+    }
+
+    private void ToggleFilters()
+    {
+        showFilters = !showFilters;
+    }
+
+    private async Task CargarPropiedades()
+    {
+        var todasPropiedades = await PropiedadesServices.Listar(p => true);
+
+        // Aplicar filtros
+        var propiedadesFiltradas = todasPropiedades;
+
+        if (filtros.CategoriaId != null)
+        {
+            propiedadesFiltradas = propiedadesFiltradas.Where(p => p.CategoriaId == filtros.CategoriaId).ToList();
+        }
+
+        if (!string.IsNullOrEmpty(filtros.TipoTransaccion))
+        {
+            propiedadesFiltradas = propiedadesFiltradas.Where(p => p.TipoTransaccion == filtros.TipoTransaccion).ToList();
+        }
+
+        propiedadesFiltradas = propiedadesFiltradas.Where(p => p.Precio <= filtros.PrecioMaximo).ToList();
+
+        if (filtros.Habitaciones.HasValue)
+        {
+            propiedadesFiltradas = propiedadesFiltradas.Where(p =>
+                p.Detalle?.Habitaciones >= filtros.Habitaciones).ToList();
+        }
+
+        if (filtros.Banos.HasValue)
+        {
+            propiedadesFiltradas = propiedadesFiltradas.Where(p =>
+                p.Detalle?.Banos >= filtros.Banos).ToList();
+        }
+
+        if (filtros.Parqueos.HasValue)
+        {
+            propiedadesFiltradas = propiedadesFiltradas.Where(p =>
+                p.Detalle?.Parqueo >= filtros.Parqueos).ToList();
+        }
+
+        propiedades = propiedadesFiltradas.ToList();
+        totalResultados = propiedades.Count;
+        totalPages = (int)Math.Ceiling((double)totalResultados / pageSize);
+
+        // Asegura que la página actual esté dentro del rango
+        if (currentPage < 1) currentPage = 1;
+        if (currentPage > totalPages) currentPage = totalPages == 0 ? 1 : totalPages;
+
+        propiedadesPaginadas = propiedades
+            .Skip((currentPage - 1) * pageSize)
+            .Take(pageSize)
+            .ToList();
+    }
+
+    private async Task PrevPage()
+    {
+        if (currentPage > 1)
+        {
+            currentPage--;
+            await CargarPropiedades();
+        }
+    }
+
+    private async Task NextPage()
+    {
+        if (currentPage < totalPages)
+        {
+            currentPage++;
+            await CargarPropiedades();
+        }
+    }
+
+    private async Task GoToPage(int page)
+    {
+        if (page >= 1 && page <= totalPages)
+        {
+            currentPage = page;
+            await CargarPropiedades();
+        }
+    }
+
+    public class FiltrosPropiedades
+    {
+        public string? TipoTransaccion { get; set; }
+        public int? CategoriaId { get; set; }
+        public decimal PrecioMaximo { get; set; } = 40000000;
+        public int? Habitaciones { get; set; }
+        public int? Banos { get; set; }
+        public int? Parqueos { get; set; }
+    }
+}
