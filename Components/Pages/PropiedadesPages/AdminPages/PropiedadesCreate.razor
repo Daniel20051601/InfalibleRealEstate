@@ -1,0 +1,247 @@
+﻿@page "/admin/propiedades/create"
+@attribute [Authorize(Roles = "Admin")]
+@layout AdminLayout
+@inject CategoriaServices CategoriaServices
+@inject SupabaseStorageService SupabaseStorage
+@inject NavigationManager NavigationManager
+@inject PropiedadService PropiedadesServices
+@inject IToastService ToastService
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@rendermode InteractiveServer
+
+<PageTitle>Crear Propiedad</PageTitle>
+
+<EditForm Model="@propiedad" OnValidSubmit="@Guardar">
+    <DataAnnotationsValidator />
+    <div>
+        <div>
+            <div class="containerCreate">
+                <div class="inputImage text-center">
+                    <div>
+                        <span class="fs-3 text-secondary w-100 d-block">
+                            <i class="bi bi-images"></i>
+                        </span>
+                    </div>
+                    <InputFile class="form-control text-secondary w-auto" OnChange="CargarArchivosSeleccionados" accept="image/*" multiple />
+                    @if (archivosSeleccionados.Count > 0)
+                    {
+                        <div class="mt-2 text-success">
+                            @archivosSeleccionados.Count archivo(s) seleccionado(s)
+                        </div>
+                    }
+                </div>
+            </div>
+            <div class="containerForm mb-3">
+                <div class="containerInto">
+                    <label for="titulo" class="form-label fs-5">T&iacute;tulo</label>
+                    <InputText id="titulo" class="form-control" @bind-Value="propiedad.Titulo" placeholder="Ingrese el t&iacute;tulo de la propiedad" />
+                </div>
+            </div>
+
+            <div class="containerForm mb-3">
+                <div class="containerInto">
+                    <label for="tTransaction" class="form-label fs-5">Tipo de Transacción</label>
+                    <InputSelect id="tTransaction" class="form-select" @bind-Value="propiedad.TipoTransaccion">
+                        <option value="">Seleccione una opción</option>
+                        <option value="Venta">Venta</option>
+                        <option value="Alquiler">Alquiler</option>
+                        <option value="Ambos">Venta o Alquiler</option>
+                    </InputSelect>
+                </div>
+            </div>
+
+            <div class="containerForm">
+                <label for="precio" class="form-label fs-5">Precio</label><br />
+            </div>
+
+            <div class="containerForm mb-3 mt-0">
+                <div>
+                    <div class="input-group">
+                        <InputSelect class="form-select" @bind-Value="propiedad.Moneda">
+                            <option value="Dolar">USD$</option>
+                            <option value="Peso">DOP$</option>
+                        </InputSelect>
+                        <InputNumber id="precio" class="form-control" @bind-Value="propiedad.Precio" placeholder="Ingrese el precio de la propiedad" />
+                    </div>
+                </div>
+            </div>
+
+            <div class="containerForm mb-3">
+                <div class="containerInto">
+                    <label for="categoria" class="form-label fs-5">Categoria</label>
+                    <InputSelect class="form-select" @bind-Value="propiedad.CategoriaId">
+                        <option value="">Seleccione una categoría</option>
+                        @foreach (var categoria in categorias)
+                        {
+                            <option value="@categoria.CategoriaId">@categoria.NombreCategoria</option>
+                        }
+                    </InputSelect>
+                </div>
+            </div>
+
+            <div class="containerForm-row mb-3">
+                <div class="containerForm-half">
+                    <div class="containerCompleto">
+                        <label for="ciudad" class="form-label fs-5">Ciudad</label>
+                        <InputText id="ciudad" class="form-control" @bind-Value="propiedad.Ciudad" placeholder="Ingrese la ciudad donde est&aacute; ubicado el inmueble" />
+                    </div>
+                </div>
+                <div class="containerForm-half">
+                    <div class="containerCompleto">
+                        <label for="Provincia" class="form-label fs-5">Provincia</label>
+                        <InputText id="Provincia" class="form-control" @bind-Value="propiedad.EstadoProvincia" placeholder="Ingrese la provincia donde est&aacute; ubicado el inmueble" />
+
+                    </div>
+                </div>
+            </div>
+
+            <div class="containerForm-row mb-3">
+                <div class="containerForm-half">
+                    <div class="containerCompleto">
+                        <label for="habitaciones" class="form-label fs-5">Habitaciones</label>
+                        <InputNumber id="habitaciones" class="form-control" @bind-Value="propiedad.Detalle!.Habitaciones" placeholder="" />
+
+                    </div>
+                </div>
+                <div class="containerForm-half">
+                    <div class="containerCompleto">
+                        <label for="Baños" class="form-label fs-5">Baños</label>
+                        <InputNumber id="Baños" class="form-control" @bind-Value="propiedad.Detalle!.Banos" placeholder="" />
+                    </div>
+                </div>
+                <div class="containerForm-half">
+                    <div class="containerCompleto">
+                        <label for="Parqueos" class="form-label fs-5">Parqueos</label>
+                        <InputNumber id="Parqueos" class="form-control" @bind-Value="propiedad.Detalle!.Parqueo" placeholder="" />
+                    </div>
+                </div>
+
+                <div class="containerForm-half">
+                    <div class="containerCompleto">
+                        <label for="Metros" class="form-label fs-5">Metros cuadrados</label>
+                        <InputNumber id="Metros" class="form-control" @bind-Value="propiedad.Detalle!.MetrosCuadrados" placeholder="" />
+                    </div>
+                </div>
+            </div>
+
+            <div class="containerForm mb-3">
+                <div class="containerInto">
+                    <label for="descripcion" class="form-label fs-5">Descripci&oacute;n</label>
+                    <InputTextArea id="descripcion" class="form-control inputTextAre" @bind-Value="propiedad.Detalle!.Descripcion" placeholder="Ingrese la Descripci&oacute;n de la propiedad" />
+                </div>
+            </div>
+
+        </div>
+
+        <div class="container d-flex justify-content-center gap-2">
+            <a href="/admin/administrar-propiedades" class="btn btn-secondary">Volver</a>
+            <button type="submit" class="btn btn-primary">Guardar</button>
+        </div>
+
+    </div>
+</EditForm>
+
+
+@code {
+    private Propiedad propiedad = new()
+    {
+        Titulo = "Apartamento",
+        Categoria = new Categoria(),
+        Detalle = new PropiedadDetalle(),
+        Moneda = "Dolar",
+        TipoTransaccion = "Venta",
+        Precio = 1,
+        Ciudad = "SFM",
+        EstadoProvincia = "Duarte",
+        FechaPublicacion = DateTime.UtcNow,
+        FechaActualizacion = DateTime.UtcNow
+
+    };
+    private List<string> imagenesUrls = new();
+    private List<IBrowserFile> archivosSeleccionados = new();
+    private bool cargandoImagenes = false;
+
+    private List<Categoria> categorias = new List<Categoria>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        categorias = await CategoriaServices.Listar(c => true);
+        if (categorias.Any())
+        {
+            propiedad.CategoriaId = categorias.First().CategoriaId;
+        }
+    }
+
+    private void CargarArchivosSeleccionados(InputFileChangeEventArgs e)
+    {
+        archivosSeleccionados = e.GetMultipleFiles().ToList();
+    }
+
+    private async Task Guardar()
+    {
+        try
+        {
+
+            var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+            var user = authState.User;
+
+            if (!user.Identity?.IsAuthenticated ?? true)
+                throw new InvalidOperationException("Usuario no autorizado.");
+
+            propiedad.FechaActualizacion = DateTime.UtcNow;
+            propiedad.FechaPublicacion = DateTime.UtcNow;
+            propiedad.AdministradorId = user.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            propiedad.EstadoPropiedadId = 1;
+
+            var guardado = await PropiedadesServices.Guardar(propiedad);
+
+            if (guardado && archivosSeleccionados.Any())
+            {
+                var imagenesUrls = await SupabaseStorage.UploadFiles(archivosSeleccionados);
+                foreach (var url in imagenesUrls)
+                {
+                    var imagen = new ImagenPropiedad
+                    {
+                        PropiedadId = propiedad.PropiedadId,
+                        UrlImagen = url,
+                        Orden = imagenesUrls.IndexOf(url) + 1
+                    };
+                    await PropiedadesServices.AgregarImagen(imagen);
+                }
+            }
+
+            if (guardado)
+            {
+                ToastService.ShowSuccess("Propiedad creada exitosamente.");
+                propiedad = new Propiedad
+                {
+                    Titulo = "",
+                    Categoria = new Categoria(),
+                    Detalle = new PropiedadDetalle(),
+                    Moneda = "Dolar",
+                    TipoTransaccion = "",
+                    Precio = 0,
+                    Ciudad = "",
+                    EstadoProvincia = "",
+                    FechaPublicacion = DateTime.UtcNow,
+                    FechaActualizacion = DateTime.UtcNow
+                };
+                archivosSeleccionados.Clear();
+                imagenesUrls.Clear();
+
+                StateHasChanged();
+            }
+            else
+            {
+                ToastService.ShowError("Error al guardar la propiedad.");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error en Guardar: {ex.Message}");
+            ToastService.ShowError($"Error: {ex.Message}");
+        }
+    }
+
+
+}
