@@ -689,3 +689,78 @@
     object-fit: cover;
     object-position: center;
 }
+
+/*Log In*/
+.ir-login-bg {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f5f7fa;
+    padding: 1rem;
+}
+
+.ir-login-card {
+    box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+    border-radius: 18px;
+    border: none;
+    background: #fff;
+    max-width: 420px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.ir-login-body {
+    padding: 2.5rem 2rem;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.ir-login-title {
+    text-align: center;
+    margin-bottom: 1.5rem;
+    font-weight: 700;
+    font-size: 2rem;
+    color: #222;
+}
+
+.ir-login-btn {
+    background: #007bff;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    transition: background 0.2s;
+}
+
+    .ir-login-btn:hover {
+        background: #0056b3;
+    }
+
+.ir-login-links a {
+    color: #007bff;
+    text-decoration: none;
+    font-size: 0.9rem;
+    display: flex;
+    justify-content: center;
+}
+
+    .ir-login-links a:hover {
+        text-decoration: underline;
+    }
+
+@media (max-width: 600px) {
+    .ir-login-card {
+        max-width: 100%;
+        border-radius: 10px;
+    }
+
+    .ir-login-body {
+        padding: 1.2rem 0.5rem;
+    }
+}
+
