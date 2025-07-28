@@ -1,13 +1,14 @@
+using Blazored.Toast;
 using InfalibleRealEstate.Components;
 using InfalibleRealEstate.Components.Account;
 using InfalibleRealEstate.Data;
+using InfalibleRealEstate.Services;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
@@ -15,6 +16,12 @@ builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddScoped<IdentityUserAccessor>();
 builder.Services.AddScoped<IdentityRedirectManager>();
 builder.Services.AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuthenticationStateProvider>();
+builder.Services.AddBlazoredToast();
+builder.Services.AddScoped<PropiedadService>();
+builder.Services.AddScoped<CategoriaServices>();
+builder.Services.AddScoped<SupabaseStorageService>();
+builder.Services.AddScoped<UsuariosService>();
+builder.Services.AddHttpClient<SupabaseStorageService>();
 
 builder.Services.AddAuthentication(options =>
     {
