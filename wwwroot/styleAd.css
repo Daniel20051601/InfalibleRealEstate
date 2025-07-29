@@ -1,0 +1,162 @@
+﻿.admin-layout {
+    width: 100%;
+}
+
+.admin-main {
+    display: flex;
+    min-height: calc(100vh - 70px); 
+}
+
+.sidebar-bg {
+    background: #f8f9fa;
+    min-height: 100vh;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+    border-right: 1px solid #e3e3e3;
+    padding-top: 1rem;
+    width: 260px;
+    flex-shrink: 0;
+}
+
+.nav-admin {
+    width: 260px;
+    min-height: 100vh;
+    background: transparent;
+}
+
+.nav-scrollable {
+    overflow-y: auto;
+    max-height: calc(100vh - 2rem);
+}
+
+.nav {
+    width: 100%;
+}
+
+.nav-item {
+    margin-bottom: 0.5rem;
+}
+
+.nav-link {
+    color: #191140;
+    font-weight: 500;
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    transition: background 0.2s, color 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: none;
+}
+
+    .nav-link:hover,
+    .nav-link.active {
+        background: rgba(0,204,255,0.15);
+        color: #00bdf3;
+        text-decoration: none;
+    }
+
+    .nav-link .bi {
+        margin-right: 0.5rem;
+        color: #00bdf3;
+        font-size: 1.2rem;
+    }
+
+.text-center {
+    text-align: left !important;
+}
+
+.contentAdmin {
+    flex: 1;
+    padding: 2rem;
+    background: #fff;
+    min-height: 100vh;
+}
+
+/*Propiedad Create*/
+.titleCreate {
+    font-size: 2.5rem;
+    font-family: 'Segoe UI', Arial, sans-serif;
+    font-weight: 600;
+    color: #00CCFF;
+    margin-bottom: 20px;
+    margin-top: 5px;
+    text-align: center;
+}
+
+
+.inputImage {
+    width: 100%;
+    height: 200px;
+    margin: 4px;
+    object-fit: cover;
+    background-color: rgba(128, 128, 128,0.1);
+    align-items: center;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    color: #888888;
+}
+
+    .inputImage input[type="file"] {
+        color: #888888; 
+    }
+
+.containerCreate {
+    display: flex;
+    justify-content: center;
+    margin: 20px auto;
+}
+
+.containerForm {
+    display: flex;
+    justify-content: start;
+    margin-left: 60px;
+    margin-right: 60px;
+}
+
+.containerInto {
+    width: 100%;
+}
+
+.containerForm-row {
+    display: flex;
+    gap: 16px;
+    margin-left: 60px;
+    margin-right: 60px;
+}
+
+.containerForm-half {
+    flex: 1 1 0;
+    min-width: 0;
+}
+
+.containerCompleto {
+    width: 100%;
+}
+
+.inputTextAre {
+    height: 200px;
+    resize: none;
+    padding: 10px;
+    border-radius: 10px;
+    border: 1px solid #ccc;
+    font-size: 16px;
+    color: #333;
+}
+
+/*AdminHome*/
+
+.admin-card-link {
+    text-decoration: none !important;
+}
+
+    .admin-card-link .admin-card-hover {
+        transition: transform 0.18s;
+    }
+
+    .admin-card-link:hover .admin-card-hover,
+    .admin-card-link:focus .admin-card-hover {
+        transform: scale(1.04);
+        z-index: 2;
+    }
