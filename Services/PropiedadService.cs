@@ -135,6 +135,13 @@ public class PropiedadService(IDbContextFactory<ApplicationDbContext> DbContext)
 
         return await contexto.SaveChangesAsync() > 0;
     }
+
+    public async Task<int> ContarPropiedades()
+    {
+        await using var contexto = await DbContext.CreateDbContextAsync();
+        return await contexto.Propiedades.CountAsync();
+    }
+
 }
 
 

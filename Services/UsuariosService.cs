@@ -31,4 +31,10 @@ public class UsuariosService(IDbContextFactory<ApplicationDbContext> DbContext)
             .AsNoTracking()
             .ToListAsync();
     }
+
+    public async Task<int> ContarUsuarios()
+    {
+        await using var contexto = await DbContext.CreateDbContextAsync();
+        return await contexto.Users.CountAsync();
+    }
 }
