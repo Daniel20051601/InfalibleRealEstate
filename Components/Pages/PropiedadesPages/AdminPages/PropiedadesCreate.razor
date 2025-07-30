@@ -22,11 +22,25 @@
                             <i class="bi bi-images"></i>
                         </span>
                     </div>
-                    <InputFile class="form-control text-secondary w-auto" OnChange="CargarArchivosSeleccionados" accept="image/*" multiple />
-                    @if (archivosSeleccionados.Count > 0)
+                    <InputFile class="form-control text-secondary w-auto" OnChange="CargarArchivosSeleccionados" accept="image/*" multiple disabled="@(archivosSeleccionados.Count >= 10)" />
+                    @if (archivosSeleccionados.Count >= 10)
+                    {
+                        <div class="mt-2 text-danger small">
+                            Has alcanzado el límite de 10 imágenes.
+                        </div>
+                    }
+                    @if (imagenesPreview.Count > 0)
                     {
                         <div class="mt-2 text-success">
-                            @archivosSeleccionados.Count archivo(s) seleccionado(s)
+                            @for (int i = 0; i < imagenesPreview.Count; i++)
+                            {
+                                var index = i;
+                                <div @key="imagenesPreview[index]" class="preview-img-container position-relative d-inline-block me-2 mb-2">
+                                    <img src="@imagenesPreview[index]" class="preview-img rounded" />
+                                    <button type="button" class="btn-close preview-close" title="Eliminar"
+                                            @onclick="() => EliminarArchivo(index)"></button>
+                                </div>
+                            }
                         </div>
                     }
                 </div>
@@ -35,6 +49,7 @@
                 <div class="containerInto">
                     <label for="titulo" class="form-label fs-5">T&iacute;tulo</label>
                     <InputText id="titulo" class="form-control" @bind-Value="propiedad.Titulo" placeholder="Ingrese el t&iacute;tulo de la propiedad" />
+                    <ValidationMessage For="@(() => propiedad.Titulo)" class="text-danger" />
                 </div>
             </div>
 
@@ -47,6 +62,7 @@
                         <option value="Alquiler">Alquiler</option>
                         <option value="Ambos">Venta o Alquiler</option>
                     </InputSelect>
+                    <ValidationMessage For="@(() => propiedad.TipoTransaccion)" class="text-danger" />
                 </div>
             </div>
 
@@ -61,7 +77,8 @@
                             <option value="Dolar">USD$</option>
                             <option value="Peso">DOP$</option>
                         </InputSelect>
-                        <InputNumber id="precio" class="form-control" @bind-Value="propiedad.Precio" placeholder="Ingrese el precio de la propiedad" />
+                        <InputNumber id="precio" class="form-control" @bind-Value="propiedad.Precio" placeholder="Ingrese el precio de la propiedad" min="0" />
+                        <ValidationMessage For="@(() => propiedad.Precio)" class="text-danger" />
                     </div>
                 </div>
             </div>
@@ -76,6 +93,7 @@
                             <option value="@categoria.CategoriaId">@categoria.NombreCategoria</option>
                         }
                     </InputSelect>
+                    <ValidationMessage For="@(() => propiedad.CategoriaId)" class="text-danger" />
                 </div>
             </div>
 
@@ -83,13 +101,27 @@
                 <div class="containerForm-half">
                     <div class="containerCompleto">
                         <label for="ciudad" class="form-label fs-5">Ciudad</label>
-                        <InputText id="ciudad" class="form-control" @bind-Value="propiedad.Ciudad" placeholder="Ingrese la ciudad donde est&aacute; ubicado el inmueble" />
+                        <InputText id="ciudad" class="form-control" @bind-Value="propiedad.Ciudad" list="ciudadesRD" placeholder="Ingrese la ciudad donde está ubicado el inmueble" />
+                        <datalist id="ciudadesRD">
+                            @foreach (var ciudad in ProvinciasyCiudades.Ciudades)
+                            {
+                                <option value="@ciudad"></option>
+                            }
+                        </datalist>
+                        <ValidationMessage For="@(() => propiedad.Ciudad)" class="text-danger" />
                     </div>
                 </div>
                 <div class="containerForm-half">
                     <div class="containerCompleto">
                         <label for="Provincia" class="form-label fs-5">Provincia</label>
-                        <InputText id="Provincia" class="form-control" @bind-Value="propiedad.EstadoProvincia" placeholder="Ingrese la provincia donde est&aacute; ubicado el inmueble" />
+                        <InputText id="Provincia" class="form-control" @bind-Value="propiedad.EstadoProvincia" list="provincias" placeholder="Ingrese la ciudad donde está ubicado el inmueble" />
+                        <datalist id="provincias">
+                            @foreach (var provinvia in ProvinciasyCiudades.Provincias)
+                            {
+                                <option value="@provinvia"></option>
+                            }
+                        </datalist>
+                        <ValidationMessage For="@(() => propiedad.EstadoProvincia)" class="text-danger" />
 
                     </div>
                 </div>
@@ -99,27 +131,31 @@
                 <div class="containerForm-half">
                     <div class="containerCompleto">
                         <label for="habitaciones" class="form-label fs-5">Habitaciones</label>
-                        <InputNumber id="habitaciones" class="form-control" @bind-Value="propiedad.Detalle!.Habitaciones" placeholder="" />
+                        <InputNumber id="habitaciones" class="form-control" @bind-Value="propiedad.Detalle!.Habitaciones" placeholder="" min="0" />
+                        <ValidationMessage For="@(() => propiedad.Detalle!.Habitaciones)" class="text-danger" />
 
                     </div>
                 </div>
                 <div class="containerForm-half">
                     <div class="containerCompleto">
                         <label for="Baños" class="form-label fs-5">Baños</label>
-                        <InputNumber id="Baños" class="form-control" @bind-Value="propiedad.Detalle!.Banos" placeholder="" />
+                        <InputNumber id="Baños" class="form-control" @bind-Value="propiedad.Detalle!.Banos" placeholder="" min="0" />
+                        <ValidationMessage For="@(() => propiedad.Detalle!.Banos)" class="text-danger" />
                     </div>
                 </div>
                 <div class="containerForm-half">
                     <div class="containerCompleto">
                         <label for="Parqueos" class="form-label fs-5">Parqueos</label>
-                        <InputNumber id="Parqueos" class="form-control" @bind-Value="propiedad.Detalle!.Parqueo" placeholder="" />
+                        <InputNumber id="Parqueos" class="form-control" @bind-Value="propiedad.Detalle!.Parqueo" placeholder="" min="0" />
+                        <ValidationMessage For="@(() => propiedad.Detalle!.Parqueo)" class="text-danger" />
                     </div>
                 </div>
 
                 <div class="containerForm-half">
                     <div class="containerCompleto">
                         <label for="Metros" class="form-label fs-5">Metros cuadrados</label>
-                        <InputNumber id="Metros" class="form-control" @bind-Value="propiedad.Detalle!.MetrosCuadrados" placeholder="" />
+                        <InputNumber id="Metros" class="form-control" @bind-Value="propiedad.Detalle!.MetrosCuadrados" placeholder="" min="0" />
+                        <ValidationMessage For="@(() => propiedad.Detalle!.MetrosCuadrados)" class="text-danger" />
                     </div>
                 </div>
             </div>
@@ -128,6 +164,7 @@
                 <div class="containerInto">
                     <label for="descripcion" class="form-label fs-5">Descripci&oacute;n</label>
                     <InputTextArea id="descripcion" class="form-control inputTextAre" @bind-Value="propiedad.Detalle!.Descripcion" placeholder="Ingrese la Descripci&oacute;n de la propiedad" />
+                    <ValidationMessage For="@(() => propiedad.Detalle!.Descripcion)" class="text-danger" />
                 </div>
             </div>
 
@@ -141,70 +178,125 @@
     </div>
 </EditForm>
 
+@if (isGuardando)
+{
+    <div class="modal fade show" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="false" style="display: block;">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-body d-flex flex-column align-items-center">
+                    <span class="mb-3 fs-5">Guardando...</span>
+                    <div>
+                        <div class="spinner-grow text-primary mx-1" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <div class="spinner-grow text-primary mx-1" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <div class="spinner-grow text-primary mx-1" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-backdrop fade show"></div>
+}
 
 @code {
-    private Propiedad propiedad = new()
-    {
-        Titulo = "Apartamento",
-        Categoria = new Categoria(),
-        Detalle = new PropiedadDetalle(),
-        Moneda = "Dolar",
-        TipoTransaccion = "Venta",
-        Precio = 1,
-        Ciudad = "SFM",
-        EstadoProvincia = "Duarte",
-        FechaPublicacion = DateTime.UtcNow,
-        FechaActualizacion = DateTime.UtcNow
-
-    };
+    private Propiedad propiedad = Propiedad.CrearNueva(1);
     private List<string> imagenesUrls = new();
     private List<IBrowserFile> archivosSeleccionados = new();
     private bool cargandoImagenes = false;
-
     private List<Categoria> categorias = new List<Categoria>();
+    private List<string> imagenesPreview = new();
+    private string? administradorId;
+
+    public bool isGuardando = false;
 
     protected override async Task OnInitializedAsync()
     {
-        categorias = await CategoriaServices.Listar(c => true);
-        if (categorias.Any())
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (!user.Identity?.IsAuthenticated ?? true)
         {
-            propiedad.CategoriaId = categorias.First().CategoriaId;
+            throw new InvalidOperationException("Usuario no autorizado para acceder a este recurso.");
+        }
+
+        administradorId = user.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+
+        categorias = await CategoriaServices.Listar(c => true);
+        var categoriaId = categorias.Any() ? categorias.First().CategoriaId : 1;
+        propiedad = Propiedad.CrearNueva(categoriaId);
+    }
+
+    private async Task CargarArchivosSeleccionados(InputFileChangeEventArgs e)
+    {
+        const int maximoImagenes = 10;
+        foreach (var file in e.GetMultipleFiles())
+        {
+            if (archivosSeleccionados.Count >= maximoImagenes)
+            {
+                ToastService.ShowWarning($"No se pueden agregar más imágenes. El límite es de {maximoImagenes}.");
+                break;
+            }
+
+            if (!archivosSeleccionados.Any(f => f.Name == file.Name && f.Size == file.Size))
+            {
+                archivosSeleccionados.Add(file);
+                using var stream = file.OpenReadStream(1024 * 1024 * 15);
+                using var memoryStream = new MemoryStream();
+                await stream.CopyToAsync(memoryStream);
+                var buffer = memoryStream.ToArray();
+
+                var base64 = Convert.ToBase64String(buffer);
+                var imageDataUrl = $"data:{file.ContentType};base64,{base64}";
+                imagenesPreview.Add(imageDataUrl);
+            }
         }
     }
 
-    private void CargarArchivosSeleccionados(InputFileChangeEventArgs e)
+    private void EliminarArchivo(int index)
     {
-        archivosSeleccionados = e.GetMultipleFiles().ToList();
+        if (index >= 0 && index < archivosSeleccionados.Count)
+        {
+            archivosSeleccionados.RemoveAt(index);
+            imagenesPreview.RemoveAt(index);
+            StateHasChanged();
+        }
     }
 
     private async Task Guardar()
     {
+        isGuardando = true;
+        StateHasChanged();
+        await Task.Delay(1); 
+
         try
         {
+            if (string.IsNullOrEmpty(administradorId))
+            {
+                throw new InvalidOperationException("El ID del administrador no se encontró. No se puede guardar.");
+            }
 
-            var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-            var user = authState.User;
-
-            if (!user.Identity?.IsAuthenticated ?? true)
-                throw new InvalidOperationException("Usuario no autorizado.");
-
-            propiedad.FechaActualizacion = DateTime.UtcNow;
             propiedad.FechaPublicacion = DateTime.UtcNow;
-            propiedad.AdministradorId = user.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            propiedad.FechaActualizacion = DateTime.UtcNow;
+            propiedad.AdministradorId = administradorId;
             propiedad.EstadoPropiedadId = 1;
 
             var guardado = await PropiedadesServices.Guardar(propiedad);
 
             if (guardado && archivosSeleccionados.Any())
             {
-                var imagenesUrls = await SupabaseStorage.UploadFiles(archivosSeleccionados);
-                foreach (var url in imagenesUrls)
+                var urls = await SupabaseStorage.UploadFiles(archivosSeleccionados);
+                foreach (var url in urls)
                 {
                     var imagen = new ImagenPropiedad
                     {
                         PropiedadId = propiedad.PropiedadId,
                         UrlImagen = url,
-                        Orden = imagenesUrls.IndexOf(url) + 1
+                        Orden = urls.IndexOf(url) + 1
                     };
                     await PropiedadesServices.AgregarImagen(imagen);
                 }
@@ -213,23 +305,11 @@
             if (guardado)
             {
                 ToastService.ShowSuccess("Propiedad creada exitosamente.");
-                propiedad = new Propiedad
-                {
-                    Titulo = "",
-                    Categoria = new Categoria(),
-                    Detalle = new PropiedadDetalle(),
-                    Moneda = "Dolar",
-                    TipoTransaccion = "",
-                    Precio = 0,
-                    Ciudad = "",
-                    EstadoProvincia = "",
-                    FechaPublicacion = DateTime.UtcNow,
-                    FechaActualizacion = DateTime.UtcNow
-                };
+                var categoriaId = categorias.Any() ? categorias.First().CategoriaId : 1;
+                propiedad = Propiedad.CrearNueva(categoriaId);
                 archivosSeleccionados.Clear();
                 imagenesUrls.Clear();
-
-                StateHasChanged();
+                imagenesPreview.Clear();
             }
             else
             {
@@ -241,7 +321,10 @@
             Console.WriteLine($"Error en Guardar: {ex.Message}");
             ToastService.ShowError($"Error: {ex.Message}");
         }
+        finally
+        {
+            isGuardando = false;
+            StateHasChanged();
+        }
     }
-
-
 }
