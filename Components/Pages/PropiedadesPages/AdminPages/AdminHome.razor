@@ -107,12 +107,12 @@
 </div>
 
 @code {
-    public List<ApplicationUser> UsuariosRegistrados { get; set; } = new List<ApplicationUser>();
-    public List<Propiedad> PropiedadesPublicadas { get; set; } = new List<Propiedad>();
+    public int UsuariosRegistrados { get; set; }
+    public int PropiedadesPublicadas { get; set; } 
 
     protected override async Task OnInitializedAsync()
     {
-        UsuariosRegistrados = await UserService.Listar(u => true);
-        PropiedadesPublicadas = await PropiedadService.Listar(p => true);
+        UsuariosRegistrados = await UserService.ContarUsuarios();
+        PropiedadesPublicadas = await PropiedadService.ContarPropiedades();
     }
 }
