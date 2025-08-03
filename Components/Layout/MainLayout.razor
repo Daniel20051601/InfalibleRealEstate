@@ -3,12 +3,17 @@
 
 <div class="page">
     <main>
-        <TopRow></TopRow>
+        <TopRow />
         <article class="content">
             @Body
         </article>
     </main>
+    <Footer />
+    
 </div>
 
-<BlazoredToasts @rendermode="RenderMode.InteractiveServer" />
+<BlazoredToasts @rendermode="RenderMode.InteractiveServer" Position="ToastPosition.TopRight" />
+
+
+
 
