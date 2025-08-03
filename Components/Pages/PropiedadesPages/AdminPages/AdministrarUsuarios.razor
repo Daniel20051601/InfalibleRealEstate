@@ -2,79 +2,124 @@
 @attribute [Authorize(Roles = "Admin")]
 @layout AdminLayout
 @inject UsuariosService UserService
+@inject UserManager<ApplicationUser> UserManager
 
 
 <PageTitle>Administrar Usuarios</PageTitle>
 
-<div class="card shadow-lg">
-    <div class="card-header text-secondary d-flex justify-content-center">
-        <strong>Administrar Usuarios</strong>
-    </div>
-    <div class="card-body">
-        
-        <div class="row d-flex justify-content-center mb-2 mt-2">
-            <div class="col-md-2">
-                <InputSelect class="form-select" @bind-Value="Filtro">
-                    <option value="Nombre">Nombre</option>
-                    <option value="Email">Email</option>
-                    <option value="Rol">Rol</option>
-                </InputSelect>
+@if(isLoading)
+{
+    <div class="d-flex flex-column align-items-center">
+        <span class="mb-3 fs-6">Cargando Usuarios...</span>
+        <div>
+            <div class="spinner-grow text-primary mx-1" role="status">
+                <span class="visually-hidden">Loading...</span>
             </div>
-            <div class="col-md-5">
-                <div class="input-group" role="group">
-                    <input class="form-control" type="text" placeholder="Buscar..." @bind-value="inputText" />
-                    <button class="btn btn-outline-primary" type="button" @onclick="BuscarUsuarios">Buscar</button>
-                </div>
+            <div class="spinner-grow text-primary mx-1" role="status">
+                <span class="visually-hidden">Loading...</span>
             </div>
-
-            <div class="col-md-2">
-                <InputDate class="form-control" @bind-Value="Desde" placeholder="Desde" />
-            </div>
-            <div class="col-md-2">
-                <InputDate class="form-control" @bind-Value="Hasta" placeholder="Hasta" />
+            <div class="spinner-grow text-primary mx-1" role="status">
+                <span class="visually-hidden">Loading...</span>
             </div>
         </div>
-        <div class="row mt-3">
-            <div class="col-md-12">
-                <table class="table table-striped table-hover">
-                    <thead>
-                        <tr>
-                            <th>Nombre</th>
-                            <th>Email</th>
-                            <th>Rol</th>
-                            <th>Editar</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var user in Users)
-                        {
-                            <tr>
-                                <td>@user.Nombre</td>
-                                <td>@user.Email</td>
-                                <td>rol</td>
-                                <td>
-                                    <button class="btn btn-outline-primary bi bi-pencil"></button>
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
+    </div>
+}
+else
+{
+    <div class="card shadow-lg">
+        <div class="card-header text-secondary d-flex justify-content-center">
+            <strong>Administrar Usuarios</strong>
+        </div>
+        <div class="card-body">
+
+            <div class="row d-flex justify-content-center mb-2 mt-2">
+                <div class="col-md-2">
+                    <InputSelect class="form-select" @bind-Value="Filtro">
+                        <option value="Nombre">Nombre</option>
+                        <option value="Email">Email</option>
+                        <option value="Rol">Rol</option>
+                    </InputSelect>
+                </div>
+                <div class="col-md-5">
+                    <div class="input-group" role="group">
+                        <input class="form-control" type="text" placeholder="Buscar..." @bind-value="inputText" />
+                        <button class="btn btn-outline-primary" type="button" @onclick="BuscarUsuarios">Buscar</button>
+                    </div>
+                </div>
+
+                <div class="col-md-2">
+                    <InputDate class="form-control" @bind-Value="Desde" placeholder="Desde" />
+                </div>
+                <div class="col-md-2">
+                    <InputDate class="form-control" @bind-Value="Hasta" placeholder="Hasta" />
                 </div>
             </div>
+            <div class="row mt-3">
+                <div class="col-md-12">
+                    <table class="table table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Apellido</th>
+                                <th>Email</th>
+                                <th>Tel&eacute;fono</th>
+                                <th>Rol</th>
+                                <th>Estado</th>
+                                <th>Editar</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var user in Users)
+                            {
+                                <tr>
+                                    <td>@user.Nombre</td>
+                                    <td>@user.Apellido</td>
+                                    <td>@user.Email</td>
+                                    <td>@user.PhoneNumber</td>
+                                    <td>@RolesPorUsuario[user.Id]</td>
+                                    <td>@user.EstadoUsuario?.Nombre</td>
+                                    <td>
+                                        <a href="/admin/usuariosedit/@user.Id" class="btn btn-outline-primary bi bi-pencil"></a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
     </div>
-</div>
+}
+
+
 
 @code {
     public List<ApplicationUser> Users { get; set; } = new List<ApplicationUser>();
+    public Dictionary<string, string> RolesPorUsuario { get; set; } = new();
 
     public string Filtro { get; set; } = "Nombre";
     public string inputText { get; set; } = string.Empty;
     public DateTime Desde { get; set; } 
     public DateTime Hasta { get; set; }
+    public bool isLoading { get; set; } = false;
 
     protected override async Task OnInitializedAsync()
     {
+        isLoading = true;
         Users = await UserService.Listar(u => true);
+
+        RolesPorUsuario.Clear();
+        foreach (var user in Users)
+        {
+            var roles = await UserManager.GetRolesAsync(user);
+            RolesPorUsuario[user.Id] = roles.FirstOrDefault() ?? "Sin rol";
+        }
+
+        if (!Users.Any())
+        {
+            await Task.Delay(1000); 
+        }
+        isLoading = false;
     }
 
     private void BuscarUsuarios()
