@@ -3,6 +3,7 @@ using System;
 using InfalibleRealEstate.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace InfalibleRealEstate.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250801211552_AumentaRequerimirntoDeCampoTransaccion")]
+    partial class AumentaRequerimirntoDeCampoTransaccion
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -45,9 +48,6 @@ namespace InfalibleRealEstate.Migrations
 
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("boolean");
-
-                    b.Property<int>("EstadoUsuarioId")
-                        .HasColumnType("integer");
 
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("boolean");
@@ -88,8 +88,6 @@ namespace InfalibleRealEstate.Migrations
                         .HasColumnType("character varying(256)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("EstadoUsuarioId");
 
                     b.HasIndex("NormalizedEmail")
                         .HasDatabaseName("EmailIndex");
@@ -204,47 +202,6 @@ namespace InfalibleRealEstate.Migrations
                             EstadoPropiedadId = 6,
                             Descripcion = "La propiedad ha sido eliminada del sistema.",
                             NombreEstado = "Eliminada"
-                        });
-                });
-
-            modelBuilder.Entity("InfalibleRealEstate.Models.EstadoUsuario", b =>
-                {
-                    b.Property<int>("EstadoUsuarioId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("EstadoUsuarioId"));
-
-                    b.Property<string>("Descripcion")
-                        .HasColumnType("text");
-
-                    b.Property<string>("Nombre")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
-
-                    b.HasKey("EstadoUsuarioId");
-
-                    b.ToTable("EstadosUsuarios");
-
-                    b.HasData(
-                        new
-                        {
-                            EstadoUsuarioId = 1,
-                            Descripcion = "El usuario está activo y puede acceder al sistema.",
-                            Nombre = "Activo"
-                        },
-                        new
-                        {
-                            EstadoUsuarioId = 2,
-                            Descripcion = "El usuario no puede acceder al sistema.",
-                            Nombre = "Inactivo"
-                        },
-                        new
-                        {
-                            EstadoUsuarioId = 3,
-                            Descripcion = "El usuario ha sido suspendido temporalmente.",
-                            Nombre = "Suspendido"
                         });
                 });
 
@@ -524,17 +481,6 @@ namespace InfalibleRealEstate.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("InfalibleRealEstate.Data.ApplicationUser", b =>
-                {
-                    b.HasOne("InfalibleRealEstate.Models.EstadoUsuario", "EstadoUsuario")
-                        .WithMany("Usuarios")
-                        .HasForeignKey("EstadoUsuarioId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("EstadoUsuario");
-                });
-
             modelBuilder.Entity("InfalibleRealEstate.Models.ImagenPropiedad", b =>
                 {
                     b.HasOne("InfalibleRealEstate.Models.Propiedad", "Propiedad")
@@ -659,11 +605,6 @@ namespace InfalibleRealEstate.Migrations
             modelBuilder.Entity("InfalibleRealEstate.Models.EstadoPropiedad", b =>
                 {
                     b.Navigation("Propiedades");
-                });
-
-            modelBuilder.Entity("InfalibleRealEstate.Models.EstadoUsuario", b =>
-                {
-                    b.Navigation("Usuarios");
                 });
 
             modelBuilder.Entity("InfalibleRealEstate.Models.Propiedad", b =>
