@@ -5,7 +5,7 @@ using InfalibleRealEstate.Data;
 
 namespace InfalibleRealEstate.Services;
 
-public class PropiedadService(IDbContextFactory<ApplicationDbContext> DbContext)
+public class PropiedadService(IDbContextFactory<ApplicationDbContext> DbContext, SupabaseStorageService supabaseStorage)
 {
     public async Task<bool> Existe(int PropiedadId)
     {
@@ -32,26 +32,28 @@ public class PropiedadService(IDbContextFactory<ApplicationDbContext> DbContext)
     {
         await using var contexto = await DbContext.CreateDbContextAsync();
 
-        contexto.Propiedades.Update(propiedad);
+        var propiedadExistente = await contexto.Propiedades
+            .Include(p => p.Detalle)
+            .FirstOrDefaultAsync(p => p.PropiedadId == propiedad.PropiedadId);
+
+        if (propiedadExistente == null)
+        {
+            return false;
+        }
+
+        contexto.Entry(propiedadExistente).CurrentValues.SetValues(propiedad);
+
 
         if (propiedad.Detalle != null)
         {
-            var detalleExistente = await contexto.PropiedadDetalles
-                .FirstOrDefaultAsync(d => d.PropiedadId == propiedad.PropiedadId);
-
-            if (detalleExistente != null)
+            if (propiedadExistente.Detalle != null)
             {
-                detalleExistente.Descripcion = propiedad.Detalle.Descripcion;
-                detalleExistente.Habitaciones = propiedad.Detalle.Habitaciones;
-                detalleExistente.Banos = propiedad.Detalle.Banos;
-                detalleExistente.MetrosCuadrados = propiedad.Detalle.MetrosCuadrados;
-
-                contexto.PropiedadDetalles.Update(detalleExistente);
+                contexto.Entry(propiedadExistente.Detalle).CurrentValues.SetValues(propiedad.Detalle);
             }
             else
             {
-                propiedad.Detalle.PropiedadId = propiedad.PropiedadId;
-                contexto.PropiedadDetalles.Add(propiedad.Detalle);
+                propiedadExistente.Detalle = propiedad.Detalle;
+                contexto.PropiedadDetalles.Add(propiedadExistente.Detalle);
             }
         }
 
@@ -86,9 +88,28 @@ public class PropiedadService(IDbContextFactory<ApplicationDbContext> DbContext)
     public async Task<bool> Eliminar(int propiedadId)
     {
         await using var contexto = await DbContext.CreateDbContextAsync();
-        return await contexto.Propiedades
-            .Where(p => p.PropiedadId == propiedadId)
-            .ExecuteDeleteAsync() > 0;
+
+        var propiedad = await contexto.Propiedades
+            .Include(p => p.Imagenes)
+            .FirstOrDefaultAsync(p => p.PropiedadId == propiedadId);
+
+        if (propiedad == null)
+        {
+            return false; 
+        }
+
+        if (propiedad.Imagenes != null && propiedad.Imagenes.Any())
+        {
+            var tareasEliminacion = new List<Task>();
+            foreach (var imagen in propiedad.Imagenes)
+            {
+                tareasEliminacion.Add(supabaseStorage.DeleteFile(imagen.UrlImagen));
+            }
+            await Task.WhenAll(tareasEliminacion);
+        }
+        contexto.Propiedades.Remove(propiedad);
+
+        return await contexto.SaveChangesAsync() > 0;
     }
 
     public async Task<List<Propiedad>> Listar(Expression<Func<Propiedad, bool>> criterio)
@@ -140,6 +161,30 @@ public class PropiedadService(IDbContextFactory<ApplicationDbContext> DbContext)
     {
         await using var contexto = await DbContext.CreateDbContextAsync();
         return await contexto.Propiedades.CountAsync();
+    }
+
+    public async Task<bool> EliminarImagen(int imagenId)
+    {
+        await using var contexto = await DbContext.CreateDbContextAsync();
+        var imagen = await contexto.ImagenesPropiedad.FindAsync(imagenId);
+        if (imagen == null)
+        {
+            return false;
+        }
+        contexto.ImagenesPropiedad.Remove(imagen);
+        return await contexto.SaveChangesAsync() > 0;
+    }
+
+    public async Task<int> ContarImagenes(int propiedadId)
+    {
+        await using var contexto = await DbContext.CreateDbContextAsync();
+        return await contexto.ImagenesPropiedad.CountAsync(i => i.PropiedadId == propiedadId);
+    }
+
+    public async Task<List<EstadoPropiedad>> ListarEstados()
+    {
+        await using var contexto = await DbContext.CreateDbContextAsync();
+        return await contexto.EstadosPropiedad.ToListAsync();
     }
 
 }
