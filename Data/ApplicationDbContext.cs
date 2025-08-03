@@ -12,6 +12,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<Categoria> Categorias { get; set; }
     public DbSet<EstadoPropiedad> EstadosPropiedad { get; set; }
     public DbSet<SuscripcionNoticia> SuscripcionesNoticia { get; set; }
+    public DbSet<EstadoUsuario> EstadosUsuarios { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -44,6 +45,12 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         .HasForeignKey(p => p.CategoriaId)
         .OnDelete(DeleteBehavior.Restrict);
 
+        builder.Entity<ApplicationUser>()
+        .HasOne(u => u.EstadoUsuario)
+        .WithMany(e => e.Usuarios)
+        .HasForeignKey(u => u.EstadoUsuarioId)
+        .OnDelete(DeleteBehavior.Restrict);
+
         builder.Entity<Categoria>().HasData(
             new Categoria { CategoriaId = 1, NombreCategoria = "Apartamento", Descripcion = "Unidad de vivienda en un edificio de apartamentos." },
             new Categoria { CategoriaId = 2, NombreCategoria = "Casa", Descripcion = "Vivienda unifamiliar o adosada." },
@@ -58,6 +65,12 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             new EstadoPropiedad { EstadoPropiedadId = 3, NombreEstado = "Vendida", Descripcion = "La propiedad ha sido vendida y ya no está disponible." },
             new EstadoPropiedad { EstadoPropiedadId = 4, NombreEstado = "Alquilada", Descripcion = "La propiedad ha sido alquilada y ya no está disponible." },
             new EstadoPropiedad { EstadoPropiedadId = 6, NombreEstado = "Eliminada", Descripcion = "La propiedad ha sido eliminada del sistema." }
+        );
+
+        builder.Entity<EstadoUsuario>().HasData(
+            new EstadoUsuario { EstadoUsuarioId = 1, Nombre = "Activo", Descripcion = "El usuario está activo y puede acceder al sistema." },
+            new EstadoUsuario { EstadoUsuarioId = 2, Nombre = "Inactivo", Descripcion = "El usuario no puede acceder al sistema." },
+            new EstadoUsuario { EstadoUsuarioId = 3, Nombre = "Suspendido", Descripcion = "El usuario ha sido suspendido temporalmente." }
         );
     }
 }
