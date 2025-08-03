@@ -60,7 +60,7 @@
                         <option value="">Seleccione una opción</option>
                         <option value="Venta">Venta</option>
                         <option value="Alquiler">Alquiler</option>
-                        <option value="Ambos">Venta o Alquiler</option>
+                        <option value="Venta o Alquiler">Venta o Alquiler</option>
                     </InputSelect>
                     <ValidationMessage For="@(() => propiedad.TipoTransaccion)" class="text-danger" />
                 </div>
@@ -171,8 +171,12 @@
         </div>
 
         <div class="container d-flex justify-content-center gap-2">
-            <a href="/admin/administrar-propiedades" class="btn btn-secondary">Volver</a>
-            <button type="submit" class="btn btn-primary">Guardar</button>
+            <div class="btn-group" role="group">
+                <button type="button" class="btn btn-outline-primary" @onclick="Limpiar">Limpiar</button>
+                <button type="submit" class="btn btn-outline-success">Guardar</button>
+                <a href="/admin/administrar-propiedades" class="btn btn-outline-secondary">Volver</a>
+            </div>
+            
         </div>
 
     </div>
@@ -305,11 +309,13 @@
             if (guardado)
             {
                 ToastService.ShowSuccess("Propiedad creada exitosamente.");
+                NavigationManager.NavigateTo("/admin/administrar-propiedades");
                 var categoriaId = categorias.Any() ? categorias.First().CategoriaId : 1;
                 propiedad = Propiedad.CrearNueva(categoriaId);
                 archivosSeleccionados.Clear();
                 imagenesUrls.Clear();
                 imagenesPreview.Clear();
+                
             }
             else
             {
@@ -326,5 +332,13 @@
             isGuardando = false;
             StateHasChanged();
         }
+    }
+    public void Limpiar()
+    {
+        propiedad = Propiedad.CrearNueva(1);
+        archivosSeleccionados.Clear();
+        imagenesUrls.Clear();
+        imagenesPreview.Clear();
+        StateHasChanged();
     }
 }
