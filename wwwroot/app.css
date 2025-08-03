@@ -65,3 +65,10 @@ h1:focus {
 .form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
     text-align: start;
 }
+
+.blazored-toast-container.top-right {
+    top: 1.25rem !important;
+    right: 1.25rem !important;
+    bottom: auto !important;
+    left: auto !important;
+}
