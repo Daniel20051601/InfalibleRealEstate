@@ -30,7 +30,7 @@ public class Propiedad
     public string EstadoProvincia { get; set; } = string.Empty;
 
     [Required(ErrorMessage = "El tipo de transacción es obligatorio.")]
-    [MaxLength(10)]
+    [MaxLength(30)]
     public string TipoTransaccion { get; set; } = string.Empty;
 
     [Required(ErrorMessage = "Debe seleccionar una categoría.")]
