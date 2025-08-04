@@ -179,7 +179,17 @@
 }
 
 /*AdminHome*/
+.bg-naranja {
+    background-color: #FF9800;
+}
+.color-naranja{
+        color: #FF9800;
+}
+}
 
+.bg-azul {
+    background-color: #2196F3;
+}
 .admin-card-link {
     text-decoration: none !important;
 }
@@ -189,7 +199,13 @@
     }
 
     .admin-card-link:hover .admin-card-hover,
-    .admin-card-link:focus .admin-card-hover {
+    .admin-card-link:focus .admin-card-hover{
         transform: scale(1.04);
         z-index: 2;
     }
+
+.fecha-foro {
+    font-size: 0.7rem;
+}
+
+

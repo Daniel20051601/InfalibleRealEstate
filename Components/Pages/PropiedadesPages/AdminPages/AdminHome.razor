@@ -3,6 +3,9 @@
 @layout AdminLayout
 @inject UsuariosService UserService
 @inject PropiedadService PropiedadService
+@inject SolicitudesUnirseService SolicitudesUnirseService
+@inject SolicitudesVentaService SolicitudesVentaService
+@inject ForoService ForoService
 @rendermode InteractiveServer
 
 <PageTitle>Inicio Admin</PageTitle>
@@ -11,26 +14,39 @@
     <div class="row">
         <div class="col-md-4 mb-3">
             <a href="/admin/administrar-propiedades" class="admin-card-link">
-                <div class="card text-white bg-success h-100 admin-card-hover">
-                <div class="card-header"><strong>Propiedades publicadas</strong></div>
-                <div class="card-body">
-                    <div class="d-flex justify-content-between">
-                        <h5 class="card-title"><strong>@PropiedadesPublicadas.Count() </strong> propiedades</h5>
-                        <i class="fs-3 bi bi-card-checklist"></i>
+                <div class="card text-white bg-success h-100 admin-card-hover cardInicio">
+                    <div class="card-header"><strong>Propiedades publicadas</strong></div>
+                    <div class="card-body bg-light text-dark">
+                        <div class="d-flex justify-content-between">
+                            <h5 class="card-title"><strong>@PropiedadesPublicadas </strong> propiedades</h5>
+                            <i class="text-success fs-3 bi bi-card-checklist"></i>
+                        </div>
                     </div>
                 </div>
-            </div>
+            </a>
+        </div>
+        <div class="col-md-4 mb-3">
+            <a href="/admin/administrar-foros" class="admin-card-link">
+                <div class="card text-white bg-secondary h-100 admin-card-hover cardInicio">
+                    <div class="card-header"><strong>Foros publicados</strong></div>
+                    <div class="card-body bg-light text-dark">
+                        <div class="d-flex justify-content-between">
+                            <h5 class="card-title"><strong>@TotalForos </strong> foros</h5>
+                            <i class="text-secondary fs-3 bi bi-card-checklist"></i>
+                        </div>
+                    </div>
+                </div>
             </a>
         </div>
 
         <div class="col-md-4 mb-3">
             <a href="/admin/administrar-usuarios" class="admin-card-link">
-                <div class="card text-white bg-primary h-100 admin-card-hover">
+                <div class="card text-white bg-primary h-100 admin-card-hover cardInicio">
                     <div class="card-header"><strong>Usuarios registrados</strong></div>
-                    <div class="card-body">
+                    <div class="card-body bg-light text-dark">
                         <div class="d-flex justify-content-between align-content-center">
-                            <h5 class="card-title"><strong>@UsuariosRegistrados.Count() </strong> usuarios</h5>
-                            <i class="fs-3 bi bi-person-check-fill"></i>
+                            <h5 class="card-title"><strong>@UsuariosRegistrados </strong> usuarios</h5>
+                            <i class="fs-3 text-primary bi bi-person-check-fill"></i>
                         </div>
                     </div>
                 </div>
@@ -44,7 +60,29 @@
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-content-center">
                             <h5 class="card-title"><strong>5 </strong> agentes</h5>
-                            <i class="fs-3 bi bi-patch-check-fill"></i>
+                            <i class="fs-3 text-secondary bi bi-patch-check-fill"></i>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-4 mb-3">
+            <a href="/admin/solicitudes" class="admin-card-link">
+                <div class="card bg-naranja text-white h-100 admin-card-hover cardInicio">
+                    <div class="card-header">
+                        <strong>Solicitudes</strong>
+
+                    </div>
+                    <div class="card-body bg-light text-dark">
+                        <div class="d-flex justify-content-between w-100">
+                            <div>
+                                <h5 class="card-title"><strong>@SolicitudesVenta </strong> para Vender propiedad</h5>
+                                <h5 class="card-title"><strong>@SolicitudesUnirse </strong> para unirse al equipo</h5>
+                            </div>
+                            <div>
+                                <i class="fs-3 color-naranja  bi bi-clipboard2-check-fill"></i>
+                            </div>
+                                
                         </div>
                     </div>
                 </div>
@@ -108,11 +146,17 @@
 
 @code {
     public int UsuariosRegistrados { get; set; }
-    public int PropiedadesPublicadas { get; set; } 
+    public int PropiedadesPublicadas { get; set; }
+    public int SolicitudesVenta { get; set; }
+    public int SolicitudesUnirse { get; set; }
+    public int TotalForos { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
         UsuariosRegistrados = await UserService.ContarUsuarios();
         PropiedadesPublicadas = await PropiedadService.ContarPropiedades();
+        SolicitudesVenta = await SolicitudesVentaService.ContarSolicitudes();
+        SolicitudesUnirse = await SolicitudesUnirseService.ContarSolicitudes();
+        TotalForos = await ForoService.ContarForos();
     }
 }

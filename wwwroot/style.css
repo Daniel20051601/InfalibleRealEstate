@@ -270,7 +270,8 @@
 .ultimas-card-col {
     min-width: 325px;
     max-width: 325px;
-    margin-top: 5px; 
+    margin-top: 5px;
+    position: relative;
 }
 
 .ultimas-card {
@@ -307,6 +308,10 @@
     box-shadow: 0 2px 6px rgba(0,0,0,0.08);
     transition: background 0.2s, color 0.2s;
     z-index: 2;
+}
+
+.ultimas-card-col > .btn-fav {
+    right: 15px !important;
 }
 
     .btn-fav:hover, .btn-fav:focus {
@@ -814,3 +819,113 @@
     -ms-overflow-style: none;
     scrollbar-width: none;
 }
+
+/*Componente Vende*/
+.titulo-vende {
+    color: #444 !important;
+}
+.imgVende-container {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.imgVende {
+    max-width: 550px;
+    width: 100%;
+    height: auto;
+    border-radius: 5px;
+    box-shadow: 0 4px 18px rgba(0, 204, 255, 0.10);
+    object-fit: contain;
+    background: #f8f9fa;
+}
+
+.vende-descripcion {
+    font-size: 1.08rem;
+    color: #222;
+    background: linear-gradient(90deg, #f5f6fa 0%, #fafdff 100%); 
+    border-radius: 12px;
+    padding: 1.2rem 1.5rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 2px 12px rgba(0,204,255,0.05);
+    line-height: 1.7;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+    text-align: center;
+}
+
+.animated-underline {
+    position: relative;
+    display: block;
+    margin: 0 auto;
+    text-align: center;
+    overflow: hidden;
+}
+
+    .animated-underline::after {
+        content: "";
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%) scaleX(0);
+        bottom: -2px;
+        width: 60%;
+        height: 4px; 
+        background: linear-gradient(90deg, #00ccff 0%, #ff4b2b 100%);
+        opacity: 0.40; 
+        border-radius: 2px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+        transform-origin: left;
+        transition: transform 1.2s cubic-bezier(0.4,0,0.2,1);
+    }
+
+    .animated-underline.show-underline::after {
+        transform: translateX(-50%) scaleX(1);
+    }
+
+.altura-textarea {
+    height: 120px !important;
+    min-height: 120px !important;
+    max-height: 500px;
+    resize: vertical;
+}
+
+/*Componente Foros*/
+/*Componente Foros*/
+.foros-item {
+    transition: box-shadow 0.2s, transform 0.2s;
+}
+
+    .foros-item:hover {
+        box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+        transform: translateY(-2px);
+    }
+
+/*perfil*/
+a.aVolver,
+a.aVolver:visited,
+a.aVolver:active,
+a.aVolver:hover,
+a.aVolver:focus {
+    text-decoration: none !important;
+    color: inherit;
+    font-size: 1rem;
+}
+
+a.itemPerfil,
+a.itemPerfil:visited,
+a.itemPerfil:active,
+a.itemPerfil:hover,
+a.itemPerfil:focus {
+    text-decoration: none !important;
+    color: #191140;
+    font-weight: 600;
+}
+.itemPerfil_ {
+    text-decoration: none !important;
+    color: #191140;
+    font-weight: 600;
+}
+
+

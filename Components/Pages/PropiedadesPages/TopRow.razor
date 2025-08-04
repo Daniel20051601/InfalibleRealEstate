@@ -16,12 +16,12 @@
                 <span></span>  
             </label>  
             <div class="nav-links ms-auto  ">
-                <a href="/propiedad/create" class="btn menu-btn">Nosotros</a>
-                <a class="btn menu-btn">Compra</a>  
-                <a class="btn menu-btn">Alquila</a>  
-                <a class="btn menu-btn">Vende</a>  
-                <a class="btn menu-btn">Invierte</a>  
-                <a class="btn menu-btn">Forma Parte</a>  
+                <a href="/nosotros" class="btn menu-btn">Nosotros</a>
+                <a href="/Propiedad/Catalogo?t=Venta" class="btn menu-btn" @onclick="ComprarClick">Comprar</a>
+                <a href="/Propiedad/Catalogo?t=Alquiler" class="btn menu-btn" @onclick="AlquilarClick">Alquilar</a>
+                <a href="/vende" class="btn menu-btn">Vende</a>
+                <a href="/unete" class="btn menu-btn">Forma Parte</a>
+                <a href="/foros" class="btn menu-btn">Foros</a>
                 <a class="btn menu-btn">Cont&aacute;ctanos</a>  
                 <div class="dropdown">  
                     <button class="btn btnPerson dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">  
@@ -30,22 +30,23 @@
 
                     <AuthorizeView>  
                         <Authorized Context="authorizedContext">
-                            <div class="dropdown-menu dropDowmHome dropdown-menu-end p-3 mt-2" style="width: 300px;">
-                                <small class="text-center">@authorizedContext.User.Identity?.Name</small>  
-                                <a class="dropdown-item" href="Account/Manage"><i class="bi bi-person-gear"></i> Perfil</a>  
-                                <a class="dropdown-item" href=""><i class="bi bi-bookmark"></i> Guardados</a>  
-                                <a class="dropdown-item" href=""><i class="bi bi-cart"></i> Carrito</a>  
+                            <div class="dropdown-menu bg-light dropDowmHome dropdown-menu-end p-3 mt-3">
+                                <small class="text-center">
+                                    @($"{authorizedContext.User.FindFirst("nombre")?.Value} {authorizedContext.User.FindFirst("apellido")?.Value}")
+                                    </small>
+                                <a class="dropdown-item dropdown-item-top" href="/perfil"><i class="bi bi-person-gear"></i> Perfil</a>
+                                <a class="dropdown-item dropdown-item-top" href="/carrito"><i class="bi bi-cart"></i> Carrito</a>
                                 <AuthorizeView Roles="Admin">  
                                     <Authorized Context="adminContext">
-                                        <a class="dropdown-item" href="/Admin/Home">
+                                        <a class="dropdown-item dropdown-item-top" href="/Admin/Home">
                                             <i class="bi bi-shield-lock"></i> Administrar  
                                         </a>  
                                     </Authorized>  
                                 </AuthorizeView>  
                                 <form action="Account/Logout" method="post">  
                                     <AntiforgeryToken />  
-                                    <input type="hidden" name="ReturnUrl" value="@currentUrl" />  
-                                    <button type="submit" class="dropdown-item">  
+                                    <input type="hidden" name="ReturnUrl" value="@currentUrl" />
+                                    <button type="submit" class="dropdown-item dropdown-item-top">
                                         <span class="bi bi-arrow-bar-left" aria-hidden="true"></span> Cerrar Sesión  
                                     </button>  
                                 </form>  
@@ -87,4 +88,16 @@
     {  
         NavigationManager.LocationChanged -= OnLocationChanged;  
     }  
+
+    private void ComprarClick()
+    {
+        NavigationManager.NavigateTo("/Propiedad/Catalogo?t=Venta", forceLoad: true);
+        StateHasChanged();
+    }
+
+    private void AlquilarClick()
+    {
+        NavigationManager.NavigateTo("/Propiedad/Catalogo?t=Alquiler", forceLoad: true);
+        StateHasChanged();
+    }
 }

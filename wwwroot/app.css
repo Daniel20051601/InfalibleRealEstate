@@ -66,9 +66,3 @@ h1:focus {
     text-align: start;
 }
 
-.blazored-toast-container.top-right {
-    top: 1.25rem !important;
-    right: 1.25rem !important;
-    bottom: auto !important;
-    left: auto !important;
-}
