@@ -20,6 +20,11 @@ public class ApplicationUser : IdentityUser
     public int EstadoUsuarioId { get; set; } = 1; 
     public virtual EstadoUsuario EstadoUsuario { get; set; }
 
+    public virtual Carrito? Carrito { get; set; }
+
     public virtual ICollection<Propiedad> PropiedadesPublicadas { get; set; } = new List<Propiedad>();
     public virtual ICollection<SuscripcionNoticia> Suscripciones { get; set; } = new List<SuscripcionNoticia>();
+    public virtual ICollection<SolicitudVenta> SolicitudesVenta { get; set; } = new List<SolicitudVenta>();
+    public virtual ICollection<SolicitudUnirse> SolicitudesUnirse { get; set; } = new List<SolicitudUnirse>();
+    public virtual ICollection<Foros> Foros { get; set; } = new List<Foros>();
 }
