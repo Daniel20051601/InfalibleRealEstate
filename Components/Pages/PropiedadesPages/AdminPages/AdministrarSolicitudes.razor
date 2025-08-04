@@ -1,0 +1,454 @@
+﻿@page "/admin/solicitudes"
+@layout AdminLayout
+@attribute [Authorize(Roles = "Admin")]
+@inject SolicitudesUnirseService SolicitudesUnirseService
+@inject SolicitudesVentaService SolicitudesVentaService
+@inject IToastService ToastService
+@inject IJSRuntime JSRuntime
+@rendermode InteractiveServer
+
+<PageTitle>Administrar Solicitudes</PageTitle>
+
+@if (isLoading)
+{
+    <div class="d-flex flex-column align-items-center">
+        <span class="mb-3 fs-6">Cargando Solicitudes...</span>
+        <div>
+            <div class="spinner-grow text-primary mx-1" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <div class="spinner-grow text-primary mx-1" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <div class="spinner-grow text-primary mx-1" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <div class="card shadow-lg mb-4">
+        <div class="card-header text-secondary d-flex justify-content-center bg-success text-white">
+            <strong>Solicitudes para Unirse al Equipo</strong>
+        </div>
+        <div class="card-body">
+            <div class="row d-flex justify-content-center mb-2 mt-2">
+                <div class="col-md-2">
+                    <InputSelect class="form-select" @bind-Value="FiltroUnirse">
+                        <option value="Nombre">Nombre</option>
+                        <option value="Email">Email</option>
+                        <option value="Rol">Rol</option>
+                    </InputSelect>
+                </div>
+                <div class="col-md-5">
+                    <div class="input-group" role="group">
+                        <input class="form-control" type="text" placeholder="Buscar..." />
+                        <button class="btn btn-outline-primary" type="button">Buscar</button>
+                    </div>
+                </div>
+
+                <div class="col-md-2">
+                    <InputDate class="form-control" @bind-Value="DesdeUnirse" placeholder="Desde" />
+                </div>
+                <div class="col-md-2">
+                    <InputDate class="form-control" @bind-Value="HastaUnirse" placeholder="Hasta" />
+                </div>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Apellido</th>
+                            <th>Correo</th>
+                            <th>Teléfono</th>
+                            <th>Profesión</th>
+                            <th>Fecha</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var solicitud in solicitudesUnirse)
+                        {
+                            <tr>
+                                <td>@solicitud.Nombre</td>
+                                <td>@solicitud.Apellido</td>
+                                <td>@solicitud.CorreoElectronico</td>
+                                <td>@solicitud.Telefono</td>
+                                <td>@solicitud.Profesion</td>
+                                <td>@solicitud.FechaSolicitud.ToShortDateString()</td>
+                                <td><span class="badge @GetEstadoBadgeClass(solicitud.Estado)">@solicitud.Estado</span></td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <button class="btn btn-outline-primary btn-sm bi bi-pencil" title="Editar" @onclick="() => AbrirModalUnirse(solicitud)"></button>
+                                        <button class="btn btn-outline-success btn-sm bi bi-eye" title="Ver informaci&oacute;n" @onclick="() => AbrirModalVerUnirse(solicitud)"></button>
+                                    </div>
+
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-lg">
+        <div class="card-header text-secondary d-flex justify-content-center bg-primary text-white">
+            <strong>Solicitudes para Vender Propiedad</strong>
+        </div>
+        <div class="card-body">
+            <div class="row d-flex justify-content-center mb-2 mt-2">
+                <div class="col-md-2">
+                    <InputSelect class="form-select" @bind-Value="FiltroVender">
+                        <option value="Nombre">Nombre</option>
+                        <option value="Email">Email</option>
+                        <option value="Rol">Rol</option>
+                    </InputSelect>
+                </div>
+                <div class="col-md-5">
+                    <div class="input-group" role="group">
+                        <input class="form-control" type="text" placeholder="Buscar..." />
+                        <button class="btn btn-outline-primary" type="button">Buscar</button>
+                    </div>
+                </div>
+
+                <div class="col-md-2">
+                    <InputDate class="form-control" @bind-Value="DesdeVender" placeholder="Desde" />
+                </div>
+                <div class="col-md-2">
+                    <InputDate class="form-control" @bind-Value="HastaVender" placeholder="Hasta" />
+                </div>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Apellido</th>
+                            <th>Correo</th>
+                            <th>Teléfono</th>
+                            <th>Categoría</th>
+                            <th>Fecha</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var solicitud in solicitudesVender)
+                        {
+                            <tr>
+                                <td>@solicitud.Nombre</td>
+                                <td>@solicitud.Apellido</td>
+                                <td>@solicitud.CorreoElectronico</td>
+                                <td>@solicitud.Telefono</td>
+                                <td>@solicitud.Categoria?.NombreCategoria</td>
+                                <td>@solicitud.FechaSolicitud.ToShortDateString()</td>
+                                <td><span class="badge @GetEstadoBadgeClass(solicitud.Estado)">@solicitud.Estado</span></td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <button class="btn btn-outline-primary btn-sm bi bi-pencil" title="Editar" @onclick="() => AbrirModalVender(solicitud)"></button>
+                                        <button class="btn btn-outline-success btn-sm bi bi-eye" title="Ver informaci&oacute;n" @onclick="() => AbrirModalVerVender(solicitud)"></button>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+}
+
+@if (solicitudVentaSeleccionada != null)
+{
+    <div class="modal fade show" style="display: block;" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title">Editar Solicitud</h5>
+                    <button type="button" class="btn-close" @onclick="CerrarModal"></button>
+                </div>
+                <div class="modal-body">
+                    <p><strong>Solicitante:</strong> @solicitudVentaSeleccionada.Nombre @solicitudVentaSeleccionada.Apellido</p>
+                    <div class="mb-3">
+                        <label for="estadoVenta" class="form-label">Estado</label>
+                        <InputSelect id="estadoVenta" class="form-select" @bind-Value="solicitudVentaSeleccionada.Estado">
+                            <option value="Pendiente">Pendiente</option>
+                            <option value="Contactado">Contactado</option>
+                            <option value="En Proceso">En Proceso</option>
+                            <option value="Completada">Completada</option>
+                            <option value="Rechazada">Rechazada</option>
+                        </InputSelect>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger me-auto" @onclick="EliminarSolicitudVenta">Eliminar</button>
+                    <button type="button" class="btn btn-secondary" @onclick="CerrarModal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" @onclick="GuardarEstadoVenta">Guardar Cambios</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-backdrop fade show"></div>
+}
+
+@if (solicitudUnirseSeleccionada != null)
+{
+    <div class="modal fade show" style="display: block;" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title">Editar Solicitud</h5>
+                    <button type="button" class="btn-close" @onclick="CerrarModal"></button>
+                </div>
+                <div class="modal-body">
+                    <p><strong>Solicitante:</strong> @solicitudUnirseSeleccionada.Nombre @solicitudUnirseSeleccionada.Apellido</p>
+                    <div class="mb-3">
+                        <label for="estadoUnirse" class="form-label">Estado</label>
+                        <InputSelect id="estadoUnirse" class="form-select" @bind-Value="solicitudUnirseSeleccionada.Estado">
+                            <option value="Pendiente">Pendiente</option>
+                            <option value="En Revisión">En Revisión</option>
+                            <option value="Aprobada">Aprobada</option>
+                            <option value="Rechazada">Rechazada</option>
+                        </InputSelect>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger me-auto" @onclick="EliminarSolicitudUnirse">Eliminar</button>
+                    <button type="button" class="btn btn-secondary" @onclick="CerrarModal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" @onclick="GuardarEstadoUnirse">Guardar Cambios</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-backdrop fade show"></div>
+}
+
+@if (solicitudUnirseParaVer != null)
+{
+    <div class="modal fade show" style="display: block;" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title">Detalles de Solicitud para Unirse al Equipo</h5>
+                    <button type="button" class="btn-close" @onclick="CerrarModalVer"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Nombre:</strong> @solicitudUnirseParaVer.Nombre @solicitudUnirseParaVer.Apellido</p>
+                            <p><strong>Correo:</strong> @solicitudUnirseParaVer.CorreoElectronico</p>
+                            <p><strong>Teléfono:</strong> @solicitudUnirseParaVer.Telefono</p>
+                            <p><strong>Fecha de Nacimiento:</strong> @solicitudUnirseParaVer.FechaNacimiento.ToShortDateString()</p>
+                            <p><strong>Provincia:</strong> @solicitudUnirseParaVer.Provincia</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Nivel de Estudios:</strong> @solicitudUnirseParaVer.NivelEstudios</p>
+                            <p><strong>Profesión:</strong> @solicitudUnirseParaVer.Profesion</p>
+                            <p><strong>Trabaja Actualmente:</strong> @solicitudUnirseParaVer.TrabajaActualmente</p>
+                            <p><strong>Fecha de Solicitud:</strong> @solicitudUnirseParaVer.FechaSolicitud.ToShortDateString()</p>
+                        </div>
+                    </div>
+                    <hr />
+                    <p><strong>Experiencia:</strong></p>
+                    <p>@solicitudUnirseParaVer.Experiencia</p>
+                    <hr />
+                    <p><strong>¿Por qué unirse a nosotros?:</strong></p>
+                    <p>@solicitudUnirseParaVer.PorqueNosotros</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="CerrarModalVer">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-backdrop fade show"></div>
+}
+
+@if (solicitudVentaParaVer != null)
+{
+    <div class="modal fade show" style="display: block;" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title">Detalles de Solicitud de Venta</h5>
+                    <button type="button" class="btn-close" @onclick="CerrarModalVer"></button>
+                </div>
+                <div class="modal-body">
+                    <p><strong>Nombre:</strong> @solicitudVentaParaVer.Nombre @solicitudVentaParaVer.Apellido</p>
+                    <p><strong>Correo:</strong> @solicitudVentaParaVer.CorreoElectronico</p>
+                    <p><strong>Teléfono:</strong> @solicitudVentaParaVer.Telefono</p>
+                    <p><strong>Categoría de Propiedad:</strong> @solicitudVentaParaVer.Categoria?.NombreCategoria</p>
+                    <p><strong>Fecha de Solicitud:</strong> @solicitudVentaParaVer.FechaSolicitud.ToShortDateString()</p>
+                    <p><strong>Estado:</strong> @solicitudVentaParaVer.Estado</p>
+                    <hr />
+                    <p><strong>Descripción:</strong></p>
+                    <p>@solicitudVentaParaVer.Descripcion</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="CerrarModalVer">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-backdrop fade show"></div>
+}
+
+
+@code {
+    private bool isLoading = true;
+    private List<SolicitudUnirse> solicitudesUnirse = new List<SolicitudUnirse>();
+    private List<SolicitudVenta> solicitudesVender = new List<SolicitudVenta>();
+
+    private SolicitudVenta? solicitudVentaSeleccionada;
+    private SolicitudUnirse? solicitudUnirseSeleccionada;
+    private SolicitudUnirse? solicitudUnirseParaVer;
+    private SolicitudVenta? solicitudVentaParaVer;
+
+    public DateTime DesdeUnirse { get; set; } = DateTime.Now.AddMonths(-1);
+    public DateTime HastaUnirse { get; set; } = DateTime.Now;
+    public string FiltroUnirse { get; set; } = "Nombre";
+
+
+    public DateTime DesdeVender { get; set; } = DateTime.Now.AddMonths(-1);
+    public DateTime HastaVender { get; set; } = DateTime.Now;
+    public string FiltroVender { get; set; } = "Nombre";
+
+    protected override async Task OnInitializedAsync()
+    {
+        isLoading = true;
+        solicitudesUnirse = await SolicitudesUnirseService.ListarSolicitudesUnirse();
+        solicitudesVender = await SolicitudesVentaService.ListarSolicitudesVenta();
+        isLoading = false;
+    }
+
+    private void AbrirModalVender(SolicitudVenta solicitud)
+    {
+        solicitudVentaSeleccionada = solicitud;
+        solicitudUnirseSeleccionada = null;
+        StateHasChanged();
+    }
+
+    private void AbrirModalUnirse(SolicitudUnirse solicitud)
+    {
+        solicitudUnirseSeleccionada = solicitud;
+        solicitudVentaSeleccionada = null;
+        StateHasChanged();
+    }
+
+    private void CerrarModal()
+    {
+        solicitudVentaSeleccionada = null;
+        solicitudUnirseSeleccionada = null;
+        StateHasChanged();
+    }
+
+    private void AbrirModalVerUnirse(SolicitudUnirse solicitud)
+    {
+        solicitudUnirseParaVer = solicitud;
+        StateHasChanged();
+    }
+
+    private void AbrirModalVerVender(SolicitudVenta solicitud)
+    {
+        solicitudVentaParaVer = solicitud;
+        StateHasChanged();
+    }
+
+    private void CerrarModalVer()
+    {
+        solicitudUnirseParaVer = null;
+        solicitudVentaParaVer = null;
+        StateHasChanged();
+    }
+
+    private async Task GuardarEstadoVenta()
+    {
+        if (solicitudVentaSeleccionada != null)
+        {
+            var success = await SolicitudesVentaService.Guardar(solicitudVentaSeleccionada);
+            if (success)
+            {
+                ToastService.ShowSuccess("Estado de la solicitud de venta actualizado correctamente.");
+            }
+            else
+            {
+                ToastService.ShowError("No se pudo actualizar el estado de la solicitud de venta.");
+            }
+            CerrarModal();
+        }
+    }
+
+    private async Task GuardarEstadoUnirse()
+    {
+        if (solicitudUnirseSeleccionada != null)
+        {
+
+            var success = await SolicitudesUnirseService.Guardar(solicitudUnirseSeleccionada);
+            if (success)
+            {
+                ToastService.ShowSuccess("Estado de la solicitud para unirse actualizado correctamente.");
+            }
+            else
+            {
+                ToastService.ShowError("No se pudo actualizar el estado de la solicitud");
+            }
+
+            CerrarModal();
+        }
+    }
+
+    private async Task EliminarSolicitudVenta()
+    {
+        if (solicitudVentaSeleccionada != null)
+        {
+            var success = await SolicitudesVentaService.Eliminar(solicitudVentaSeleccionada.SolicitudVentaId);
+            if (success)
+            {
+                ToastService.ShowSuccess("Solicitud de venta eliminada correctamente.");
+                solicitudesVender.Remove(solicitudVentaSeleccionada);
+            }
+            else
+            {
+                ToastService.ShowError("No se pudo eliminar la solicitud de venta.");
+            }
+            CerrarModal();
+        }
+    }
+
+    private async Task EliminarSolicitudUnirse()
+    {
+        if (solicitudUnirseSeleccionada != null)
+        {
+            var success = await SolicitudesUnirseService.Eliminar(solicitudUnirseSeleccionada.SolicitudUnirseId);
+            if (success)
+            {
+                ToastService.ShowSuccess("Solicitud para unirse eliminada correctamente.");
+                solicitudesUnirse.Remove(solicitudUnirseSeleccionada);
+            }
+            else
+            {
+                ToastService.ShowError("No se pudo eliminar la solicitud para unirse.");
+            }
+            CerrarModal();
+        }
+    }
+
+    private string GetEstadoBadgeClass(string estado)
+    {
+        return estado switch
+        {
+            "Pendiente" => "bg-warning text-dark",
+            "Contactado" => "bg-info text-dark",
+            "En Proceso" => "bg-primary",
+            "Completada" => "bg-success",
+            "Rechazada" => "bg-danger",
+            _ => "bg-secondary"
+        };
+    }
+
+
+}
