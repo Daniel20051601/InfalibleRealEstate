@@ -13,5 +13,6 @@ public class Categoria
 
     public string? Descripcion { get; set; }
 
-    public ICollection<Propiedad>? Propiedades { get; set; }
+    public virtual ICollection<Propiedad>? Propiedades { get; set; }
+    public virtual ICollection<SolicitudVenta> SolicitudesVenta { get; set; } = new List<SolicitudVenta>();
 }
