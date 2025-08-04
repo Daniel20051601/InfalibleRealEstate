@@ -1,6 +1,7 @@
 using InfalibleRealEstate.Models;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using System.Reflection.Emit;
 
 namespace InfalibleRealEstate.Data;
 
@@ -13,6 +14,11 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<EstadoPropiedad> EstadosPropiedad { get; set; }
     public DbSet<SuscripcionNoticia> SuscripcionesNoticia { get; set; }
     public DbSet<EstadoUsuario> EstadosUsuarios { get; set; }
+    public DbSet<Carrito> Carritos { get; set; }
+    public DbSet<CarritoItem> CarritoItems { get; set; }
+    public DbSet<SolicitudVenta> SolicitudesVenta { get; set; }
+    public DbSet<SolicitudUnirse> SolicitudesUnirse { get; set; }
+    public DbSet<Foros> Foros { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -50,6 +56,11 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         .WithMany(e => e.Usuarios)
         .HasForeignKey(u => u.EstadoUsuarioId)
         .OnDelete(DeleteBehavior.Restrict);
+
+        builder.Entity<ApplicationUser>()
+                .HasOne(a => a.Carrito)
+                .WithOne(c => c.Usuario)
+                .HasForeignKey<Carrito>(c => c.UsuarioId);
 
         builder.Entity<Categoria>().HasData(
             new Categoria { CategoriaId = 1, NombreCategoria = "Apartamento", Descripcion = "Unidad de vivienda en un edificio de apartamentos." },
