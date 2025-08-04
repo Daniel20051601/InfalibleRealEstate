@@ -1,0 +1,154 @@
+﻿@page "/vende"
+@rendermode InteractiveServer
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject UsuariosService UsuariosService
+@inject CategoriaServices CategoriaServices
+@inject SolicitudesVentaService SolicitudesService
+@inject NavigationManager NavigationManager
+@inject IToastService ToastService
+
+<PageTitle>Vende</PageTitle>
+
+<div class="container my-4 mb-5">
+
+    <div class="row">
+        <div class="col-lg-7 col">
+            <div class="">
+                <h1 class="mb-2 fw-bold titulo-vende">Vende tu propiedad</h1>
+            </div>
+            <div class="imgVende-container">
+                <img class="imgVende" src="https://scrgajdklzafafwrxrng.supabase.co/storage/v1/object/public/propiedades/ComponenteSolicitud/feliz-pareja-saludando-consultor-financiero.png" />
+            </div>
+
+            <p class="text-muted vende-descripcion">
+                <span class="text-center">¿Quieres vender tu propiedad de forma rápida y segura?</span> <br />
+                En <span class="text-danger fw-bold">Infalible Real Estate</span> te ofrecemos asesoría personalizada, promoción profesional y acceso a compradores calificados.<br />
+                Nos encargamos de todo el proceso, desde la valoración hasta la firma, para que tú solo te ocupes de recibir los mejores resultados.<br />
+                Completa el formulario y descubre cómo podemos ayudarte a convertir tu inmueble en una oportunidad exitosa.<br />
+                <span class="animated-underline show-underline">¡Confía en nuestro equipo y vende con tranquilidad!</span>
+            </p>
+        </div>
+
+        <div class=" col-lg-5 col-md-5 p-4 card shadow-lg">
+            <div class="d-flex justify-content-center">
+                <h4 class="mb-4 titulo-vende">Formulario de Venta</h4>
+
+            </div>
+            <EditForm Model="solicitudVenta" OnValidSubmit="@Guardar">
+                <DataAnnotationsValidator />
+
+                <div class="form-floating mb-3">
+                    <InputText type="text" class="form-control" id="input.nombre" @bind-Value="solicitudVenta.Nombre" />
+                    <label for="input.nombre">Nombre</label>
+                    <ValidationMessage For="@(() => solicitudVenta.Nombre)" />
+                </div>
+
+                <div class="form-floating mb-3">
+                    <input type="text" class="form-control" id="apellido" @bind="solicitudVenta.Apellido" />
+                    <label for="apellido" class="form-label">Apellido</label>
+                    <ValidationMessage For="@(() => solicitudVenta.Apellido)" />
+                </div>
+
+                <div class="form-floating mb-3">
+                    <input type="text" class="form-control" id="email" @bind="solicitudVenta.CorreoElectronico" placeholder="maria@gmail.com" />
+                    <label for="email" class="form-label">Email</label>
+                    <ValidationMessage For="@(() => solicitudVenta.CorreoElectronico)" />
+                </div>
+
+                <div class="form-floating mb-3">
+                    <input type="text" class="form-control" id="telefono" @bind="solicitudVenta.Telefono" />
+                    <label for="telefono" class="form-label">Tel&eacute;fono</label>
+                    <ValidationMessage For="@(() => solicitudVenta.Telefono)" />
+                </div>
+                <div class="form-floating mb-3">
+                    <InputSelect type="text" class="form-select" id="telefono" @bind-Value="solicitudVenta.CategoriaId">
+                        <option value="">Seleccione una Categoría</option>
+                        @foreach (var categoria in Categorias)
+                        {
+                            <option value="@categoria.CategoriaId">@categoria.NombreCategoria</option>
+                        }
+                    </InputSelect>
+                    <label for="telefono" class="form-label">Categoria</label>
+                    <ValidationMessage For="@(() => solicitudVenta.Categoria)" />
+                </div>
+                <div class="form-floating mb-3">
+                    <textarea class="form-control altura-textarea" id="descripcion" @bind="solicitudVenta.Descripcion"></textarea>
+                    <label for="telefono" class="form-label">Descripci&oacute;n</label>
+                    <ValidationMessage For="@(() => solicitudVenta.Descripcion)" />
+                </div>
+                <div class="d-flex justify-content-center">
+                    <button type="submit" class="btn btn-success w-100 bi bi-whatsapp" disabled="@enviando">
+                        @if (enviando)
+                        {
+                            <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                            <span> Enviando...</span>
+                        }
+                        else
+                        {
+                            <span> Enviar Solicitud</span>
+                        }
+                    </button>
+                </div>
+            </EditForm>
+        </div>
+
+
+    </div>
+
+</div>
+
+@code {
+    public ApplicationUser? User { get; set; }
+    public SolicitudVenta solicitudVenta { get; set; } = new SolicitudVenta();
+    public List<Categoria> Categorias { get; set; } = new List<Categoria>();
+    public bool enviando { get; set; } = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        Categorias = await CategoriaServices.Listar(c => true);
+        var claimsUser = authState.User;
+
+        if (claimsUser.Identity is not null && claimsUser.Identity.IsAuthenticated)
+        {
+            var userId = claimsUser.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+
+            if (!string.IsNullOrEmpty(userId))
+            {
+                User = await UsuariosService.Buscar(userId);
+                solicitudVenta.UsuarioId = User?.Id;
+            }
+        }
+    }
+
+    public async Task Guardar()
+    {
+        solicitudVenta.FechaSolicitud = DateTime.UtcNow;
+        enviando = true;
+        var guardado = await SolicitudesService.Guardar(solicitudVenta);
+        if (guardado)
+        {
+            EnviarPorWhatsapp();
+            
+        }
+        else
+        {
+            ToastService.ShowError("Error al enviar la solicitud. Por favor, inténtalo de nuevo más tarde.");
+        }
+        enviando = false;
+    }
+
+    public void EnviarPorWhatsapp()
+    {
+        var mensaje = $"Hola, me gustaría vender mi propiedad. Aquí están mis datos:\n" +
+                      $"Nombre: {solicitudVenta.Nombre} {solicitudVenta.Apellido}\n" +
+                      $"Email: {solicitudVenta.CorreoElectronico}\n" +
+                      $"Teléfono: {solicitudVenta.Telefono}\n" +
+                      $"Categoría: {Categorias.FirstOrDefault(c => c.CategoriaId == solicitudVenta.CategoriaId)?.NombreCategoria}\n"+
+                      $"Descripción: {solicitudVenta.Descripcion}\n";
+        var url = $"https://wa.me/18098419551?text={Uri.EscapeDataString(mensaje)}";
+        NavigationManager.NavigateTo(url, true);
+    }
+
+
+}

@@ -1,0 +1,191 @@
+﻿@page "/admin/foro/edit/{Id:int}"
+@attribute [Authorize(Roles = "Admin")]
+@layout AdminLayout
+@inject ForoService ForoService
+@inject SupabaseStorageService SupabaseStorage
+@inject NavigationManager NavigationManager
+@inject IToastService ToastService
+@rendermode InteractiveServer
+
+<PageTitle>Editar Foro</PageTitle>
+
+@if (foro == null)
+{
+    <div class="d-flex flex-column align-items-center">
+        <span class="mb-3 fs-6">Cargando Foro...</span>
+        <div>
+            <div class="spinner-grow text-primary mx-1" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <EditForm Model="@foro" OnValidSubmit="@Guardar">
+        <DataAnnotationsValidator />
+        <div class="container mt-2">
+            <div class="">
+                <div class="d-flex justify-content-start mb-4">
+                    <h3 class="text-secondary">Editar Foro</h3>
+                </div>
+                <div class="">
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <div class="inputImage text-center p-3 border rounded h-100">
+                                @if (!string.IsNullOrEmpty(imagenPreview))
+                                {
+                                    <div class="preview-img-container position-relative d-inline-block">
+                                        <img src="@imagenPreview" class="preview-img rounded" style="max-width: 100%;" />
+                                        <button type="button" class="btn-close preview-close" title="Eliminar" @onclick="EliminarArchivo"></button>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="d-flex flex-column justify-content-center">
+                                        <span class="fs-3 text-secondary w-100 d-block">
+                                            <i class="bi bi-image"></i>
+                                        </span>
+                                        <p class="text-muted">Imagen del Foro</p>
+                                    </div>
+                                }
+                                <InputFile class="form-control mt-2" OnChange="CargarArchivoSeleccionado" accept="image/*" />
+                            </div>
+                        </div>
+                        <div class="col-md-8">
+                            <div class="mb-3">
+                                <label for="titulo" class="form-label fs-5">Título</label>
+                                <InputText id="titulo" class="form-control" @bind-Value="foro.Titulo" placeholder="Ingrese el título del foro" />
+                                <ValidationMessage For="@(() => foro.Titulo)" class="text-danger" />
+                            </div>
+                            <div class="mb-3">
+                                <label for="link" class="form-label fs-5">Enlace del Foro</label>
+                                <InputText id="link" class="form-control" @bind-Value="foro.LinkForo" placeholder="https://ejemplo.com/foro" />
+                                <ValidationMessage For="@(() => foro.LinkForo)" class="text-danger" />
+                            </div>
+                            <div class="mb-4">
+                                <label for="descripcion" class="form-label fs-5">Descripción</label>
+                                <InputTextArea id="descripcion" class="form-control" @bind-Value="foro.Descripcion" rows="5" placeholder="Ingrese una breve descripción del foro" />
+                                <ValidationMessage For="@(() => foro.Descripcion)" class="text-danger" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="">
+                    <div class="d-flex justify-content-center gap-2">
+                        <div class="btn-group" role="group">
+                            <a href="/admin/administrar-foros" class="btn btn-outline-secondary">Volver</a>
+                            <button type="submit" class="btn btn-outline-success" disabled="@isGuardando">
+                                @if (isGuardando)
+                                {
+                                    <span class="spinner-border spinner-border-sm"></span>
+                                    <span>Guardando...</span>
+                                }
+                                else
+                                {
+                                    <span>Guardar Cambios</span>
+                                }
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </EditForm>
+}
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private Foros? foro;
+    private IBrowserFile? archivoSeleccionado;
+    private string? imagenPreview;
+    private string? imagenUrlOriginal;
+    private bool isGuardando = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        foro = await ForoService.Buscar(Id);
+        if (foro != null)
+        {
+            imagenPreview = foro.ImagenUrl;
+            imagenUrlOriginal = foro.ImagenUrl;
+        }
+        else
+        {
+            ToastService.ShowError("Foro no encontrado.");
+            NavigationManager.NavigateTo("/admin/administrar-foros");
+        }
+    }
+
+    private async Task CargarArchivoSeleccionado(InputFileChangeEventArgs e)
+    {
+        archivoSeleccionado = e.File;
+        if (archivoSeleccionado != null)
+        {
+            using var stream = archivoSeleccionado.OpenReadStream(1024 * 1024 * 10);
+            using var memoryStream = new MemoryStream();
+            await stream.CopyToAsync(memoryStream);
+            var buffer = memoryStream.ToArray();
+            var base64 = Convert.ToBase64String(buffer);
+            imagenPreview = $"data:{archivoSeleccionado.ContentType};base64,{base64}";
+            StateHasChanged();
+        }
+    }
+
+    private void EliminarArchivo()
+    {
+        archivoSeleccionado = null;
+        imagenPreview = null;
+        StateHasChanged();
+    }
+
+    private async Task Guardar()
+    {
+        if (foro is null) return;
+
+        isGuardando = true;
+        await Task.Delay(1);
+
+        try
+        {
+            if (archivoSeleccionado != null)
+            {
+                if (!string.IsNullOrEmpty(imagenUrlOriginal))
+                {
+                    await SupabaseStorage.DeleteFile(imagenUrlOriginal);
+                }
+
+                var urls = await SupabaseStorage.UploadFiles(new[] { archivoSeleccionado });
+                foro.ImagenUrl = urls.FirstOrDefault();
+            }
+            else if (string.IsNullOrEmpty(imagenPreview) && !string.IsNullOrEmpty(imagenUrlOriginal))
+            {
+                await SupabaseStorage.DeleteFile(imagenUrlOriginal);
+                foro.ImagenUrl = null;
+            }
+
+            var guardado = await ForoService.Guardar(foro);
+
+            if (guardado)
+            {
+                ToastService.ShowSuccess("Foro actualizado exitosamente.");
+                NavigationManager.NavigateTo("/admin/administrar-foros");
+            }
+            else
+            {
+                ToastService.ShowError("Error al guardar los cambios del foro.");
+            }
+        }
+        catch (Exception ex)
+        {
+            ToastService.ShowError($"Error inesperado: {ex.Message}");
+        }
+        finally
+        {
+            isGuardando = false;
+            StateHasChanged();
+        }
+    }
+}

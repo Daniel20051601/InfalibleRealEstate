@@ -13,11 +13,12 @@ public class Propiedad
     [MaxLength(255)]
     public string Titulo { get; set; } = string.Empty;
 
-    [Required]
-    [Column(TypeName = "decimal(18, 2)")] 
-    public decimal Precio { get; set; }
+    [Required(ErrorMessage = "El precio es obligatorio.")]
+    [Range(0.01, double.MaxValue, ErrorMessage = "El precio debe ser mayor que cero.")]
+    [Column(TypeName = "decimal(18, 2)")]
+    public decimal Precio { get; set; } = 0;
 
-    [Required]
+    [Required(ErrorMessage = "La moneda es obligatoria.")]
     [MaxLength(10)]
     public string Moneda { get; set; } = string.Empty;
 
@@ -29,27 +30,54 @@ public class Propiedad
     public string EstadoProvincia { get; set; } = string.Empty;
 
     [Required(ErrorMessage = "El tipo de transacción es obligatorio.")]
-    [MaxLength(10)]
+    [MaxLength(30)]
     public string TipoTransaccion { get; set; } = string.Empty;
 
-    [Range(1, int.MaxValue, ErrorMessage = "Debe seleccionar una categoría.")]
-    public int CategoriaId { get; set; }
+    [Required(ErrorMessage = "Debe seleccionar una categoría.")]
+    [Range(1, int.MaxValue, ErrorMessage = "Debe seleccionar una categoría válida.")]
+    public int CategoriaId { get; set; } = 0;
     public Categoria? Categoria { get; set; }
 
     public string? AdministradorId { get; set; }
 
     public ApplicationUser? Administrador { get; set; }
 
-    [Required]
+    [Required(ErrorMessage = "La fecha de publicación es obligatoria.")]
     public DateTime FechaPublicacion { get; set; } = DateTime.UtcNow;
 
-    [Required]
+    [Required(ErrorMessage = "La fecha de actualización es obligatoria.")]
     public DateTime FechaActualizacion { get; set; }
 
-    [Required]
-    public int EstadoPropiedadId { get; set; }
+    [Required(ErrorMessage = "Debe seleccionar un estado para la propiedad.")]
+    [Range(1, int.MaxValue, ErrorMessage = "Debe seleccionar un estado válido.")]
+    public int EstadoPropiedadId { get; set; } = 0;
     public EstadoPropiedad? EstadoPropiedad { get; set; }
 
     public PropiedadDetalle? Detalle { get; set; }
     public ICollection<ImagenPropiedad>? Imagenes { get; set; }
+
+    public static Propiedad CrearNueva(int categoriaId = 1)
+    {
+        return new Propiedad
+        {
+            Titulo = "",
+            Detalle = new PropiedadDetalle
+            {
+                Descripcion = "",
+                Habitaciones = 0,
+                Banos = 0,
+                Parqueo = 0,
+                MetrosCuadrados = 0
+            },
+            Moneda = "Dolar",
+            TipoTransaccion = "",
+            Precio = 0,
+            Ciudad = "",
+            EstadoProvincia = "",
+            CategoriaId = categoriaId,
+            FechaPublicacion = DateTime.UtcNow,
+            FechaActualizacion = DateTime.UtcNow,
+            EstadoPropiedadId = 1
+        };
+    }
 }

@@ -72,6 +72,11 @@
     min-height: 100vh;
 }
 
+.cardInicio {
+    border-radius: 5px;
+    overflow: hidden;
+}
+
 /*Propiedad Create*/
 .titleCreate {
     font-size: 2.5rem;
@@ -101,7 +106,35 @@
     .inputImage input[type="file"] {
         color: #888888; 
     }
+.preview-img-container {
+    width: 80px;
+    height: 80px;
+    position: relative;
+    border: 1px solid #ddd;
+    border-radius: 0.25rem;
+    overflow: hidden;
+}
 
+.preview-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.preview-close {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    display: none;
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 50%;
+    padding: 0.1rem;
+    line-height: 1;
+}
+
+.preview-img-container:hover .preview-close {
+    display: block;
+}
 .containerCreate {
     display: flex;
     justify-content: center;
@@ -146,7 +179,17 @@
 }
 
 /*AdminHome*/
+.bg-naranja {
+    background-color: #FF9800;
+}
+.color-naranja{
+        color: #FF9800;
+}
+}
 
+.bg-azul {
+    background-color: #2196F3;
+}
 .admin-card-link {
     text-decoration: none !important;
 }
@@ -156,7 +199,13 @@
     }
 
     .admin-card-link:hover .admin-card-hover,
-    .admin-card-link:focus .admin-card-hover {
+    .admin-card-link:focus .admin-card-hover{
         transform: scale(1.04);
         z-index: 2;
     }
+
+.fecha-foro {
+    font-size: 0.7rem;
+}
+
+

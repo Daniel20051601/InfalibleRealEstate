@@ -1,6 +1,7 @@
 ﻿@page "/Propiedad/Detalle/{PropiedadId:int}"
 @rendermode InteractiveServer
 @inject PropiedadService PropiedadService
+@inject NavigationManager NavigationManager
 
 <PageTitle>@propiedad?.Titulo</PageTitle>
 
@@ -27,6 +28,7 @@
             <span class="carousel-control-prev-icon" aria-hidden="true"></span>
             <span class="visually-hidden">Previous</span>
         </button>
+
         <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleControls" data-bs-slide="next">
             <span class="carousel-control-next-icon" aria-hidden="true"></span>
             <span class="visually-hidden">Next</span>
@@ -35,18 +37,217 @@
 </div>
 
 <div class="container">
-    <h1 class="mt-3">@propiedad?.Titulo</h1>
-    <p class="text-muted">@propiedad?.Precio.ToString("N2")</p>
+    <div class="row align-items-center my-3">
+        <div class="row text-muted">
+            <span class="bi bi-geo-alt"> <t /> @propiedad?.Ciudad, @propiedad?.EstadoProvincia</span>
+        </div>
+        <div class="col-sm-8">
+            <h1 class="mt-3">@propiedad?.Titulo</h1>
+        </div>
+        <div class="col-sm-4 text-sm-end">
+            @if (propiedad != null)
+            {
+                <h3 class="mt-3 text-primary fw-bold">@($"{(propiedad.Moneda == "Dolar" ? "USD$" : "DOP$")} {propiedad.Precio:N2}")</h3>
+                <span class="text-muted fw-3">@propiedad.TipoTransaccion</span>
+            }
+        </div>
+    </div>
+
+    @if (propiedad?.Detalle != null)
+    {
+        <div class="">
+            <div class="card w-100 my-4 border-0">
+                <div class="card-body p-0">
+
+                    <div class="bg-light rounded mb-3">
+                        <div class="row text-center py-4 row-cols-2 row-cols-md-3 row-cols-lg-5 g-3">
+                            <div class="col">
+                                <div class="d-flex justify-content-center align-items-center gap-2">
+                                    <i class="@GetCategoryIconClass(propiedad.Categoria?.NombreCategoria) fs-2 text-secondary"></i>
+                                </div>
+                                <div class="d-flex justify-content-center align-items-center">
+                                    <p class="text-muted small mb-0 mt-1">@propiedad.Categoria?.NombreCategoria</p>
+                                </div>
+                            </div>
+
+                            @if (propiedad.Detalle.Habitaciones > 0)
+                            {
+                                <div class="col">
+                                    <div class="d-flex justify-content-center align-items-center gap-2">
+                                        <i class="bi bi-door-closed-fill fs-2 text-secondary"></i>
+                                        <span class="fs-5 fw-bold">@propiedad.Detalle.Habitaciones</span>
+                                    </div>
+                                    <div class="d-flex justify-content-center align-items-center">
+                                        <p class="text-muted small mb-0">Habitaciones</p>
+                                    </div>
+                                </div>
+                            }
+
+                            @if (propiedad.Detalle.Banos > 0)
+                            {
+                                <div class="col">
+                                    <div class="d-flex justify-content-center align-items-center gap-2">
+                                        <i class="bi bi-droplet-half fs-2 text-secondary"></i>
+                                        <span class="fs-5 fw-bold">@propiedad.Detalle.Banos</span>
+                                    </div>
+                                    <div class="d-flex justify-content-center align-items-center">
+                                        <p class="text-muted small mb-0">Baños</p>
+                                    </div>
+                                </div>
+                            }
+
+                            @if (propiedad.Detalle.Parqueo > 0)
+                            {
+                                <div class="col">
+                                    <div class="d-flex justify-content-center align-items-center gap-2">
+                                        <i class="bi bi-car-front-fill fs-2 text-secondary"></i>
+                                        <span class="fs-5 fw-bold">@propiedad.Detalle.Parqueo</span>
+                                    </div>
+                                    <div class="d-flex justify-content-center align-items-center">
+                                        <p class="text-muted small mb-0">Parqueos</p>
+                                    </div>
+                                </div>
+                            }
+
+                            @if (propiedad.Detalle.MetrosCuadrados > 0)
+                            {
+                                <div class="col">
+                                    <div class="d-flex justify-content-center align-items-center gap-2">
+                                        <i class="bi bi-rulers fs-2 text-secondary"></i>
+                                        <span class="fs-5 fw-bold">@($"{propiedad.Detalle.MetrosCuadrados:N2} m²")</span>
+                                    </div>
+                                    <div class="d-flex justify-content-center align-items-center">
+                                        <p class="text-muted small mb-0">Superficie</p>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+                <div class="row d-flex">
+                    <div class="col-12 col-lg-8 mb-4 mb-lg-0">
+                        <div class="bg-light p-4 rounded h-100">
+                            <div class="card-text text-muted">@FormatDescription(propiedad.Detalle.Descripcion)</div>
+                        </div>
+                    </div>
+
+
+                    <div class=" p-4 rounded col-12 col-lg-4">
+                        <EditForm Model="@contactanos" OnValidSubmit="@EnviarPorWhatsapp">
+                            <DataAnnotationsValidator />
+                            <div class="card shadow-lg">
+                                <div class="card-body border-0">
+                                    <h5 class="d-flex justify-content-center text-secondary fw-bold mb-2">Cont&aacute;ctanos</h5>
+                                    <div class="container">
+                                        <div class="form-floating mb-3">
+                                            <input class="form-control" id="Input.Nombre" @bind="contactanos.Nombre" />
+                                            <label for="Input.Nombre" class="form-label">Nombre</label>
+                                            <ValidationMessage For="@(() => @contactanos.Nombre)" />
+                                        </div>
+                                        <div class="form-floating mb-3">
+                                            <input class="form-control" id="Input.Correo" @bind="contactanos.Correo" />
+                                            <label type="email" for="Input.Correo" class="form-label">Email</label>
+                                            <ValidationMessage For="@(() => @contactanos.Correo)" />
+                                        </div>
+                                        <div class="form-floating mb-3">
+                                            <input class="form-control" id="Input.Correo" @bind="contactanos.Telefono" />
+                                            <label type="email" for="Input.Correo" class="form-label">Tel&eacute;fono</label>
+                                            <ValidationMessage For="@(() => @contactanos.Telefono)" />
+                                        </div>
+                                        <div class="form-floating mb-3">
+                                            <InputTextArea class="form-control altura-textarea" id="InputDetalle" @bind-Value="contactanos.DetalleMensaje">
+                                            </InputTextArea>
+                                            <label for="Input.Detalle" class="form-label">Informaci&oacute;n Adicional</label>
+                                            <ValidationMessage For="@(() => @contactanos.DetalleMensaje)" />
+
+                                        </div>
+                                        <div class="mb-3 d-flex justify-content-center">
+                                            <button type="submit" class="btn btn-outline-primary bi bi-whatsapp"> Enviar</button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </EditForm>
+                    </div>
+
+
+                </div>
+
+            </div>
+        </div>
+
+    }
+
+
 </div>
 
 @code {
     [Parameter]
     public int PropiedadId { get; set; }
 
-    private Propiedad? propiedad = new Propiedad();
+    public Contactanos contactanos { get; set; } = new Contactanos();
+
+    private Propiedad? propiedad;
+
 
     protected override async Task OnInitializedAsync()
     {
         propiedad = await PropiedadService.Buscar(PropiedadId);
+    }
+
+    private MarkupString FormatDescription(string? description)
+    {
+        if (string.IsNullOrWhiteSpace(description))
+        {
+            return new MarkupString();
+        }
+
+        var encodedText = System.Net.WebUtility.HtmlEncode(description);
+        var formattedHtml = encodedText.Replace("\r\n", "<br />").Replace("\n", "<br />");
+
+        return new MarkupString(formattedHtml);
+    }
+
+    private string GetCategoryIconClass(string? categoryName)
+    {
+        return categoryName switch
+        {
+            "Casa" => "bi bi-house-door-fill",
+            "Apartamento" => "bi bi-building",
+            "Penthouse" => "bi bi-building-check",
+            "Local Comercial" => "bi bi-shop",
+            "Terreno" => "bi bi-map-fill",
+            "Villa" => "bi bi-house-heart-fill",
+            _ => "bi bi-building-fill"
+        };
+    }
+
+    public void EnviarPorWhatsapp()
+    {
+        var mensaje = $"*Hola, estoy interesado en la propiedad: {propiedad?.Titulo}*\n" +
+                      $"*Precio:* {(propiedad?.Moneda == "Dolar" ? "USD$" : "DOP$")} {propiedad?.Precio:N2}\n" +
+                      $"*Ciudad:* {propiedad?.Ciudad}\n" +
+                      $"Url:\n https://ejemplo:7031/Propiedad/Detalle/{propiedad?.PropiedadId}\n\n" +
+                      $"*Estado/Provincia:* {propiedad?.EstadoProvincia}\n\n" +
+                      $"*Detalles Adicionales:*\n{contactanos.DetalleMensaje}\n\n" +
+                      $"*Contacto:* {contactanos.Nombre}, {contactanos.Telefono}, {contactanos.Correo}";
+        var url = $"https://wa.me/18098419551?text={Uri.EscapeDataString(mensaje)}";
+        NavigationManager.NavigateTo(url, true);
+    }
+
+    public class Contactanos
+    {
+        [Required(ErrorMessage = "El nombre es requerido")]
+        [StringLength(100, ErrorMessage = "El nombre no puede exceder los 100 caracteres")]
+        public string Nombre { get; set; } = string.Empty;
+        [Required(ErrorMessage = "El correo es requerido")]
+        [EmailAddress(ErrorMessage = "El correo no es v&aacute;lido")]
+        public string Correo { get; set; } = string.Empty;
+        [Required(ErrorMessage = "El teléfonofono es requerido")]
+        [Phone(ErrorMessage = "El teléfono no es v&aacute;lido")]
+        public string Telefono { get; set; } = string.Empty;
+        [StringLength(500, ErrorMessage = "La descripci&oacute;n debe tener menos de 500 caracteres")]
+        public string DetalleMensaje { get; set; } = "Me gustaría tener más información y agendar una cita";
     }
 }

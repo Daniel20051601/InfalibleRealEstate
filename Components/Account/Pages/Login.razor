@@ -1,4 +1,5 @@
 ﻿@page "/Account/Login"
+@layout Layout.AccountLayout
 
 @using System.ComponentModel.DataAnnotations
 @using Microsoft.AspNetCore.Authentication
@@ -35,7 +36,7 @@
                     <div class="checkbox mb-3">
                         <label class="form-label">
                             <InputCheckbox @bind-Value="Input.RememberMe" class="form-check-input" />
-                            Remember me
+                            Recuerdame
                         </label>
                     </div>
                     <div>
@@ -43,13 +44,13 @@
                     </div>
                     <div class="mt-3 ir-login-links">
                         <p>
-                            <a href="Account/ForgotPassword" class="text-center">Forgot your password?</a>
+                            <a href="Account/ForgotPassword" class="text-center">¿Olvidaste tu contraseña?</a>
                         </p>
                         <p>
-                            <a href="@(NavigationManager.GetUriWithQueryParameters("Account/Register", new Dictionary<string, object?> { ["ReturnUrl"] = ReturnUrl }))">Register as a new user</a>
+                            <a href="@(NavigationManager.GetUriWithQueryParameters("Account/Register", new Dictionary<string, object?> { ["ReturnUrl"] = ReturnUrl }))">¿No tienes una cuenta? Registrate</a>
                         </p>
                         <p>
-                            <a href="Account/ResendEmailConfirmation">Resend email confirmation</a>
+                            <a href="Account/ResendEmailConfirmation">Reenviar email de confirmaci&oacute;n</a>
                         </p>
                     </div>
                 </EditForm>

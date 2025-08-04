@@ -3,7 +3,6 @@
 @layout AdminLayout
 @inject PropiedadService PropiedadesService
 @inject Blazored.Toast.Services.IToastService ToastService
-@using Microsoft.AspNetCore.Components.Forms
 @rendermode InteractiveServer
 
 <PageTitle>Administrar Propiedades</PageTitle>
@@ -11,13 +10,13 @@
 
     <div class="d-flex justify-content-between mb-4">
         <h5 class="text-secondary">Administrar Propiedades</h5>
-        <a class="btn btn-success bi bi-plus-lg" href="/admin/propiedades/create">Agregar</a>
+        <a class="btn btn-success bi bi-plus-lg" href="/admin/propiedades/create"> Agregar</a>
     </div>
 
     <div class="row d-flex justify-content-center mb-2">
         <div class="col-md-2">
             <InputSelect class="form-select" @bind-Value="Filtro">
-                <option value="Nombre">Titulo</option>
+                <option value="Titulo">Titulo</option>
                 <option value="Ciudad">Ciudad</option>
                 <option value="Transaccion">Tipo de Transaccion</option>
             </InputSelect>
@@ -47,11 +46,19 @@
 
     @if (propiedadesPaginadas is null)
     {
-        <div class="text-center my-5">
-            <div class="spinner-border text-primary" role="status">
-                <span class="visually-hidden">Cargando...</span>
+        <div class="d-flex flex-column align-items-center">
+            <span class="mb-3 fs-6">Cargando Propiedades...</span>
+            <div>
+                <div class="spinner-grow text-primary mx-1" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <div class="spinner-grow text-primary mx-1" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <div class="spinner-grow text-primary mx-1" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
             </div>
-            <p class="mt-2">Cargando propiedades...</p>
         </div>
     }
     else if (!propiedadesPaginadas.Any())
@@ -66,8 +73,9 @@
             @foreach (var propiedad in propiedadesPaginadas)
             {
                 <div class="col-10 col-sm-6 col-md-4 col-lg-4 col-xl-4 mb-4 ultimas-card-col">
-                    <a href="/Propiedad/Detalle/@propiedad.PropiedadId">
-                        <div class="card ultimas-card h-100">
+
+                    <div class="card ultimas-card h-100">
+                        <a href="/Propiedad/Detalle/@propiedad.PropiedadId">
                             @if (propiedad.Imagenes?.Any() == true)
                             {
                                 <img src="@propiedad.Imagenes.FirstOrDefault()?.UrlImagen"
@@ -81,13 +89,25 @@
                                 </div>
                             }
                             <div class="card-body p-3">
-                                <div class="d-flex justify-content-between mb-3">
+                                <div class="d-flex justify-content-between mb-2">
                                     <small class="text-secondary">@propiedad.TipoTransaccion</small>
-                                    <small class="text-muted">@propiedad.Ciudad</small>
+
                                 </div>
                                 <h5 class="card-title ultimas-card-title">@propiedad.Titulo</h5>
+                                @if (!string.IsNullOrWhiteSpace(propiedad.Detalle?.Descripcion))
+                                {
+                                    <p class="card-text ultimas-card-desc">
+                                        @((propiedad.Detalle.Descripcion.Length > 80)
+                                                                    ? propiedad.Detalle.Descripcion.Substring(0, 80) + "..."
+                                                                    : propiedad.Detalle.Descripcion)
+                        </p>
+                                                }
                             </div>
-                            <div class="card-footer bg-white border-0 d-flex flex-column align-items-center">
+                            <div class="card-footer bg-white border-0 d-flex pt-0 flex-column align-items-center">
+                                <div class=" mb-2">
+                                    <small class="text-muted"><span class="bi bi-geo-alt"></span> @propiedad.Ciudad</small>
+                                </div>
+
                                 <div class="d-flex justify-content-center align-items-center mb-2 gap-3">
                                     @if (propiedad.Detalle != null)
                                     {
@@ -137,16 +157,18 @@
                                     @(propiedad.Moneda == "Dolar" ? "USD$" : "DOP$") @propiedad.Precio.ToString("N2")
                                 </span>
                             </div>
-                            <div class="card-footer bg-white border-0 d-flex justify-content-between">
-                                <a class="btn btn-sm btn-primary text-white" href="/admin/propiedades/edit/@propiedad.PropiedadId">
-                                    <i class="bi bi-pencil"></i>
-                                </a>
-                                <button class="btn btn-sm btn-danger text-white" @onclick="() => AbrirModalEliminar(propiedad.PropiedadId)">
-                                    <i class="bi bi-trash"></i>
-                                </button>
-                            </div>
+                        </a>
+                        <div class="card-footer bg-white border-0 d-flex justify-content-between mt-1">
+                            <a class="btn btn-sm btn-primary text-white" href="/admin/propiedades/edit/@propiedad.PropiedadId">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            <button class="btn btn-sm btn-danger text-white" @onclick="() => AbrirModalEliminar(propiedad.PropiedadId)">
+                                <i class="bi bi-trash"></i>
+                            </button>
                         </div>
-                    </a>
+                    </div>
+
+
                 </div>
             }
         </div>
@@ -183,7 +205,17 @@
                 </div>
                 <div class="modal-footer d-flex justify-content-center">
                     <button type="button" class="btn btn-secondary" @onclick="CerrarModalEliminar">Cancelar</button>
-                    <button type="button" class="btn btn-danger" @onclick="ConfirmarEliminar">Eliminar</button>
+                    <button type="button" class="btn btn-danger" @onclick="ConfirmarEliminar">
+                        @if (isEliminando)
+                        {
+                            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                            <span>Eliminando</span>
+                        }
+                        else
+                        {
+                            <span>Eliminar</span>
+                        }
+                    </button>
                 </div>
             </div>
         </div>
@@ -195,6 +227,7 @@
     public string inputText { get; set; } = string.Empty;
     public DateTime Desde { get; set; }
     public DateTime Hasta { get; set; }
+    public bool isEliminando { get; set; } = false;
 
     private List<Propiedad>? propiedades = new();
     private List<Propiedad>? propiedadesPaginadas = new();
@@ -220,23 +253,29 @@
 
     private async Task CargarPropiedades()
     {
+        propiedadesPaginadas = null;
+        StateHasChanged();
+
         var todasPropiedades = await PropiedadesService.Listar(p => true);
 
         if (!string.IsNullOrWhiteSpace(inputText))
         {
             switch (Filtro)
             {
-                case "Nombre":
+                case "Titulo":
                     todasPropiedades = todasPropiedades
-                    .Where(p => p.Titulo.Contains(inputText, StringComparison.OrdinalIgnoreCase))
-                    .ToList();
+                        .Where(p => p.Titulo.Contains(inputText, StringComparison.OrdinalIgnoreCase))
+                        .ToList();
                     break;
-                case "Email":
+                case "Ciudad":
                     todasPropiedades = todasPropiedades
-                    .Where(p => p.Administrador != null && p.Administrador.Email != null && p.Administrador.Email.Contains(inputText, StringComparison.OrdinalIgnoreCase))
-                    .ToList();
+                        .Where(p => p.Ciudad != null && p.Ciudad.Contains(inputText, StringComparison.OrdinalIgnoreCase))
+                        .ToList();
                     break;
-                case "Rol":
+                case "Transaccion":
+                    todasPropiedades = todasPropiedades
+                        .Where(p => p.TipoTransaccion != null && p.TipoTransaccion.Contains(inputText, StringComparison.OrdinalIgnoreCase))
+                        .ToList();
                     break;
             }
         }
@@ -244,8 +283,8 @@
         if (Desde != default && Hasta != default && Desde <= Hasta)
         {
             todasPropiedades = todasPropiedades
-            .Where(p => p.FechaPublicacion.Date >= Desde.Date && p.FechaPublicacion.Date <= Hasta.Date)
-            .ToList();
+                .Where(p => p.FechaPublicacion.Date >= Desde.Date && p.FechaPublicacion.Date <= Hasta.Date)
+                .ToList();
         }
 
         propiedades = todasPropiedades.ToList();
@@ -255,10 +294,18 @@
         if (currentPage < 1) currentPage = 1;
         if (currentPage > totalPages) currentPage = totalPages == 0 ? 1 : totalPages;
 
-        propiedadesPaginadas = propiedades
-        .Skip((currentPage - 1) * pageSize)
-        .Take(pageSize)
-        .ToList();
+        var resultadosPaginados = propiedades
+            .Skip((currentPage - 1) * pageSize)
+            .Take(pageSize)
+            .ToList();
+
+        if (!resultadosPaginados.Any())
+        {
+            await Task.Delay(1000);
+        }
+
+        propiedadesPaginadas = resultadosPaginados;
+        StateHasChanged();
     }
 
     private void AbrirModalEliminar(int propiedadId)
@@ -275,6 +322,7 @@
 
     private async Task ConfirmarEliminar()
     {
+        isEliminando = true;
         if (propiedadIdAEliminar != 0)
         {
             var eliminado = await PropiedadesService.Eliminar(propiedadIdAEliminar);
@@ -282,6 +330,7 @@
             {
                 ToastService.ShowSuccess("Propiedad eliminada correctamente.");
                 await CargarPropiedades();
+
             }
             else
             {
@@ -289,6 +338,7 @@
             }
         }
         mostrarModalEliminar = false;
+        isEliminando = false;
         propiedadIdAEliminar = 0;
     }
 

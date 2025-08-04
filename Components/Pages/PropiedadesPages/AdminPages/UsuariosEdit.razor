@@ -1,0 +1,138 @@
+﻿@page "/admin/usuariosedit/{Id}"
+@attribute [Authorize(Roles = "Admin")]
+@layout AdminLayout
+@rendermode InteractiveServer
+@inject UsuariosService UserService
+@inject NavigationManager NavigationManager
+@inject IToastService ToastService
+@inject UserManager<ApplicationUser> UserManager
+
+<PageTitle>Editar usuario</PageTitle>
+
+<EditForm Model="User" OnValidSubmit="@Guardar">
+    <DataAnnotationsValidator />
+
+    @if (User == null)
+    {
+        <div class="d-flex flex-column align-items-center">
+            <span class="mb-3 fs-6">Cargando Informaci&oacute;n...</span>
+            <div>
+                <div class="spinner-grow text-primary mx-1" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <div class="spinner-grow text-primary mx-1" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <div class="spinner-grow text-primary mx-1" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+            </div>
+        </div>
+
+    }
+    else
+    {
+        <div>
+            <div class="mb-3">
+                <label for="User.Nombre" class="form-label fs-5">Nombre</label>
+                <InputText id="User.Nombre" class="form-control" @bind-Value="User.Nombre" />
+                <ValidationMessage For="@(() => User.Nombre)" class="text-danger" />
+            </div>
+            <div class="mb-3">
+                <label for="User.Apellido" class="form-label fs-5">Apellido</label>
+                <InputText id="User.Apellido" class="form-control" @bind-Value="User.Apellido" />
+                <ValidationMessage For="@(() => User.Apellido)" class="text-danger" />
+            </div>
+            <div class="mb-3">
+                <label for="User.Telefono" class="form-label fs-5">Tel&eacute;fono</label>
+                <InputText id="User.Telefono" class="form-control" @bind-Value="User.PhoneNumber" />
+                <ValidationMessage For="@(() => User.PhoneNumber)" class="text-danger" />
+            </div>
+            <div class="mb-3">
+                <label for="User.Rol" class="form-label fs-5">Rol</label>
+                <InputSelect id="User.Rol" class="form-select" @bind-Value="SelectedRole">
+                    @foreach(var rol in Roles)
+                    {
+                        <option value="@rol.Name">@rol.Name</option>
+                    }
+
+                </InputSelect>
+                <ValidationMessage For="@(() => SelectedRole)" class="text-danger" />
+            </div>
+
+
+            <div class="mb-3">
+                <label for="User.Estado" class="form-label fs-5">Estado Usuario</label>
+                <InputSelect id="User.Estado" class="form-select" @bind-Value="User.EstadoUsuarioId">
+                    @foreach(var estado in estadoUsuarios)
+                    {
+                        <option value="@estado.EstadoUsuarioId">@estado.Nombre</option>
+                    }
+
+                </InputSelect>
+                <ValidationMessage For="@(() => User.EstadoUsuarioId)" class="text-danger" />
+            </div>
+
+            <div class="container d-flex justify-content-center gap-2">
+                <div class="btn-group" role="group">
+                    <a href="/admin/administrar-usuarios" class="btn btn-outline-secondary bi bi-arrow-bar-left"> Volver</a>
+                    <button type="submit" class="btn btn-outline-success bi bi-floppy">
+                        Guardar
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    }
+
+
+</EditForm>
+
+
+@code {
+    [Parameter]
+    public string Id { get; set; } = string.Empty;
+
+    public ApplicationUser User { get; set; } = new ApplicationUser();
+    public List<EstadoUsuario> estadoUsuarios = new List<EstadoUsuario>();
+    public List<IdentityRole> Roles { get; set; } = new List<IdentityRole>();
+
+    public string SelectedRole { get; set; } = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var user = await UserService.Buscar(Id);
+        estadoUsuarios = await UserService.ListarEstados();
+        Roles = await UserService.ListarRoles();
+        if (user == null)
+        {
+            NavigationManager.NavigateTo("/admin/administrar-usuarios");
+            return;
+        }
+        User = user;
+
+        var rolesUsuario = await UserManager.GetRolesAsync(User);
+        SelectedRole = rolesUsuario.FirstOrDefault() ?? string.Empty;
+    }
+
+    private async Task Guardar()
+    {
+        if (string.IsNullOrEmpty(User.Nombre) || string.IsNullOrEmpty(User.Apellido))
+        {
+            ToastService.ShowError("Por favor, complete todos los campos obligatorios.");
+            return;
+        }
+
+        var (exito, error) = await UserService.ModificarUsuarioConRol(User, SelectedRole);
+
+        if (exito)
+        {
+            NavigationManager.NavigateTo("/admin/administrar-usuarios");
+            ToastService.ShowSuccess("Usuario modificado correctamente.");
+        }
+        else
+        {
+            ToastService.ShowError($"Error al modificar el usuario: {error}");
+        }
+    }
+}

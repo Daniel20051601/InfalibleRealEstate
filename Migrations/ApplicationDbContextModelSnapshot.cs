@@ -17,7 +17,7 @@ namespace InfalibleRealEstate.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.5")
+                .HasAnnotation("ProductVersion", "9.0.7")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -45,6 +45,9 @@ namespace InfalibleRealEstate.Migrations
 
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("boolean");
+
+                    b.Property<int>("EstadoUsuarioId")
+                        .HasColumnType("integer");
 
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("boolean");
@@ -86,6 +89,8 @@ namespace InfalibleRealEstate.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("EstadoUsuarioId");
+
                     b.HasIndex("NormalizedEmail")
                         .HasDatabaseName("EmailIndex");
 
@@ -94,6 +99,48 @@ namespace InfalibleRealEstate.Migrations
                         .HasDatabaseName("UserNameIndex");
 
                     b.ToTable("AspNetUsers", (string)null);
+                });
+
+            modelBuilder.Entity("InfalibleRealEstate.Models.Carrito", b =>
+                {
+                    b.Property<int>("CarritoId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("CarritoId"));
+
+                    b.Property<string>("UsuarioId")
+                        .HasColumnType("text");
+
+                    b.HasKey("CarritoId");
+
+                    b.HasIndex("UsuarioId")
+                        .IsUnique();
+
+                    b.ToTable("Carritos");
+                });
+
+            modelBuilder.Entity("InfalibleRealEstate.Models.CarritoItem", b =>
+                {
+                    b.Property<int>("CarritoItemId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("CarritoItemId"));
+
+                    b.Property<int>("CarritoId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("PropiedadId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("CarritoItemId");
+
+                    b.HasIndex("CarritoId");
+
+                    b.HasIndex("PropiedadId");
+
+                    b.ToTable("CarritoItems");
                 });
 
             modelBuilder.Entity("InfalibleRealEstate.Models.Categoria", b =>
@@ -115,6 +162,44 @@ namespace InfalibleRealEstate.Migrations
                     b.HasKey("CategoriaId");
 
                     b.ToTable("Categorias");
+
+                    b.HasData(
+                        new
+                        {
+                            CategoriaId = 1,
+                            Descripcion = "Unidad de vivienda en un edificio de apartamentos.",
+                            NombreCategoria = "Apartamento"
+                        },
+                        new
+                        {
+                            CategoriaId = 2,
+                            Descripcion = "Vivienda unifamiliar o adosada.",
+                            NombreCategoria = "Casa"
+                        },
+                        new
+                        {
+                            CategoriaId = 3,
+                            Descripcion = "Lote de tierra disponible para construcción.",
+                            NombreCategoria = "Terreno"
+                        },
+                        new
+                        {
+                            CategoriaId = 4,
+                            Descripcion = "Espacio para negocios y oficinas.",
+                            NombreCategoria = "Local Comercial"
+                        },
+                        new
+                        {
+                            CategoriaId = 5,
+                            Descripcion = "Casa de lujo, a menudo con jardín o terreno grande.",
+                            NombreCategoria = "Villa"
+                        },
+                        new
+                        {
+                            CategoriaId = 6,
+                            Descripcion = "Apartamento de dos niveles, regularmente con Jacuzzi",
+                            NombreCategoria = "Penthouse"
+                        });
                 });
 
             modelBuilder.Entity("InfalibleRealEstate.Models.EstadoPropiedad", b =>
@@ -136,6 +221,112 @@ namespace InfalibleRealEstate.Migrations
                     b.HasKey("EstadoPropiedadId");
 
                     b.ToTable("EstadosPropiedad");
+
+                    b.HasData(
+                        new
+                        {
+                            EstadoPropiedadId = 1,
+                            Descripcion = "La propiedad está visible y disponible.",
+                            NombreEstado = "Activa"
+                        },
+                        new
+                        {
+                            EstadoPropiedadId = 3,
+                            Descripcion = "La propiedad ha sido vendida y ya no está disponible.",
+                            NombreEstado = "Vendida"
+                        },
+                        new
+                        {
+                            EstadoPropiedadId = 4,
+                            Descripcion = "La propiedad ha sido alquilada y ya no está disponible.",
+                            NombreEstado = "Alquilada"
+                        },
+                        new
+                        {
+                            EstadoPropiedadId = 6,
+                            Descripcion = "La propiedad ha sido eliminada del sistema.",
+                            NombreEstado = "Eliminada"
+                        });
+                });
+
+            modelBuilder.Entity("InfalibleRealEstate.Models.EstadoUsuario", b =>
+                {
+                    b.Property<int>("EstadoUsuarioId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("EstadoUsuarioId"));
+
+                    b.Property<string>("Descripcion")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Nombre")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.HasKey("EstadoUsuarioId");
+
+                    b.ToTable("EstadosUsuarios");
+
+                    b.HasData(
+                        new
+                        {
+                            EstadoUsuarioId = 1,
+                            Descripcion = "El usuario está activo y puede acceder al sistema.",
+                            Nombre = "Activo"
+                        },
+                        new
+                        {
+                            EstadoUsuarioId = 2,
+                            Descripcion = "El usuario no puede acceder al sistema.",
+                            Nombre = "Inactivo"
+                        },
+                        new
+                        {
+                            EstadoUsuarioId = 3,
+                            Descripcion = "El usuario ha sido suspendido temporalmente.",
+                            Nombre = "Suspendido"
+                        });
+                });
+
+            modelBuilder.Entity("InfalibleRealEstate.Models.Foros", b =>
+                {
+                    b.Property<int>("ForoId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("ForoId"));
+
+                    b.Property<string>("AdministradorId")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Descripcion")
+                        .IsRequired()
+                        .HasMaxLength(400)
+                        .HasColumnType("character varying(400)");
+
+                    b.Property<DateTime>("FechaCreacion")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("ImagenUrl")
+                        .HasColumnType("text");
+
+                    b.Property<string>("LinkForo")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<string>("Titulo")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)");
+
+                    b.HasKey("ForoId");
+
+                    b.HasIndex("AdministradorId");
+
+                    b.ToTable("Foros");
                 });
 
             modelBuilder.Entity("InfalibleRealEstate.Models.ImagenPropiedad", b =>
@@ -207,8 +398,8 @@ namespace InfalibleRealEstate.Migrations
 
                     b.Property<string>("TipoTransaccion")
                         .IsRequired()
-                        .HasMaxLength(10)
-                        .HasColumnType("character varying(10)");
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)");
 
                     b.Property<string>("Titulo")
                         .IsRequired()
@@ -231,25 +422,160 @@ namespace InfalibleRealEstate.Migrations
                     b.Property<int>("PropiedadId")
                         .HasColumnType("integer");
 
-                    b.Property<decimal?>("Banos")
+                    b.Property<decimal>("Banos")
                         .HasColumnType("numeric");
 
                     b.Property<string>("Descripcion")
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<int?>("Habitaciones")
+                    b.Property<int>("Habitaciones")
                         .HasColumnType("integer");
 
-                    b.Property<decimal?>("MetrosCuadrados")
+                    b.Property<decimal>("MetrosCuadrados")
                         .HasColumnType("numeric");
 
-                    b.Property<int?>("Parqueo")
+                    b.Property<int>("Parqueo")
                         .HasColumnType("integer");
 
                     b.HasKey("PropiedadId");
 
                     b.ToTable("PropiedadDetalles");
+                });
+
+            modelBuilder.Entity("InfalibleRealEstate.Models.SolicitudUnirse", b =>
+                {
+                    b.Property<int>("SolicitudUnirseId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("SolicitudUnirseId"));
+
+                    b.Property<string>("Apellido")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("CorreoElectronico")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("Estado")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<string>("Experiencia")
+                        .IsRequired()
+                        .HasMaxLength(300)
+                        .HasColumnType("character varying(300)");
+
+                    b.Property<DateTime>("FechaNacimiento")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("FechaSolicitud")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("NivelEstudios")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("Nombre")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("PorqueNosotros")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
+                    b.Property<string>("Profesion")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("Provincia")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("Telefono")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<string>("TrabajaActualmente")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<string>("UsuarioId")
+                        .HasColumnType("text");
+
+                    b.HasKey("SolicitudUnirseId");
+
+                    b.HasIndex("UsuarioId");
+
+                    b.ToTable("SolicitudesUnirse");
+                });
+
+            modelBuilder.Entity("InfalibleRealEstate.Models.SolicitudVenta", b =>
+                {
+                    b.Property<int>("SolicitudVentaId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("SolicitudVentaId"));
+
+                    b.Property<string>("Apellido")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<int>("CategoriaId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("CorreoElectronico")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("Descripcion")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
+                    b.Property<string>("Estado")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<DateTime>("FechaSolicitud")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Nombre")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("Telefono")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<string>("UsuarioId")
+                        .HasColumnType("text");
+
+                    b.HasKey("SolicitudVentaId");
+
+                    b.HasIndex("CategoriaId");
+
+                    b.HasIndex("UsuarioId");
+
+                    b.ToTable("SolicitudesVenta");
                 });
 
             modelBuilder.Entity("InfalibleRealEstate.Models.SuscripcionNoticia", b =>
@@ -414,6 +740,54 @@ namespace InfalibleRealEstate.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("InfalibleRealEstate.Data.ApplicationUser", b =>
+                {
+                    b.HasOne("InfalibleRealEstate.Models.EstadoUsuario", "EstadoUsuario")
+                        .WithMany("Usuarios")
+                        .HasForeignKey("EstadoUsuarioId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("EstadoUsuario");
+                });
+
+            modelBuilder.Entity("InfalibleRealEstate.Models.Carrito", b =>
+                {
+                    b.HasOne("InfalibleRealEstate.Data.ApplicationUser", "Usuario")
+                        .WithOne("Carrito")
+                        .HasForeignKey("InfalibleRealEstate.Models.Carrito", "UsuarioId");
+
+                    b.Navigation("Usuario");
+                });
+
+            modelBuilder.Entity("InfalibleRealEstate.Models.CarritoItem", b =>
+                {
+                    b.HasOne("InfalibleRealEstate.Models.Carrito", "Carrito")
+                        .WithMany("CarritoItems")
+                        .HasForeignKey("CarritoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("InfalibleRealEstate.Models.Propiedad", "Propiedad")
+                        .WithMany()
+                        .HasForeignKey("PropiedadId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Carrito");
+
+                    b.Navigation("Propiedad");
+                });
+
+            modelBuilder.Entity("InfalibleRealEstate.Models.Foros", b =>
+                {
+                    b.HasOne("InfalibleRealEstate.Data.ApplicationUser", "Administrador")
+                        .WithMany("Foros")
+                        .HasForeignKey("AdministradorId");
+
+                    b.Navigation("Administrador");
+                });
+
             modelBuilder.Entity("InfalibleRealEstate.Models.ImagenPropiedad", b =>
                 {
                     b.HasOne("InfalibleRealEstate.Models.Propiedad", "Propiedad")
@@ -435,7 +809,7 @@ namespace InfalibleRealEstate.Migrations
                     b.HasOne("InfalibleRealEstate.Models.Categoria", "Categoria")
                         .WithMany("Propiedades")
                         .HasForeignKey("CategoriaId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("InfalibleRealEstate.Models.EstadoPropiedad", "EstadoPropiedad")
@@ -460,6 +834,32 @@ namespace InfalibleRealEstate.Migrations
                         .IsRequired();
 
                     b.Navigation("Propiedad");
+                });
+
+            modelBuilder.Entity("InfalibleRealEstate.Models.SolicitudUnirse", b =>
+                {
+                    b.HasOne("InfalibleRealEstate.Data.ApplicationUser", "Usuario")
+                        .WithMany("SolicitudesUnirse")
+                        .HasForeignKey("UsuarioId");
+
+                    b.Navigation("Usuario");
+                });
+
+            modelBuilder.Entity("InfalibleRealEstate.Models.SolicitudVenta", b =>
+                {
+                    b.HasOne("InfalibleRealEstate.Models.Categoria", "Categoria")
+                        .WithMany("SolicitudesVenta")
+                        .HasForeignKey("CategoriaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("InfalibleRealEstate.Data.ApplicationUser", "Usuario")
+                        .WithMany("SolicitudesVenta")
+                        .HasForeignKey("UsuarioId");
+
+                    b.Navigation("Categoria");
+
+                    b.Navigation("Usuario");
                 });
 
             modelBuilder.Entity("InfalibleRealEstate.Models.SuscripcionNoticia", b =>
@@ -525,19 +925,39 @@ namespace InfalibleRealEstate.Migrations
 
             modelBuilder.Entity("InfalibleRealEstate.Data.ApplicationUser", b =>
                 {
+                    b.Navigation("Carrito");
+
+                    b.Navigation("Foros");
+
                     b.Navigation("PropiedadesPublicadas");
 
+                    b.Navigation("SolicitudesUnirse");
+
+                    b.Navigation("SolicitudesVenta");
+
                     b.Navigation("Suscripciones");
+                });
+
+            modelBuilder.Entity("InfalibleRealEstate.Models.Carrito", b =>
+                {
+                    b.Navigation("CarritoItems");
                 });
 
             modelBuilder.Entity("InfalibleRealEstate.Models.Categoria", b =>
                 {
                     b.Navigation("Propiedades");
+
+                    b.Navigation("SolicitudesVenta");
                 });
 
             modelBuilder.Entity("InfalibleRealEstate.Models.EstadoPropiedad", b =>
                 {
                     b.Navigation("Propiedades");
+                });
+
+            modelBuilder.Entity("InfalibleRealEstate.Models.EstadoUsuario", b =>
+                {
+                    b.Navigation("Usuarios");
                 });
 
             modelBuilder.Entity("InfalibleRealEstate.Models.Propiedad", b =>

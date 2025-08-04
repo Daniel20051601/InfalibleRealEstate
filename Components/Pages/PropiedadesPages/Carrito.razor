@@ -1,0 +1,187 @@
+﻿@page "/carrito"
+@attribute [Authorize]
+@rendermode InteractiveServer
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject UsuariosService UsuariosService
+@inject CarritoService CarritoService
+@inject NavigationManager Navigation
+@inject IToastService ToastService
+
+<PageTitle>Carrito</PageTitle>
+
+<div class="container my-3">
+    <h1 class="mb-4 fw-bold">Carrito</h1>
+    <div class="row">
+        <div class="col-lg-8 col-md-7">
+            @if(carritoItems is null){
+
+                <div class="d-flex flex-column align-items-center">
+                    <div>
+                        <div class="spinner-grow text-primary mx-1" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <div class="spinner-grow text-primary mx-1" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <div class="spinner-grow text-primary mx-1" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+                </div>
+            }
+            else if (carritoItems.Count == 0)
+            {
+                <div class="alert alert-info text-center">Tu carrito está vacío.</div>
+            }
+            else
+            {
+                <div class="row">
+                    @foreach (var item in carritoItems)
+                    {
+                        var propiedad = item.Propiedad;
+                        if (propiedad != null)
+                        {
+                            <div class="col-12 mb-4">
+                                <div class="card h-100 shadow-sm">
+                                    <div class="row g-0">
+                                        <div class="col-md-4">
+                                            <img src="@(propiedad.Imagenes?.FirstOrDefault()?.UrlImagen ?? "https://via.placeholder.com/300x200")"
+                                                 class="img-fluid rounded-start h-100 object-fit-cover"
+                                                 alt="@propiedad.Titulo"
+                                                 style="min-height: 180px; max-height: 200px;">
+                                        </div>
+                                        <div class="col-md-8">
+                                            <div class="card-body">
+                                                <h5 class="card-title text-truncate" style="overflow: hidden; white-space: nowrap; text-overflow: ellipsis;">
+                                                    @propiedad.Titulo
+                                                </h5>
+                                                <p class="card-text text-muted mb-2"
+                                                   style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+                                                    @propiedad.Detalle?.Descripcion
+                                                </p>
+                                                <div class="mb-2 d-flex justify-content-between">
+                                                    <span class="">@propiedad.TipoTransaccion</span>
+                                                    <span class="">@propiedad.Ciudad</span>
+                                                </div>
+                                                <div class="d-flex justify-content-between">
+                                                    <span class="fw-bold">
+                                                        @(propiedad.Moneda == "Dolar" ? "$USD" : "$DOP") @propiedad.Precio.ToString("N2")
+                                                    </span>
+                                                    <button class="btn btn-danger btn-sm"
+                                                            @onclick="() => EliminarItem(item.PropiedadId)"
+                                                            title="Eliminar"
+>
+                                                        <i class="bi bi-trash"></i> 
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    }
+                </div>
+            }
+        </div>
+
+        <div class="col-lg-4 col-md-5 mb-4">
+            <div class="card shadow-sm p-3">
+                <div class="d-flex justify-content-center">
+                    <h5 class="mb-3">Resumen del carrito</h5>
+                </div>
+                <div class=" mb-3">
+                    <h5><span class="fw-bold">Propiedades Agregadas:</span> @(carritoItems?.Count ?? 0)</h5>
+                    <h5><span class="fw-bold"> Total:</span>
+                        @{
+                            var moneda = carritoItems?.FirstOrDefault(i => i.Propiedad != null)?.Propiedad.Moneda ?? "DOP$";
+                            var total = carritoItems?.Where(i => i.Propiedad != null).Sum(i => i.Propiedad.Precio) ?? 0;
+                        }
+                        @moneda @total.ToString("N2")
+                    </h5>
+                    
+                </div>
+                <button class="btn btn-success w-100"
+                        @onclick="EnviarPorWhatsapp">
+                    <i class="bi bi-whatsapp"></i> Enviar por WhatsApp
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-4 mb-5">
+        <h3 class="">Tambien te puede interesar</h3>
+        <div class="d-flex flex-column align-items-center">
+            <div>
+                <div class="spinner-grow text-primary mx-1" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <div class="spinner-grow text-primary mx-1" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <div class="spinner-grow text-primary mx-1" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+@code {
+    public ApplicationUser? user { get; set; }
+    public List<CarritoItem>? carritoItems { get; set; }
+    public List<Propiedad> propiedades { get; set; } = new List<Propiedad>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var claimsUser = authState.User;
+
+        if (claimsUser.Identity is not null && claimsUser.Identity.IsAuthenticated)
+        {
+            var userId = claimsUser.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+
+            if (!string.IsNullOrEmpty(userId))
+            {
+                user = await UsuariosService.Buscar(userId);
+            }
+        }
+
+        carritoItems = await CarritoService.ObtenerItemsCarrito(user?.Id ?? string.Empty);
+
+    }
+
+    private void EnviarPorWhatsapp()
+    {
+        var mensaje = "*Hola estoy interesado en estas Propiedades:*\n";
+        foreach (var item in carritoItems)
+        {
+            var p = item.Propiedad;
+            if (p != null)
+            {
+                mensaje += $"\n- *{p.Titulo}*\nPrecio: {p.Precio:N2} {(p.Moneda == "Dolar" ? "$USD" : "$DOP")}\n{p.Ciudad}\nhttps://ejemplo:7031/Propiedad/Detalle/{p.PropiedadId}\n";
+            }
+        }
+        mensaje += $"Total: {carritoItems.Sum(i => i.Propiedad.Precio):N2} {(carritoItems.FirstOrDefault()?.Propiedad.Moneda ?? "DOP$")}";
+        var url = $"https://wa.me/18098419551?text={Uri.EscapeDataString(mensaje)}";
+        Navigation.NavigateTo(url, false);
+    }
+
+    public async Task EliminarItem(int PropiedadId)
+    {
+        var guardado = await CarritoService.Eliminar(user?.Id ?? string.Empty, PropiedadId);
+        if (guardado)
+        {
+            ToastService.ShowSuccess("Item eliminado del carrito.");
+            carritoItems = await CarritoService.ObtenerItemsCarrito(user?.Id ?? string.Empty);
+            StateHasChanged();
+        }
+
+    }
+
+}
+

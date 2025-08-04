@@ -1,0 +1,217 @@
+﻿@page "/unete"
+@rendermode InteractiveServer
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject UsuariosService UsuariosService
+@inject SolicitudesUnirseService SolicitudesUnirseService
+@inject NavigationManager NavigationManager
+@inject IToastService ToastService
+
+<PageTitle>Unete</PageTitle>
+
+<div class="container my-4 mb-5">
+
+    <div class="row g-4 ">
+        <div class="col-lg-7 col">
+            <div class="">
+                <h1 class="mb-4 fw-bold titulo-vende">Unete al equipo</h1>
+            </div>
+            <div class="imgVende-container">
+                <img class="imgVende" src="https://scrgajdklzafafwrxrng.supabase.co/storage/v1/object/public/propiedades/ComponenteSolicitud/co-trabajando-personas-trabajando-juntas.png" />
+            </div>
+            <p class="text-muted vende-descripcion">
+                En <span class="text-danger fw-bold">Infalible Real Estate</span> valoramos el talento, la iniciativa y el trabajo en equipo. Únete a nosotros y forma parte de una empresa innovadora, donde cada día es una oportunidad para aprender, aportar ideas y alcanzar tus metas. ¡Impulsa tu carrera, conecta con profesionales destacados y sé protagonista de grandes historias de éxito!<br /><br />
+                Aquí tu crecimiento profesional es nuestra prioridad. Disfruta de un ambiente colaborativo, retos constantes y capacitación continua para que desarrolles todo tu potencial. Si buscas un lugar donde tus ideas sean escuchadas y tu esfuerzo reconocido, este es el equipo ideal para ti. ¡Atrévete a dar el siguiente paso y construye el futuro que mereces junto a nosotros!
+            </p>
+            
+        </div>
+
+        <div class=" col-lg-5 col-md-5 p-4 card shadow-lg">
+            <div class="d-flex justify-content-center">
+                <h4 class="mb-4 titulo-vende">Formulario de Solicitud</h4>
+
+            </div>
+            <EditForm Model="solicitudUnirse" OnValidSubmit="@Guardar">
+                <DataAnnotationsValidator />
+
+                <div class="form-floating mb-3">
+                    <InputText type="text" class="form-control" id="input.nombre" @bind-Value="solicitudUnirse.Nombre" />
+                    <label for="input.nombre">Nombre</label>
+                    <ValidationMessage For="@(() => solicitudUnirse.Nombre)" />
+                </div>
+
+                <div class="form-floating mb-3">
+                    <InputText type="text" class="form-control" id="input.apellido" @bind-Value="solicitudUnirse.Apellido" />
+                    <label for="input.apellido">Apellido</label>
+                    <ValidationMessage For="@(() => solicitudUnirse.Apellido)" />
+                </div>
+
+                <div class="form-floating mb-3">
+                    <InputText type="email" class="form-control" id="input.email" @bind-Value="solicitudUnirse.CorreoElectronico" />
+                    <label for="input.email">Correo Electrónico</label>
+                    <ValidationMessage For="@(() => solicitudUnirse.CorreoElectronico)" />
+                </div>
+
+                <div class="form-floating mb-3">
+                    <InputText type="tel" class="form-control" id="input.telefono" @bind-Value="solicitudUnirse.Telefono" />
+                    <label for="input.telefono">Teléfono</label>
+                    <ValidationMessage For="@(() => solicitudUnirse.Telefono)" />
+                </div>
+
+                <div class="form-floating mb-3">
+                    <InputSelect type="text" class="form-select" id="input.nivelestudios" @bind-Value="solicitudUnirse.NivelEstudios" >
+                        <option value="">Seleccione un nivel de estudios</option>
+                        <option value="Primaria">Primaria</option>
+                        <option value="Secundaria">Secundaria</option>
+                        <option value="Bachillerato">Bachillerato</option>
+                        <option value="Técnico">Técnico</option>
+                        <option value="Universitario">Universitario</option>
+                        <option value="Postgrado">Postgrado</option>
+                        <option value="Maestría">Maestría</option>
+                        <option value="Doctorado">Doctorado</option>
+                    </InputSelect>
+                    <label for="input.nivelestudios">Nivel de Estudios</label>
+                    <ValidationMessage For="@(() => solicitudUnirse.NivelEstudios)" />
+                </div>
+
+                <div class="form-floating mb-3">
+                    <InputText type="text" class="form-control" id="input.experiencia" @bind-Value="solicitudUnirse.Experiencia" />
+                    <label for="input.experiencia">Experiencia</label>
+                    <ValidationMessage For="@(() => solicitudUnirse.Experiencia)" />
+                </div>
+
+                <div class="form-floating mb-3">
+                    <InputText type="text" class="form-control" id="input.profesion" @bind-Value="solicitudUnirse.Profesion" />
+                    <label for="input.profesion">Profesión</label>
+                    <ValidationMessage For="@(() => solicitudUnirse.Profesion)" />
+                </div>
+
+                <div class="form-floating mb-3">
+                    <InputSelect type="text" class="form-select" id="input.trabajaactualmente" @bind-Value="solicitudUnirse.TrabajaActualmente" >
+                        <option value="">Seleccione una opción</option>
+                        <option value="Sí">Sí</option>
+                        <option value="No">No</option>
+                    </InputSelect>
+                    <label for="input.trabajaactualmente">¿Trabaja Actualmente?</label>
+                    <ValidationMessage For="@(() => solicitudUnirse.TrabajaActualmente)" />
+                </div>
+
+                <div class="form-floating mb-3">
+                    <InputText id="input.provincia" class="form-control" @bind-Value="solicitudUnirse.Provincia" list="provincias" />
+                    <datalist id="provincias">
+                        @foreach (var provincia in ProvinciasyCiudades.Provincias)
+                        {
+                            <option value="@provincia"></option>
+                        }
+                    </datalist>
+                    <label for="input.provincia">Provincia</label>
+                    <ValidationMessage For="@(() => solicitudUnirse.Provincia)" />
+                </div>
+
+                <div class="form-floating mb-3">
+                    <InputDate class="form-control" id="input.fechanacimiento" @bind-Value="solicitudUnirse.FechaNacimiento" />
+                    <label for="input.fechanacimiento">Fecha de Nacimiento</label>
+                    <ValidationMessage For="@(() => solicitudUnirse.FechaNacimiento)" />
+                </div>
+
+                <div class="form-floating mb-3">
+                    <textarea class="form-control altura-textarea" id="input.porquenosotros" @bind="solicitudUnirse.PorqueNosotros"></textarea>
+                    <label for="input.porquenosotros">¿Por qué quieres unirte a nosotros?</label>
+                    <ValidationMessage For="@(() => solicitudUnirse.PorqueNosotros)" />
+                </div>
+
+
+                <div class="d-flex justify-content-center">
+                    <button type="submit" class="btn btn-success w-100 bi bi-whatsapp" disabled="@enviando">
+                        @if (enviando)
+                        {
+                            <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"> </span>
+                            <span> Enviando...</span>
+                        }
+                        else
+                        {
+                            <span> Enviar Solicitud</span>
+                        }
+                    </button>
+                </div>
+            </EditForm>
+        </div>
+
+
+    </div>
+
+</div>
+
+@code {
+    public ApplicationUser? User { get; set; }
+    public SolicitudUnirse solicitudUnirse { get; set; } = new SolicitudUnirse();
+    public bool enviando { get; set; } = false;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var claimsUser = authState.User;
+        solicitudUnirse.FechaNacimiento = new DateTime(1990, 1, 1); 
+
+        if (claimsUser.Identity is not null && claimsUser.Identity.IsAuthenticated)
+        {
+            var userId = claimsUser.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+
+            if (!string.IsNullOrEmpty(userId))
+            {
+                User = await UsuariosService.Buscar(userId);
+                solicitudUnirse.UsuarioId = User?.Id;
+            }
+        }
+    }
+
+    public async Task Guardar()
+    {
+        try
+        {
+            solicitudUnirse.Estado = "Pendiente";
+            solicitudUnirse.FechaSolicitud = DateTime.UtcNow;
+            solicitudUnirse.FechaNacimiento = solicitudUnirse.FechaNacimiento.ToUniversalTime(); 
+            enviando = true;
+            var guardado = await SolicitudesUnirseService.Guardar(solicitudUnirse);
+            if (guardado)
+            {
+                EnviarPorWhatsapp();
+                ToastService.ShowSuccess("Solicitud enviada correctamente.");
+            }
+            else
+            {
+                ToastService.ShowError("Error al enviar la solicitud. Por favor, inténtalo de nuevo.");
+            }
+        }
+        catch (Exception e)
+        {
+           Console.WriteLine($"Error al enviar la solicitud: {e.Message}");
+
+        }
+        finally
+        {
+            enviando = false;
+        }
+    }
+
+    public void EnviarPorWhatsapp()
+    {
+        var mensaje = $"¡Hola! Quiero unirme al equipo Infalible Real Estate. Aquí están mis datos:\n" +
+                  $"Nombre: {solicitudUnirse.Nombre} {solicitudUnirse.Apellido}\n" +
+                  $"Email: {solicitudUnirse.CorreoElectronico}\n" +
+                  $"Teléfono: {solicitudUnirse.Telefono}\n" +
+                  $"Nivel de estudios: {solicitudUnirse.NivelEstudios}\n" +
+                  $"Experiencia: {solicitudUnirse.Experiencia}\n" +
+                  $"Profesión: {solicitudUnirse.Profesion}\n" +
+                  $"¿Trabaja actualmente?: {solicitudUnirse.TrabajaActualmente}\n" +
+                  $"Provincia: {solicitudUnirse.Provincia}\n" +
+                  $"Fecha de nacimiento: {solicitudUnirse.FechaNacimiento:dd/MM/yyyy}\n" +
+                  $"Motivación: {solicitudUnirse.PorqueNosotros}\n";
+        var url = $"https://wa.me/18098419551?text={Uri.EscapeDataString(mensaje)}";
+        NavigationManager.NavigateTo(url, true);
+    }
+
+
+}
+

@@ -1,14 +1,31 @@
 ﻿@using InfalibleRealEstate.Components.Pages.PropiedadesPages
 @inherits LayoutComponentBase
 
+<BlazoredToasts @rendermode="RenderMode.InteractiveServer" Position="ToastPosition.BottomRight"
+                Timeout="10"
+                IconType="IconType.Material"
+                ErrorIcon="error_outline"
+                InfoIcon="school"
+                SuccessIcon="done_outline"
+                WarningIcon="warning"
+                ShowProgressBar="@true"
+                ShowCloseButton="@true"
+                MaxToastCount="3">
+</BlazoredToasts>
+
 <div class="page">
     <main>
-        <TopRow></TopRow>
+        <TopRow />
         <article class="content">
             @Body
         </article>
     </main>
+    <Footer />
 </div>
 
-<BlazoredToasts @rendermode="RenderMode.InteractiveServer" />
+
+
+
+
+
 

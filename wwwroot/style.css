@@ -5,6 +5,10 @@
     padding: 0;
 }
 
+.bgImg {
+    background-image: url('https://scrgajdklzafafwrxrng.supabase.co/storage/v1/object/public/propiedades/ImgProyect/ImgPrincipal.jpg');
+}
+
 .colorApp {
     color: rgb(0,204,255);
 }
@@ -98,7 +102,7 @@
 .nav-links {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: 0.4rem;
 }
 
 @media (max-width: 991px) {
@@ -128,8 +132,18 @@
 }
 
 .dropDowmHome {
-    background: #f8f9fa;
+    position: relative;
+    width: 300px;
 }
+
+.dropdown-item-top {
+    padding-left: 4px;
+}
+
+    .dropdown-item-top:hover {
+        background-color: rgba(0,204,255,0.1);
+        color: #00bdf3;
+    }
 
 .textInic {
     font-size: 50px;
@@ -219,27 +233,29 @@
     accent-color: #00bdf3;
 }
 
-.btn-outline-secondary {
-    border-color: rgb(0,204,255);
-    color: rgb(0,204,255);
-}
 
-    .btn-outline-secondary:not(.active):hover {
-        background: rgb(0,204,255);
-        border-color: #fff;
-    }
-
-.btn-primary {
+/*.btn-primary {
     background: rgb(0,204,255);
     border: none;
 }
-
+*/
 .ultimas-publicaciones-section {
     padding: 24px 18px 12px 18px;
 }
 
-.ultimas-title {
-    
+.ultimas-icon {
+    font-variation-settings: 'wght' 100, 'opsz' 20;
+    font-size: 20px;
+    vertical-align: middle;
+}
+
+.ultimas-icon-tamano {
+    font-size: 13px;
+}
+
+.ultimas-icon-tamano-v {
+    font-size: 13px;
+    vertical-align: middle;
 }
 
 .ultimas-cards-row {
@@ -252,9 +268,10 @@
     }
 
 .ultimas-card-col {
-    min-width: 300px;
-    max-width: 300px;
-    margin-top: 5px; 
+    min-width: 325px;
+    max-width: 325px;
+    margin-top: 5px;
+    position: relative;
 }
 
 .ultimas-card {
@@ -266,18 +283,19 @@
 }
 
     .ultimas-card:hover {
-        box-shadow: 0 4px 16px rgba(0,0,0,0.1);
-        transform: scale(1.02);
+        box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+        /*transform: scale(1.01);*/
     }
 
 .ultimas-card-img {
     width: 100%;
     height: 250px;
-    object-fit: cover; 
-    object-position: center; 
+    object-fit: cover;
+    object-position: center;
     border-top-left-radius: 5px;
     border-top-right-radius: 5px;
     display: block;
+    background: #f8f9fa;
 }
 
 .btn-fav {
@@ -292,6 +310,10 @@
     z-index: 2;
 }
 
+.ultimas-card-col > .btn-fav {
+    right: 15px !important;
+}
+
     .btn-fav:hover, .btn-fav:focus {
         background: #00bdf3;
         color: #fff;
@@ -302,10 +324,26 @@
     font-weight: 500;
     margin-top: 0.5rem;
     margin-bottom: 0.5rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: block;
+    width: 100%;
+}
+
+.ultimas-card-desc {
+    font-size: 0.95rem;
+    color: #555;
+    margin-bottom: 0 !important;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2; 
+    -webkit-box-orient: vertical;
 }
 
 .ultimas-card-price {
-    color: #00c6ff;
+    color: rgba(0, 204, 255, 1);
     font-weight: 600;
     font-size: 1.1rem;
 }
@@ -325,7 +363,7 @@
 }
 
 .filter-sidebar {
-    background: #f8f9fa;
+    /*background: #f8f9fa;*/
     padding: 1rem;
     width: 25%;
     transition: all 0.3s ease;
@@ -379,7 +417,7 @@
     .filter-toggle {
         display: block;
         width: 100%;
-        margin-bottom: 1rem;
+        marding: 0.5rem;
     }
 
     .filter-sidebar.collapsed {
@@ -423,7 +461,7 @@
 
 
 .text-cyan {
-    color: #00c1d4;
+    color: rgba(0, 204, 255, 1);
 }
 
 .servicio-titulo {
@@ -443,110 +481,22 @@
     margin-bottom: 2rem;
 }
 
-/*Seccion de Equipo*/
+/*Seccion canal de Youtube*/
 
-.equipo-section {
-    background: transparent;
-}
-
-.equipo-content {
-    max-width: 1200px;
-    margin: 0 auto;
-}
-
-.equipo-header h2 {
-    font-size: 2rem;
-    font-weight: 700;
-}
-
-.equipo-card-col {
-    min-width: 300px;
-    max-width: 300px;
-    padding-left: 15px;
-    padding-right: 15px;
-    margin-bottom: 2rem;
-}
-
-.equipo-card {
-    border-radius: 5px;
-    box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+.iframeYoutube {
+    width: 100%;
+    height: 400px;
     border: none;
-    background: #fff;
-    overflow: hidden;
-    transition: box-shadow 0.2s, transform 0.2s;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+    border-radius: 8px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.1);
 }
 
-    .equipo-card:hover {
-        box-shadow: 0 4px 16px rgba(0,0,0,0.12);
-        transform: scale(1.03);
-    }
-
-.equipo-card-img {
-    width: 100%;
-    height: 350px;
-    object-fit: cover;
-    object-position: center;
-    border-top-left-radius: 5px;
-    border-top-right-radius: 5px;
-    display: block;
-}
-
-.equipo-card-body {
-    padding: 1rem;
-    width: 100%;
-}
-
-.equipo-card-title {
-    font-size: 1.1rem;
-    font-weight: 600;
-    margin-bottom: 0.5rem;
-    color: #191140;
-    text-align: center;
-}
-
-.equipo-card-social {
-    margin-top: 0.5rem;
-}
-
-.equipo-social-link {
-    font-size: 1.7rem;
-    transition: color 0.2s;
-    text-decoration: none;
-}
-
-    .equipo-social-link.facebook {
-        color: #1877f3;
-    }
-
-    .equipo-social-link.whatsapp {
-        color: #25d366;
-    }
-
-    .equipo-social-link.instagram {
-        color: #e1306c;
-    }
-
-    .equipo-social-link:hover {
-        opacity: 0.8;
-    }
-
-.equipo-cards-row::-webkit-scrollbar {
-    display: none;
-}
-
-.equipo-cards-row {
-    -ms-overflow-style: none; 
-    scrollbar-width: none; 
-}
 
 /*Seccion Catalogo*/
 .catalog-cards-row {
     display: flex;
     gap: 2rem;
-    justify-content: flex-start;
+    justify-content: center;
     flex-wrap: wrap;
 }
 
@@ -693,11 +643,18 @@
 /*Log In*/
 .ir-login-bg {
     min-height: 100vh;
+    width: 100%;
+    margin: 0;
+    padding: 0;
     display: flex;
     align-items: center;
     justify-content: center;
     background: #f5f7fa;
-    padding: 1rem;
+}
+
+.layoutAccount {
+    background: #f5f7fa;
+    padding: 15px;
 }
 
 .ir-login-card {
@@ -739,6 +696,7 @@
 
     .ir-login-btn:hover {
         background: #0056b3;
+        color: #fff;
     }
 
 .ir-login-links a {
@@ -763,4 +721,211 @@
         padding: 1.2rem 0.5rem;
     }
 }
+
+/*Seccion de Equipo componente Nosotros*/
+
+.equipo-section {
+    background: transparent;
+}
+
+.equipo-content {
+    margin: 0 auto;
+}
+
+.equipo-header h2 {
+    font-size: 2rem;
+    font-weight: 700;
+}
+
+.equipo-card-col {
+    min-width: 300px;
+    max-width: 300px;
+    padding-left: 15px;
+    padding-right: 15px;
+    margin-bottom: 2rem;
+}
+
+.equipo-card {
+    border-radius: 5px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+    border: none;
+    background: #fff;
+    overflow: hidden;
+    transition: box-shadow 0.2s, transform 0.2s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+    .equipo-card:hover {
+        box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+        transform: scale(1.03);
+    }
+
+.equipo-card-img {
+    width: 100%;
+    height: 350px;
+    object-fit: cover;
+    object-position: center;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+    display: block;
+}
+
+.equipo-card-body {
+    padding: 1rem;
+    width: 100%;
+}
+
+.equipo-card-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: #191140;
+    text-align: center;
+}
+
+.equipo-card-social {
+    margin-top: 0.5rem;
+}
+
+.equipo-social-link {
+    font-size: 1.7rem;
+    transition: color 0.2s;
+    text-decoration: none;
+}
+
+    .equipo-social-link.facebook {
+        color: #1877f3;
+    }
+
+    .equipo-social-link.whatsapp {
+        color: #25d366;
+    }
+
+    .equipo-social-link.instagram {
+        color: #e1306c;
+    }
+
+    .equipo-social-link:hover {
+        opacity: 0.8;
+    }
+
+.equipo-cards-row::-webkit-scrollbar {
+    display: none;
+}
+
+.equipo-cards-row {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+/*Componente Vende*/
+.titulo-vende {
+    color: #444 !important;
+}
+.imgVende-container {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.imgVende {
+    max-width: 550px;
+    width: 100%;
+    height: auto;
+    border-radius: 5px;
+    box-shadow: 0 4px 18px rgba(0, 204, 255, 0.10);
+    object-fit: contain;
+    background: #f8f9fa;
+}
+
+.vende-descripcion {
+    font-size: 1.08rem;
+    color: #222;
+    background: linear-gradient(90deg, #f5f6fa 0%, #fafdff 100%); 
+    border-radius: 12px;
+    padding: 1.2rem 1.5rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 2px 12px rgba(0,204,255,0.05);
+    line-height: 1.7;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+    text-align: center;
+}
+
+.animated-underline {
+    position: relative;
+    display: block;
+    margin: 0 auto;
+    text-align: center;
+    overflow: hidden;
+}
+
+    .animated-underline::after {
+        content: "";
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%) scaleX(0);
+        bottom: -2px;
+        width: 60%;
+        height: 4px; 
+        background: linear-gradient(90deg, #00ccff 0%, #ff4b2b 100%);
+        opacity: 0.40; 
+        border-radius: 2px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+        transform-origin: left;
+        transition: transform 1.2s cubic-bezier(0.4,0,0.2,1);
+    }
+
+    .animated-underline.show-underline::after {
+        transform: translateX(-50%) scaleX(1);
+    }
+
+.altura-textarea {
+    height: 120px !important;
+    min-height: 120px !important;
+    max-height: 500px;
+    resize: vertical;
+}
+
+/*Componente Foros*/
+/*Componente Foros*/
+.foros-item {
+    transition: box-shadow 0.2s, transform 0.2s;
+}
+
+    .foros-item:hover {
+        box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+        transform: translateY(-2px);
+    }
+
+/*perfil*/
+a.aVolver,
+a.aVolver:visited,
+a.aVolver:active,
+a.aVolver:hover,
+a.aVolver:focus {
+    text-decoration: none !important;
+    color: inherit;
+    font-size: 1rem;
+}
+
+a.itemPerfil,
+a.itemPerfil:visited,
+a.itemPerfil:active,
+a.itemPerfil:hover,
+a.itemPerfil:focus {
+    text-decoration: none !important;
+    color: #191140;
+    font-weight: 600;
+}
+.itemPerfil_ {
+    text-decoration: none !important;
+    color: #191140;
+    font-weight: 600;
+}
+
 

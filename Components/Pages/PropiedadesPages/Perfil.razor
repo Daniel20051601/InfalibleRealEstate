@@ -1,0 +1,121 @@
+﻿@page "/perfil"
+@attribute [Authorize]
+@inject AuthenticationStateProvider authenticationStateProvider
+@rendermode InteractiveServer
+@inject UsuariosService usuariosService
+
+@if (user is not null)
+{
+    <div class="container mt-3">
+        <div class="p-3 mb-3">
+            <div class="d-flex flex-column text-start">
+                <a href="/" class="aVolver">
+                    <i class="bi bi-arrow-left text-secondary   mx-2 mb-4">volver</i>
+                </a>
+                <h3 class="text-secondary fw-bold mt-4"> Perfil</h3>
+            </div>
+            <hr />
+
+            <div class="row card shadow-sm mt-2 mb-3">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Información del Usuario</h5>
+                    <a class="btn btn-outline-secondary btn-sm" href="/perfil/editar">
+                        <i class="bi bi-pencil-square"></i>
+                    </a>
+                </div>
+                <div class="card-body">
+                    <p><strong>Nombre:</strong> @user.Nombre</p>
+                    <p><strong>Apellido:</strong> @user.Apellido</p>
+                    <p><strong>Correo Electrónico:</strong> @user.Email</p>
+
+                    <p><strong>Teléfono:</strong> @(user.PhoneNumber = " " ?? "No especificado")</p>
+                    <p><strong>Estado de la cuenta:</strong> <span class="badge bg-success">@user.EstadoUsuario?.Nombre</span></p>
+                </div>
+            </div>
+
+            <div class="row card  shadow-sm mt-2 mb-3">
+                <div class="card-header bg-white d-flex justify-content-start align-items-center">
+                    <h5 class="mb-0">Ajustes</h5>
+                </div>
+                <div class="card-body text-secondary">
+
+                    <div class="itemPerfil_ mb-2">
+                        <label for="notificacionesCheckbox" class="form-check-label"><strong>Recibir notificaciones de nuevas Propiedades</strong></label>
+                        <InputCheckbox @bind-Value="suscripcionesPropiedades" class="form-check-input" id="notificacionesCheckbox" />
+                        
+                    </div>
+                    <div class="itemPerfil_ mb-2">
+                        <label for="foroCheckbox" class="form-check-label"><strong>Recibir notificaciones de los nuevos Foros</strong></label>
+                        <InputCheckbox @bind-Value="suscripcionesForo" class="form-check-input" id="foroCheckbox" />
+
+                    </div>
+
+                    <a href="/Account/Manage/ChangePassword" class="itemPerfil">
+                        <p><strong>Olvid&eacute; mi contraseña</strong> <i class="bi bi-box-arrow-up-right"></i></p>
+                    </a>
+
+                </div>
+            </div>
+
+            <div class="row card mt-2">
+                <div class="card-header">
+                    <h5 class="mb-0 text-danger">ZONA DE PELIGRO</h5>
+                </div>
+                <div class="card-body">
+                    <div class="border border-danger rounded p-3">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-exclamation-triangle-fill text-danger me-2"></i>
+                            <h6 class="mb-0"><strong>Solicitar eliminación de cuenta</strong></h6>
+                        </div>
+                        <p class="mt-2 mb-3">
+                            Eliminar tu cuenta es permanente y no se puede deshacer. Tus datos se eliminarán en un plazo de 30 días, excepto que podamos retener algunos metadatos y registros durante más tiempo cuando sea requerido o permitido por la ley.
+                        </p>
+                        <a href="Account/Manage/DeletePersonalData" class="btn btn-outline-danger">Solicitar eliminar cuenta</a>
+                    </div>
+                </div>
+            </div>
+
+
+        </div>
+    </div>
+
+}
+else
+{
+    <div class="d-flex flex-column align-items-center">
+        <span class="mb-3 fs-6">Cargando Informaci&oacute;n...</span>
+        <div>
+            <div class="spinner-grow text-primary mx-1" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <div class="spinner-grow text-primary mx-1" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <div class="spinner-grow text-primary mx-1" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+    </div>
+}
+
+
+@code {
+    public ApplicationUser? user;
+    public bool suscripcionesPropiedades = false;
+    public bool suscripcionesForo = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await authenticationStateProvider.GetAuthenticationStateAsync();
+        var claimUser = authState.User;
+
+        if (claimUser.Identity is not null && claimUser.Identity.IsAuthenticated)
+        {
+            var userId = claimUser.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (!string.IsNullOrEmpty(userId))
+            {
+                user = await usuariosService.Buscar(userId);
+            }
+        }
+    }
+}
