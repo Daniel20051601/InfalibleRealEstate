@@ -3,6 +3,7 @@ using System;
 using InfalibleRealEstate.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,13 +12,15 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace InfalibleRealEstate.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250803155214_AgregaTablaCarrito")]
+    partial class AgregaTablaCarrito
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.7")
+                .HasAnnotation("ProductVersion", "9.0.5")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -290,45 +293,6 @@ namespace InfalibleRealEstate.Migrations
                         });
                 });
 
-            modelBuilder.Entity("InfalibleRealEstate.Models.Foros", b =>
-                {
-                    b.Property<int>("ForoId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("ForoId"));
-
-                    b.Property<string>("AdministradorId")
-                        .HasColumnType("text");
-
-                    b.Property<string>("Descripcion")
-                        .IsRequired()
-                        .HasMaxLength(400)
-                        .HasColumnType("character varying(400)");
-
-                    b.Property<DateTime>("FechaCreacion")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("ImagenUrl")
-                        .HasColumnType("text");
-
-                    b.Property<string>("LinkForo")
-                        .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)");
-
-                    b.Property<string>("Titulo")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
-
-                    b.HasKey("ForoId");
-
-                    b.HasIndex("AdministradorId");
-
-                    b.ToTable("Foros");
-                });
-
             modelBuilder.Entity("InfalibleRealEstate.Models.ImagenPropiedad", b =>
                 {
                     b.Property<int>("ImagenId")
@@ -441,141 +405,6 @@ namespace InfalibleRealEstate.Migrations
                     b.HasKey("PropiedadId");
 
                     b.ToTable("PropiedadDetalles");
-                });
-
-            modelBuilder.Entity("InfalibleRealEstate.Models.SolicitudUnirse", b =>
-                {
-                    b.Property<int>("SolicitudUnirseId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("SolicitudUnirseId"));
-
-                    b.Property<string>("Apellido")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
-
-                    b.Property<string>("CorreoElectronico")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
-
-                    b.Property<string>("Estado")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
-
-                    b.Property<string>("Experiencia")
-                        .IsRequired()
-                        .HasMaxLength(300)
-                        .HasColumnType("character varying(300)");
-
-                    b.Property<DateTime>("FechaNacimiento")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTime>("FechaSolicitud")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("NivelEstudios")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
-
-                    b.Property<string>("Nombre")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
-
-                    b.Property<string>("PorqueNosotros")
-                        .IsRequired()
-                        .HasMaxLength(1000)
-                        .HasColumnType("character varying(1000)");
-
-                    b.Property<string>("Profesion")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
-
-                    b.Property<string>("Provincia")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
-
-                    b.Property<string>("Telefono")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("character varying(20)");
-
-                    b.Property<string>("TrabajaActualmente")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
-
-                    b.Property<string>("UsuarioId")
-                        .HasColumnType("text");
-
-                    b.HasKey("SolicitudUnirseId");
-
-                    b.HasIndex("UsuarioId");
-
-                    b.ToTable("SolicitudesUnirse");
-                });
-
-            modelBuilder.Entity("InfalibleRealEstate.Models.SolicitudVenta", b =>
-                {
-                    b.Property<int>("SolicitudVentaId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("SolicitudVentaId"));
-
-                    b.Property<string>("Apellido")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
-
-                    b.Property<int>("CategoriaId")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("CorreoElectronico")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
-
-                    b.Property<string>("Descripcion")
-                        .IsRequired()
-                        .HasMaxLength(1000)
-                        .HasColumnType("character varying(1000)");
-
-                    b.Property<string>("Estado")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
-
-                    b.Property<DateTime>("FechaSolicitud")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Nombre")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
-
-                    b.Property<string>("Telefono")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("character varying(20)");
-
-                    b.Property<string>("UsuarioId")
-                        .HasColumnType("text");
-
-                    b.HasKey("SolicitudVentaId");
-
-                    b.HasIndex("CategoriaId");
-
-                    b.HasIndex("UsuarioId");
-
-                    b.ToTable("SolicitudesVenta");
                 });
 
             modelBuilder.Entity("InfalibleRealEstate.Models.SuscripcionNoticia", b =>
@@ -779,15 +608,6 @@ namespace InfalibleRealEstate.Migrations
                     b.Navigation("Propiedad");
                 });
 
-            modelBuilder.Entity("InfalibleRealEstate.Models.Foros", b =>
-                {
-                    b.HasOne("InfalibleRealEstate.Data.ApplicationUser", "Administrador")
-                        .WithMany("Foros")
-                        .HasForeignKey("AdministradorId");
-
-                    b.Navigation("Administrador");
-                });
-
             modelBuilder.Entity("InfalibleRealEstate.Models.ImagenPropiedad", b =>
                 {
                     b.HasOne("InfalibleRealEstate.Models.Propiedad", "Propiedad")
@@ -834,32 +654,6 @@ namespace InfalibleRealEstate.Migrations
                         .IsRequired();
 
                     b.Navigation("Propiedad");
-                });
-
-            modelBuilder.Entity("InfalibleRealEstate.Models.SolicitudUnirse", b =>
-                {
-                    b.HasOne("InfalibleRealEstate.Data.ApplicationUser", "Usuario")
-                        .WithMany("SolicitudesUnirse")
-                        .HasForeignKey("UsuarioId");
-
-                    b.Navigation("Usuario");
-                });
-
-            modelBuilder.Entity("InfalibleRealEstate.Models.SolicitudVenta", b =>
-                {
-                    b.HasOne("InfalibleRealEstate.Models.Categoria", "Categoria")
-                        .WithMany("SolicitudesVenta")
-                        .HasForeignKey("CategoriaId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("InfalibleRealEstate.Data.ApplicationUser", "Usuario")
-                        .WithMany("SolicitudesVenta")
-                        .HasForeignKey("UsuarioId");
-
-                    b.Navigation("Categoria");
-
-                    b.Navigation("Usuario");
                 });
 
             modelBuilder.Entity("InfalibleRealEstate.Models.SuscripcionNoticia", b =>
@@ -927,13 +721,7 @@ namespace InfalibleRealEstate.Migrations
                 {
                     b.Navigation("Carrito");
 
-                    b.Navigation("Foros");
-
                     b.Navigation("PropiedadesPublicadas");
-
-                    b.Navigation("SolicitudesUnirse");
-
-                    b.Navigation("SolicitudesVenta");
 
                     b.Navigation("Suscripciones");
                 });
@@ -946,8 +734,6 @@ namespace InfalibleRealEstate.Migrations
             modelBuilder.Entity("InfalibleRealEstate.Models.Categoria", b =>
                 {
                     b.Navigation("Propiedades");
-
-                    b.Navigation("SolicitudesVenta");
                 });
 
             modelBuilder.Entity("InfalibleRealEstate.Models.EstadoPropiedad", b =>

@@ -3,6 +3,7 @@ using System;
 using InfalibleRealEstate.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace InfalibleRealEstate.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250804023842_AgregaCampoEstado")]
+    partial class AgregaCampoEstado
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -288,45 +291,6 @@ namespace InfalibleRealEstate.Migrations
                             Descripcion = "El usuario ha sido suspendido temporalmente.",
                             Nombre = "Suspendido"
                         });
-                });
-
-            modelBuilder.Entity("InfalibleRealEstate.Models.Foros", b =>
-                {
-                    b.Property<int>("ForoId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("ForoId"));
-
-                    b.Property<string>("AdministradorId")
-                        .HasColumnType("text");
-
-                    b.Property<string>("Descripcion")
-                        .IsRequired()
-                        .HasMaxLength(400)
-                        .HasColumnType("character varying(400)");
-
-                    b.Property<DateTime>("FechaCreacion")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("ImagenUrl")
-                        .HasColumnType("text");
-
-                    b.Property<string>("LinkForo")
-                        .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)");
-
-                    b.Property<string>("Titulo")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
-
-                    b.HasKey("ForoId");
-
-                    b.HasIndex("AdministradorId");
-
-                    b.ToTable("Foros");
                 });
 
             modelBuilder.Entity("InfalibleRealEstate.Models.ImagenPropiedad", b =>
@@ -779,15 +743,6 @@ namespace InfalibleRealEstate.Migrations
                     b.Navigation("Propiedad");
                 });
 
-            modelBuilder.Entity("InfalibleRealEstate.Models.Foros", b =>
-                {
-                    b.HasOne("InfalibleRealEstate.Data.ApplicationUser", "Administrador")
-                        .WithMany("Foros")
-                        .HasForeignKey("AdministradorId");
-
-                    b.Navigation("Administrador");
-                });
-
             modelBuilder.Entity("InfalibleRealEstate.Models.ImagenPropiedad", b =>
                 {
                     b.HasOne("InfalibleRealEstate.Models.Propiedad", "Propiedad")
@@ -926,8 +881,6 @@ namespace InfalibleRealEstate.Migrations
             modelBuilder.Entity("InfalibleRealEstate.Data.ApplicationUser", b =>
                 {
                     b.Navigation("Carrito");
-
-                    b.Navigation("Foros");
 
                     b.Navigation("PropiedadesPublicadas");
 
