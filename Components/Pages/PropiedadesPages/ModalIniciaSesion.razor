@@ -1,0 +1,46 @@
+﻿<div class="container">
+    <div class="d-flex justify-content-end align-items-center">
+        <button class="btn-no-border text-secondary bi bi-x" @onclick="CerrarModal"></button>
+    </div>
+    <div class="row align-items-center">
+        <div class="col-12 col-md-6 text-center">
+            <img class="imgSesion" src="https://scrgajdklzafafwrxrng.supabase.co/storage/v1/object/public/propiedades/Card%20Inicie%20Sesion/ImagenIlustrativaSinFondo.png" />
+        </div>
+        <div class="col-12 col-md-6">
+            <div class="d-flex justify-content-center">
+                <h3 class="titleCarrito fw-bold mt-4 mt-md-0 mb-2"> Inicia Sesi&oacute;n</h3>
+            </div>
+            <div class="mt-2 mb-4">
+                <p class="text-secondary mb-1">Inicia sesi&oacute;n ahora y podr&aacute;s:</p>
+                <p class="mb-1"><i class="text-primary bi bi-check2-circle me-2"></i><span class="text-secondary">Agregar propiedades a tu Carrito</span></p>
+                <p class="mb-1"><i class="text-primary bi bi-check2-circle me-2"></i><span class="text-secondary">Agendar y administrar tus citas</span></p>
+                <p class="mb-1"><i class="text-primary bi bi-check2-circle me-2"></i><span class="text-secondary">Recibir correos de nuevas propiedades</span></p>
+                <p class="mb-1"><i class="text-primary bi bi-check2-circle me-2"></i><span class="text-secondary">Recibir correos de nuevos foros</span></p>
+            </div>
+           
+            
+            <a href="/Account/Login" class="btn btn-primary btn-lg w-100 mb-3">Iniciar Sesi&oacute;n</a>
+            <div class="d-flex justify-content-center">
+                <p class=" text-muted sizeLocation">¿No tienes una cuenta? <a href="/Account/Register" class="text-primary">Regístrate</a></p>
+            </div>
+            
+        </div>
+    </div>
+</div>
+
+
+
+@code {
+    [Parameter]
+    public bool mostrarModal { get; set; }
+
+    [Parameter]
+    public EventCallback<bool> mostrarModalChanged { get; set; }
+
+    private async Task CerrarModal()
+    {
+        await mostrarModalChanged.InvokeAsync(false);
+    }
+}
+
+
