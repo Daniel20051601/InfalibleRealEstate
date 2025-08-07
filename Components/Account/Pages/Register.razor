@@ -26,7 +26,6 @@
                 <StatusMessage Message="@Message" />
                 <EditForm Model="Input" asp-route-returnUrl="@ReturnUrl" method="post" OnValidSubmit="RegisterUser" FormName="register">
                     <DataAnnotationsValidator />
-                    <ValidationSummary class="text-danger" role="alert" />
                     <div class="form-floating mb-3">
                         <InputText @bind-Value="Input.Nombre" id="Input.Nombre" class="form-control" autocomplete="given-name" aria-required="true"  />
                         <label for="Input.Nombre" class="form-label">Nombre</label>
