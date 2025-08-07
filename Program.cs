@@ -29,6 +29,7 @@ builder.Services.AddScoped<CarritoService>();
 builder.Services.AddScoped<SolicitudesVentaService>();
 builder.Services.AddScoped<SolicitudesUnirseService>();
 builder.Services.AddScoped<ForoService>();
+builder.Services.AddScoped<CitasService>();
 
 
 builder.Services.AddBlazoredToast();
