@@ -5,7 +5,6 @@
 <EditForm Model="this" OnValidSubmit="HandleGuardarCita">
     <DataAnnotationsValidator />
     <div class="container">
-        <!-- Selección de propiedades -->
         <div class="card shadow-sm p-3 mb-2">
             <div class="d-flex justify-content-start">
                 <h5 class="text-secondary">Seleccione las propiedades que desea ver en la cita</h5>
@@ -170,7 +169,7 @@
     [Parameter]
     public EventCallback OnClose { get; set; }
 
-    // Datos de pago
+
     [Required(ErrorMessage = "El número de tarjeta es obligatorio.")]
     [RegularExpression(@"^\d{16}$", ErrorMessage = "El número de tarjeta debe tener 16 dígitos.")]
     public string NumeroTarjeta { get; set; } = string.Empty;
@@ -241,14 +240,12 @@
             return;
         }
 
-        // Validación de hora (8am a 5pm)
         if (horaCita < new TimeOnly(8, 0) || horaCita > new TimeOnly(17, 0))
         {
             errorHora = "La hora debe estar entre 8:00 AM y 5:00 PM.";
             return;
         }
 
-        // Validación manual extra de la tarjeta
         if (!ValidarDatosTarjeta())
         {
             return;
@@ -299,7 +296,8 @@
             errorPago = "El código de seguridad debe tener 3 o 4 dígitos.";
             return false;
         }
-        // Validar que la tarjeta no esté expirada
+
+
         var partes = FechaExpiracion.Split('/');
         int mes = int.Parse(partes[0]);
         int anio = 2000 + int.Parse(partes[1]);
