@@ -5,158 +5,194 @@
 @inject PropiedadService PropiedadService
 @inject SolicitudesUnirseService SolicitudesUnirseService
 @inject SolicitudesVentaService SolicitudesVentaService
+@inject CitasService CitasService
 @inject ForoService ForoService
 @rendermode InteractiveServer
 
 <PageTitle>Inicio Admin</PageTitle>
 
-<div class="container mb-3">
-    <div class="row">
-        <div class="col-md-4 mb-3">
-            <a href="/admin/administrar-propiedades" class="admin-card-link">
-                <div class="card text-white bg-success h-100 admin-card-hover cardInicio">
-                    <div class="card-header"><strong>Propiedades publicadas</strong></div>
-                    <div class="card-body bg-light text-dark">
-                        <div class="d-flex justify-content-between">
-                            <h5 class="card-title"><strong>@PropiedadesPublicadas </strong> propiedades</h5>
-                            <i class="text-success fs-3 bi bi-card-checklist"></i>
-                        </div>
-                    </div>
-                </div>
-            </a>
-        </div>
-        <div class="col-md-4 mb-3">
-            <a href="/admin/administrar-foros" class="admin-card-link">
-                <div class="card text-white bg-secondary h-100 admin-card-hover cardInicio">
-                    <div class="card-header"><strong>Foros publicados</strong></div>
-                    <div class="card-body bg-light text-dark">
-                        <div class="d-flex justify-content-between">
-                            <h5 class="card-title"><strong>@TotalForos </strong> foros</h5>
-                            <i class="text-secondary fs-3 bi bi-card-checklist"></i>
-                        </div>
-                    </div>
-                </div>
-            </a>
-        </div>
-
-        <div class="col-md-4 mb-3">
-            <a href="/admin/administrar-usuarios" class="admin-card-link">
-                <div class="card text-white bg-primary h-100 admin-card-hover cardInicio">
-                    <div class="card-header"><strong>Usuarios registrados</strong></div>
-                    <div class="card-body bg-light text-dark">
-                        <div class="d-flex justify-content-between align-content-center">
-                            <h5 class="card-title"><strong>@UsuariosRegistrados </strong> usuarios</h5>
-                            <i class="fs-3 text-primary bi bi-person-check-fill"></i>
-                        </div>
-                    </div>
-                </div>
-            </a>
-        </div>
-
-        <div class="col-md-4 mb-3">
-            <a href="/admin/administrar-usuarios" class="admin-card-link">
-                <div class="card bg-light h-100 admin-card-hover">
-                    <div class="card-header"><strong>Agentes activos</strong></div>
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between align-content-center">
-                            <h5 class="card-title"><strong>5 </strong> agentes</h5>
-                            <i class="fs-3 text-secondary bi bi-patch-check-fill"></i>
-                        </div>
-                    </div>
-                </div>
-            </a>
-        </div>
-        <div class="col-md-4 mb-3">
-            <a href="/admin/solicitudes" class="admin-card-link">
-                <div class="card bg-naranja text-white h-100 admin-card-hover cardInicio">
-                    <div class="card-header">
-                        <strong>Solicitudes</strong>
-
-                    </div>
-                    <div class="card-body bg-light text-dark">
-                        <div class="d-flex justify-content-between w-100">
-                            <div>
-                                <h5 class="card-title"><strong>@SolicitudesVenta </strong> para Vender propiedad</h5>
-                                <h5 class="card-title"><strong>@SolicitudesUnirse </strong> para unirse al equipo</h5>
-                            </div>
-                            <div>
-                                <i class="fs-3 color-naranja  bi bi-clipboard2-check-fill"></i>
-                            </div>
-                                
-                        </div>
-                    </div>
-                </div>
-            </a>
+@if (isLoading)
+{
+    <div class="d-flex flex-column align-items-center mt-5">
+        <span class="mb-3 fs-5">Cargando datos del panel...</span>
+        <div>
+            <div class="spinner-grow text-primary mx-1" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <div class="spinner-grow text-primary mx-1" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <div class="spinner-grow text-primary mx-1" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
         </div>
     </div>
-</div>
-
-<div class="container">
-    <div class="card">
-        <div class="card-header text-secondary">
-            <strong>Propiedades publicadas por categoria</strong>
-        </div>
-        <div class="card-body">
-            <div class="mb-2">
-                <label class="text-muted">Casas</label>
-                <div class="progress ">
-                    <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="20" aria-valuemin="0" aria-valuemax="100" style="width: 20%">20%</div>
-                </div>
+}
+else
+{
+    <div class="container mb-3">
+        <div class="row">
+            <div class="col-md-4 mb-3">
+                <a href="/admin/administrar-propiedades" class="admin-card-link">
+                    <div class="card text-white bg-success h-100 admin-card-hover cardInicio">
+                        <div class="card-header"><strong>Propiedades publicadas</strong></div>
+                        <div class="card-body bg-light text-dark">
+                            <div class="d-flex justify-content-between">
+                                <h5 class="card-title"><strong>@PropiedadesPublicadas </strong> propiedades</h5>
+                                <i class="text-success fs-3 bi bi-card-checklist"></i>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            <div class="col-md-4 mb-3">
+                <a href="/admin/administrar-foros" class="admin-card-link">
+                    <div class="card text-white bg-secondary h-100 admin-card-hover cardInicio">
+                        <div class="card-header"><strong>Foros publicados</strong></div>
+                        <div class="card-body bg-light text-dark">
+                            <div class="d-flex justify-content-between">
+                                <h5 class="card-title"><strong>@TotalForos </strong> foros</h5>
+                                <i class="text-secondary fs-3 bi bi-card-checklist"></i>
+                            </div>
+                        </div>
+                    </div>
+                </a>
             </div>
 
-            <div class="mb-2">
-                <label class="text-muted">Apartamentos</label>
-                <div class="progress">
-                    <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="45" aria-valuemin="0" aria-valuemax="100" style="width: 30%">30%</div>
-                </div>
+            <div class="col-md-4 mb-3">
+                <a href="/admin/administrar-usuarios" class="admin-card-link">
+                    <div class="card text-white bg-primary h-100 admin-card-hover cardInicio">
+                        <div class="card-header"><strong>Usuarios registrados</strong></div>
+                        <div class="card-body bg-light text-dark">
+                            <div class="d-flex justify-content-between align-content-center">
+                                <h5 class="card-title"><strong>@UsuariosRegistrados </strong> usuarios</h5>
+                                <i class="fs-3 text-primary bi bi-person-check-fill"></i>
+                            </div>
+                        </div>
+                    </div>
+                </a>
             </div>
 
-            <div class="mb-2">
-                <label class="text-muted">Penthouses</label>
-                <div class="progress">
-                    <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="15" aria-valuemin="0" aria-valuemax="100" style="width: 15%">15%</div>
-                </div>
+            <div class="col-md-4 mb-3">
+                <a href="/admin/administrar-usuarios" class="admin-card-link">
+                    <div class="card bg-light h-100 admin-card-hover">
+                        <div class="card-header"><strong>Citas</strong></div>
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between w-100">
+                                <div>
+                                    <h5 class="card-title"><strong>@CitasPendites </strong> pendientes</h5>
+                                    <h5 class="card-title"><strong>@CitasCompletadas </strong> Completas</h5>
+                                </div>
+                                <div>
+                                    <i class="fs-3 text-secondary  bi bi-calendar-week"></i>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </a>
             </div>
+            <div class="col-md-4 mb-3">
+                <a href="/admin/solicitudes" class="admin-card-link">
+                    <div class="card bg-naranja text-white h-100 admin-card-hover cardInicio">
+                        <div class="card-header">
+                            <strong>Solicitudes</strong>
 
-            <div class="mb-2">
-                <label class="text-muted">Terrenos</label>
-                <div class="progress">
-                    <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="15" aria-valuemin="0" aria-valuemax="100" style="width: 5%">5%</div>
-                </div>
+                        </div>
+                        <div class="card-body bg-light text-dark">
+                            <div class="d-flex justify-content-between w-100">
+                                <div>
+                                    <h5 class="card-title"><strong>@SolicitudesVenta </strong> de Venta</h5>
+                                    <h5 class="card-title"><strong>@SolicitudesUnirse </strong> para Unirse</h5>
+                                </div>
+                                <div>
+                                    <i class="fs-3 color-naranja  bi bi-clipboard2-check-fill"></i>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </a>
             </div>
-
-            <div class="mb-2">
-                <label class="text-muted">Locales comerciales</label>
-                <div class="progress">
-                    <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="10" aria-valuemin="0" aria-valuemax="100" style="width: 10%">10%</div>
-                </div>
-            </div>
-
-            <div class="mb-2">
-                <label class="text-muted">Villas</label>
-                <div class="progress">
-                    <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="15" aria-valuemin="0" aria-valuemax="100" style="width: 10%">10%</div>
-                </div>
-            </div>
-
-
         </div>
     </div>
-</div>
+
+    <div class="container">
+        <div class="card">
+            <div class="card-header text-secondary">
+                <strong>Propiedades publicadas por categoria</strong>
+            </div>
+            <div class="card-body">
+                <div class="mb-2">
+                    <label class="text-muted">Casas</label>
+                    <div class="progress ">
+                        <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="20" aria-valuemin="0" aria-valuemax="100" style="width: 20%">20%</div>
+                    </div>
+                </div>
+
+                <div class="mb-2">
+                    <label class="text-muted">Apartamentos</label>
+                    <div class="progress">
+                        <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="45" aria-valuemin="0" aria-valuemax="100" style="width: 30%">30%</div>
+                    </div>
+                </div>
+
+                <div class="mb-2">
+                    <label class="text-muted">Penthouses</label>
+                    <div class="progress">
+                        <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="15" aria-valuemin="0" aria-valuemax="100" style="width: 15%">15%</div>
+                    </div>
+                </div>
+
+                <div class="mb-2">
+                    <label class="text-muted">Terrenos</label>
+                    <div class="progress">
+                        <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="15" aria-valuemin="0" aria-valuemax="100" style="width: 5%">5%</div>
+                    </div>
+                </div>
+
+                <div class="mb-2">
+                    <label class="text-muted">Locales comerciales</label>
+                    <div class="progress">
+                        <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="10" aria-valuemin="0" aria-valuemax="100" style="width: 10%">10%</div>
+                    </div>
+                </div>
+
+                <div class="mb-2">
+                    <label class="text-muted">Villas</label>
+                    <div class="progress">
+                        <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="15" aria-valuemin="0" aria-valuemax="100" style="width: 10%">10%</div>
+                    </div>
+                </div>
+
+
+            </div>
+        </div>
+    </div>
+}
+
 
 @code {
+    private bool isLoading = true;
     public int UsuariosRegistrados { get; set; }
     public int PropiedadesPublicadas { get; set; }
     public int SolicitudesVenta { get; set; }
     public int SolicitudesUnirse { get; set; }
     public int TotalForos { get; set; }
+    public int CitasPendites { get; set; }
+    public int CitasCompletadas { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
-        UsuariosRegistrados = await UserService.ContarUsuarios();
-        PropiedadesPublicadas = await PropiedadService.ContarPropiedades();
-        SolicitudesVenta = await SolicitudesVentaService.ContarSolicitudes();
-        SolicitudesUnirse = await SolicitudesUnirseService.ContarSolicitudes();
-        TotalForos = await ForoService.ContarForos();
+        await Task.WhenAll(
+            Task.Run(async () => UsuariosRegistrados = await UserService.ContarUsuarios()),
+            Task.Run(async () => PropiedadesPublicadas = await PropiedadService.ContarPropiedades()),
+            Task.Run(async () => SolicitudesVenta = await SolicitudesVentaService.ContarSolicitudes()),
+            Task.Run(async () => SolicitudesUnirse = await SolicitudesUnirseService.ContarSolicitudes()),
+            Task.Run(async () => TotalForos = await ForoService.ContarForos()),
+            Task.Run(async () => CitasPendites = await CitasService.CitasPendientes()),
+            Task.Run(async () => CitasCompletadas = await CitasService.CitasCompletadas())
+        );
+        isLoading = false;
     }
 }
