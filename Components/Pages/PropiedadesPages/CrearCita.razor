@@ -1,0 +1,318 @@
+﻿@attribute [Authorize]
+@inject CitasService CitasService
+@inject NotificationService NotificationService
+
+<EditForm Model="this" OnValidSubmit="HandleGuardarCita">
+    <DataAnnotationsValidator />
+    <div class="container">
+        <div class="card shadow-sm p-3 mb-2">
+            <div class="d-flex justify-content-start">
+                <h5 class="text-secondary">Seleccione las propiedades que desea ver en la cita</h5>
+            </div>
+            <div>
+                @if (CarritoItems is not null && CarritoItems.Any())
+                {
+                    <div class="mb-3" style="max-height: 200px; overflow-y: auto; padding-right: 10px;">
+                        @if (propiedadesSeleccionadas.Count >= 3)
+                        {
+                            <div class="alert alert-info p-2 text-center">
+                                Solo puedes seleccionar hasta 3 propiedades para la cita.
+                            </div>
+                        }
+                        @foreach (var item in CarritoItems)
+                        {
+                            
+                            if (item.Propiedad is not null)
+                            {
+                                var propiedad = item.Propiedad;
+                                <div class="card mb-3 shadow-sm">
+                                    <div class="row g-0">
+                                        <div class="col-3">
+                                            <img src="@(propiedad.Imagenes?.FirstOrDefault()?.UrlImagen ?? "https://via.placeholder.com/150")"
+                                                 class="img-fluid rounded-start h-100 object-fit-cover" alt="@propiedad.Titulo">
+                                        </div>
+                                        <div class="col-9">
+                                            <div class="card-body py-2 px-3">
+                                                <div class="d-flex justify-content-between align-items-start">
+                                                    <div>
+                                                        <h6 class="card-title mb-1 text-truncate" title="@propiedad.Titulo">
+                                                            @propiedad.Titulo
+                                                        </h6>
+                                                        <span class="fw-bold text-info">
+                                                            @(propiedad.Moneda == "Dolar" ? "$USD" : "$DOP") @propiedad.Precio.ToString("N2")
+                                                        </span>
+                                                    </div>
+                                                    <input class="form-check-input mt-1"
+                                                           type="checkbox"
+                                                           style="width: 1.5em; height: 1.5em;"
+                                                           @onchange="eventArgs => ToggleSeleccion(propiedad.PropiedadId, eventArgs.Value)"
+                                                           checked="@(propiedadesSeleccionadas.Contains(propiedad.PropiedadId))"
+                                                           disabled="@(propiedadesSeleccionadas.Count >= 3 && !propiedadesSeleccionadas.Contains(propiedad.PropiedadId))">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        }
+                        
+                    </div>
+                }
+                else
+                {
+                    <p class="text-muted">No hay propiedades en el carrito.</p>
+                }
+            </div>
+        </div>
+
+        <!-- Selección de fecha y hora -->
+        <div class="card shadow-sm p-3 mb-2">
+            <div class="d-flex justify-content-start">
+                <h5 class="text-secondary">Seleccione el d&iacute;a y la hora</h5>
+            </div>
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <div class="form-floating">
+                        <InputDate @bind-Value="fechaCita"
+                                   class="form-control"
+                                   id="fechaCita"
+                                   min="@DateTime.Today.ToString("yyyy-MM-dd")"
+                                   max="@DateTime.Today.AddDays(14).ToString("yyyy-MM-dd")" />
+                        <label for="fechaCita">Fecha de la cita</label>
+                        <ValidationMessage For="@(() => fechaCita)" />
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-floating">
+                        <input @bind="horaCita" type="time" class="form-control" id="horaCita"
+                                   min="08:00" max="17:00" />
+                        <label for="horaCita">Hora de la cita</label>
+                        <ValidationMessage For="@(() => horaCita)" />
+                        @if (!string.IsNullOrEmpty(errorHora))
+                        {
+                            <div class="text-danger small">@errorHora</div>
+                        }
+                    </div>
+                </div>
+            </div>
+            @if (!string.IsNullOrEmpty(errorFecha))
+            {
+                <div class="text-danger small mt-2">@errorFecha</div>
+            }
+        </div>
+
+        <!-- Pago -->
+        <div class="card shadow-sm p-3 mb-2">
+            <div>
+                <h5 class="text-secondary">Realizar pago de la cita</h5>
+                <p>Las citas tienen un costo de <strong class="text-success">500 pesos</strong></p>
+            </div>
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <div class="form-floating mb-2">
+                        <InputText @bind-Value="NumeroTarjeta" class="form-control" id="tarjeta" maxlength="16" />
+                        <label for="tarjeta">N&uacute;mero de la Tarjeta</label>
+                        <ValidationMessage For="@(() => NumeroTarjeta)" />
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-floating mb-2">
+                        <InputText @bind-Value="NombreTarjeta" class="form-control" id="nombreTarjeta" />
+                        <label for="nombreTarjeta">Nombre en la Tarjeta</label>
+                        <ValidationMessage For="@(() => NombreTarjeta)" />
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-floating mb-2">
+                        <InputText @bind-Value="FechaExpiracion" class="form-control" id="fechaExpiracion" placeholder="MM/AA" maxlength="5" />
+                        <label for="fechaExpiracion">Fecha Expiraci&oacute;n (MM/AA)</label>
+                        <ValidationMessage For="@(() => FechaExpiracion)" />
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-floating mb-2">
+                        <InputText @bind-Value="CodigoSeguridad" class="form-control" id="codigoSeguridad" maxlength="4" />
+                        <label for="codigoSeguridad">C&oacute;digo de Seguridad</label>
+                        <ValidationMessage For="@(() => CodigoSeguridad)" />
+                    </div>
+                </div>
+            </div>
+            @if (!string.IsNullOrEmpty(errorPago))
+            {
+                <div class="alert alert-danger mt-2">@errorPago</div>
+            }
+        </div>
+
+        <div class="d-flex justify-content-center mt-4">
+            <button type="button" class="btn btn-secondary mx-2" @onclick="CerrarModal"> Cerrar</button>
+            <button type="submit" class="btn btn-success" disabled="@(isSubmitting || propiedadesSeleccionadas.Count == 0)">
+                @if (isSubmitting)
+                {
+                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                }
+                else
+                {
+                    <span>Guardar Cita</span>
+                }
+            </button>
+        </div>
+    </div>
+</EditForm>
+
+@code {
+    [Parameter]
+    public List<CarritoItem> CarritoItems { get; set; } = new();
+
+    [Parameter]
+    public string? UsuarioId { get; set; }
+
+    [Parameter]
+    public EventCallback OnClose { get; set; }
+
+
+    [Required(ErrorMessage = "El número de tarjeta es obligatorio.")]
+    [RegularExpression(@"^\d{16}$", ErrorMessage = "El número de tarjeta debe tener 16 dígitos.")]
+    public string NumeroTarjeta { get; set; } = string.Empty;
+
+    [Required(ErrorMessage = "El nombre en la tarjeta es obligatorio.")]
+    public string NombreTarjeta { get; set; } = string.Empty;
+
+    [Required(ErrorMessage = "La fecha de expiración es obligatoria.")]
+    [RegularExpression(@"^(0[1-9]|1[0-2])\/\d{2}$", ErrorMessage = "Formato de fecha inválido (MM/AA).")]
+    public string FechaExpiracion { get; set; } = string.Empty;
+
+    [Required(ErrorMessage = "El código de seguridad es obligatorio.")]
+    [RegularExpression(@"^\d{3,4}$", ErrorMessage = "El código de seguridad debe tener 3 o 4 dígitos.")]
+    public string CodigoSeguridad { get; set; } = string.Empty;
+
+    private string errorPago = string.Empty;
+    private string errorFecha = string.Empty;
+    private string errorHora = string.Empty;
+
+    private Citas nuevaCita = new();
+    private DateTime fechaCita = DateTime.Today.AddDays(1);
+    private TimeOnly horaCita { get; set; } = new(9, 0);
+    private HashSet<int> propiedadesSeleccionadas = new();
+    private bool isSubmitting = false;
+
+    private void ToggleSeleccion(int propiedadId, object? isChecked)
+    {
+        if (isChecked is true)
+        {
+            if (propiedadesSeleccionadas.Count < 3)
+                propiedadesSeleccionadas.Add(propiedadId);
+        }
+        else
+        {
+            propiedadesSeleccionadas.Remove(propiedadId);
+        }
+    }
+
+    private async Task HandleGuardarCita()
+    {
+        errorPago = string.Empty;
+        errorFecha = string.Empty;
+        errorHora = string.Empty;
+
+        if (isSubmitting) return;
+
+        if (string.IsNullOrEmpty(UsuarioId))
+        {
+            NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Error", Detail = "No se pudo identificar al usuario.", Duration = 4000 });
+            return;
+        }
+
+        if (propiedadesSeleccionadas.Count == 0 || propiedadesSeleccionadas.Count > 3)
+        {
+            NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Error", Detail = "Debes seleccionar entre 1 y 3 propiedades.", Duration = 4000 });
+            return;
+        }
+
+        if (fechaCita.DayOfWeek == DayOfWeek.Sunday)
+        {
+            errorFecha = "Solo puedes agendar citas de lunes a sábado.";
+            return;
+        }
+
+        if (fechaCita < DateTime.Today || fechaCita > DateTime.Today.AddDays(14))
+        {
+            errorFecha = "Solo puedes agendar citas desde hoy hasta 14 días en el futuro.";
+            return;
+        }
+
+        if (horaCita < new TimeOnly(8, 0) || horaCita > new TimeOnly(17, 0))
+        {
+            errorHora = "La hora debe estar entre 8:00 AM y 5:00 PM.";
+            return;
+        }
+
+        if (!ValidarDatosTarjeta())
+        {
+            return;
+        }
+
+        isSubmitting = true;
+        DateTime FechaFinal = fechaCita.Date + horaCita.ToTimeSpan();
+        
+        nuevaCita.UsuarioId = UsuarioId;
+        nuevaCita.FechaHora = FechaFinal.Kind == DateTimeKind.Utc ? FechaFinal : FechaFinal.ToUniversalTime();
+        nuevaCita.EstadoCitaId = 1;
+        nuevaCita.FechaCreacion = DateTime.UtcNow;
+        nuevaCita.Costo = 500;
+
+        var citaCreada = await CitasService.CrearCitaConPropiedades(nuevaCita, propiedadesSeleccionadas.ToList());
+
+        if (citaCreada is not null)
+        {
+            NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = "Éxito", Detail = "Cita creada correctamente.", ShowProgress = true, Duration = 4000 });
+            await CerrarModal();
+        }
+        else
+        {
+            NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Error", Detail = "No se pudo crear la cita.", Duration = 4000 });
+        }
+        isSubmitting = false;
+    }
+
+    private bool ValidarDatosTarjeta()
+    {
+        if (string.IsNullOrWhiteSpace(NumeroTarjeta) || NumeroTarjeta.Length != 16 || !NumeroTarjeta.All(char.IsDigit))
+        {
+            errorPago = "El número de tarjeta debe tener 16 dígitos.";
+            return false;
+        }
+        if (string.IsNullOrWhiteSpace(NombreTarjeta))
+        {
+            errorPago = "El nombre en la tarjeta es obligatorio.";
+            return false;
+        }
+        if (!System.Text.RegularExpressions.Regex.IsMatch(FechaExpiracion, @"^(0[1-9]|1[0-2])\/\d{2}$"))
+        {
+            errorPago = "La fecha de expiración debe tener el formato MM/AA.";
+            return false;
+        }
+        if (string.IsNullOrWhiteSpace(CodigoSeguridad) || (CodigoSeguridad.Length != 3 && CodigoSeguridad.Length != 4) || !CodigoSeguridad.All(char.IsDigit))
+        {
+            errorPago = "El código de seguridad debe tener 3 o 4 dígitos.";
+            return false;
+        }
+
+
+        var partes = FechaExpiracion.Split('/');
+        int mes = int.Parse(partes[0]);
+        int anio = 2000 + int.Parse(partes[1]);
+        var fechaExp = new DateTime(anio, mes, DateTime.DaysInMonth(anio, mes));
+        if (fechaExp < DateTime.Today)
+        {
+            errorPago = "La tarjeta está expirada.";
+            return false;
+        }
+        return true;
+    }
+
+    private async Task CerrarModal()
+    {
+        if (OnClose.HasDelegate)
+            await OnClose.InvokeAsync();
+    }
+}

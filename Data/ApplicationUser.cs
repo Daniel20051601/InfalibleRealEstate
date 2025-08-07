@@ -27,4 +27,5 @@ public class ApplicationUser : IdentityUser
     public virtual ICollection<SolicitudVenta> SolicitudesVenta { get; set; } = new List<SolicitudVenta>();
     public virtual ICollection<SolicitudUnirse> SolicitudesUnirse { get; set; } = new List<SolicitudUnirse>();
     public virtual ICollection<Foros> Foros { get; set; } = new List<Foros>();
+    public virtual ICollection<Citas> Citas { get; set; } = new List<Citas>();
 }

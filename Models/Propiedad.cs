@@ -56,6 +56,8 @@ public class Propiedad
     public PropiedadDetalle? Detalle { get; set; }
     public ICollection<ImagenPropiedad>? Imagenes { get; set; }
 
+    public virtual ICollection<CitasPropiedades> CitaPropiedades { get; set; } = new List<CitasPropiedades>();
+
     public static Propiedad CrearNueva(int categoriaId = 1)
     {
         return new Propiedad

@@ -5,7 +5,6 @@
 @inject SupabaseStorageService SupabaseStorage
 @inject NavigationManager NavigationManager
 @inject PropiedadService PropiedadesServices
-@inject IToastService ToastService
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @rendermode InteractiveServer
 
@@ -269,7 +268,6 @@ else
 
         if (propiedad == null)
         {
-            ToastService.ShowError("Propiedad no encontrada.");
             NavigationManager.NavigateTo("/admin/administrar-propiedades");
             return;
         }
@@ -294,7 +292,6 @@ else
         {
             if (totalImagenes >= maximoImagenes)
             {
-                ToastService.ShowWarning($"No se pueden agregar más imágenes. El límite es de {maximoImagenes}.");
                 break;
             }
 
@@ -371,18 +368,15 @@ else
 
             if (guardado)
             {
-                ToastService.ShowSuccess("Propiedad actualizada exitosamente.");
                 NavigationManager.NavigateTo("/admin/administrar-propiedades");
             }
             else
             {
-                ToastService.ShowError("Error al guardar los cambios de la propiedad.");
             }
         }
         catch (Exception ex)
         {
             Console.WriteLine($"Error en Guardar: {ex.Message}");
-            ToastService.ShowError($"Error: {ex.Message}");
         }
         finally
         {

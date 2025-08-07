@@ -1,0 +1,165 @@
+﻿@page "/citas/agendadas"
+@attribute [Authorize]
+@rendermode InteractiveServer
+@inject CitasService CitasService
+@inject NavigationManager NavigationManager
+@inject NotificationService NotificationService
+
+<PageTitle>Citas Agendadas</PageTitle>
+
+<div class="container mb-4">
+    <div class="d-flex justify-content-between align-items-center mt-4">
+        <h3 class="titleCarrito fw-bold "> Citas Agendadas</h3>
+        <div class="d-flex gap-2">
+            <div class="form-floating">
+                <InputDate @bind-Value="Desde"
+                           class="form-control form-control-sm"
+                           id="fechaCita" />
+                <label for="fechaCita">Desde</label>
+            </div>
+            <div class="form-floating">
+                <InputDate @bind-Value="Hasta"
+                           class="form-control form-control-sm"
+                           id="fechaCitaHasta" />
+                <label for="fechaCitaHasta">Hasta</label>
+
+            </div>
+        </div>
+
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8 col-md-7">
+            @if (Citas is null || Citas.Count == 0)
+            {
+                <div class="d-flex flex-column align-items-center">
+                    <div>
+                        <div class="spinner-grow text-primary mx-1" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <div class="spinner-grow text-primary mx-1" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <div class="spinner-grow text-primary mx-1" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="row">
+                    <small class="text-secondary mb-2">Total: @Citas.Count</small>
+                    @foreach (var cita in Citas)
+                    {
+                        <div class="col-12 mb-4">
+                            <div class="card cardCita h-100 shadow-sm">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <small class="badge @BadgeEstadoCita(cita.EstadoCita?.Nombre ?? string.Empty)">@cita.EstadoCita?.Nombre</small>
+                                        <small class="text-muted">Creada: @cita.FechaCreacion.ToString("yy/mm/dd")</small>
+                                    </div>
+                                    <div>
+                                        <p class="card-title"><strong>Fecha de la Cita: </strong>@cita.FechaHora.ToString("yy/MM/dd")</p>
+                                        <p class="card-title"><strong>Hora de la Cita: </strong>@cita.FechaHora.ToString("HH:mm")</p>
+                                        <p class="card-title"><strong>Propiedades a ver: </strong> @cita.CitaPropiedades.Count <button class=" btn-no-border text-primary mx-1  btn-sm " @onclick="()=> MostrarModalPropiedades(cita)"><i class="bi bi-eye"></i></button></p>
+                                        <p class="card-title"><strong>Costo de la Cita: </strong> <span class="fw-semibold text-success">@cita.Costo pesos</span></p>
+                                        <p class="card-text"></p>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                    }
+
+
+                </div>
+
+            }
+        </div>
+    </div>
+</div>
+
+@if (mostrarModalPropiedades)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Propiedades a visitar</h5>
+                    <button type="button" class="btn-close" @onclick="CerrarModalPropiedades"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        @foreach (var citaPropiedad in citaSeleccionada.CitaPropiedades)
+                        {
+                            var propiedad = citaPropiedad.Propiedad;
+                            if (propiedad != null)
+                            {
+                                <div class="col-12 col-md-6 mb-3">
+                                    <a href="/Propiedad/Detalle/@propiedad.PropiedadId" class="text-decoration-none">
+                                        <div class="card h-100 ultimas-card">
+                                            <img src="@(propiedad.Imagenes?.FirstOrDefault()?.UrlImagen ?? "https://via.placeholder.com/300x200")" class="card-img-top" style="height: 180px; object-fit: cover;" alt="@propiedad.Titulo">
+                                            <div class="card-body p-2">
+                                                <h6 class="card-title text-truncate">@propiedad.Titulo</h6>
+                                                <p class="card-text ultimas-card-price">@(propiedad.Moneda == "Dolar" ? "USD$" : "DOP$") @propiedad.Precio.ToString("N0")</p>
+                                            </div>
+                                        </div>
+                                    </a>
+                                </div>
+                            }
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+
+@code {
+    public List<Citas> Citas { get; set; } = new List<Citas>();
+    public bool ModalPropiedades { get; set; } = false;
+    public Citas citaSeleccionada { get; set; } = new Citas();
+
+    public DateTime Desde { get; set; } = DateTime.Now.AddDays(-30);
+    public DateTime Hasta { get; set; } = DateTime.Now;
+
+    private bool mostrarModalPropiedades = false;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            Citas = await CitasService.Listar();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error al cargar las citas: {ex.Message}");
+        }
+    }
+
+    private void CerrarModalPropiedades()
+    {
+        mostrarModalPropiedades = false;
+    }
+
+    private void MostrarModalPropiedades(Citas cita)
+    {
+        citaSeleccionada = cita;
+        mostrarModalPropiedades = true;
+    }
+
+    public string BadgeEstadoCita(string estado)
+    {
+        return estado switch
+        {
+            "Pendiente" => "badge bg-secondary",
+            "Confirmada" => "badge bg-success",
+            "Cancelada" => "badge bg-danger",
+            "Completada" => "badge bg-primary",
+            _ => "badge bg-secondary"
+        };
+    }
+}

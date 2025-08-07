@@ -1,0 +1,265 @@
+﻿@page "/admin/administrar-citas"
+@attribute [Authorize(Roles = "Admin")]
+@rendermode InteractiveServer
+@layout AdminLayout
+
+@inject CitasService CitasService
+@inject NavigationManager NavigationManager
+@inject NotificationService NotificationService
+
+<PageTitle>Administrar Citas</PageTitle>
+
+<div class="container my-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3 class="titleCarrito fw-bold">Administrar Citas</h3>
+        <div class="d-flex gap-2 align-items-center">
+            <div class="form-floating">
+                <InputDate @bind-Value="Desde" class="form-control form-control-sm" id="fechaDesde" />
+                <label for="fechaDesde">Desde</label>
+            </div>
+            <div class="form-floating">
+                <InputDate @bind-Value="Hasta" class="form-control form-control-sm" id="fechaHasta" />
+                <label for="fechaHasta">Hasta</label>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            @if (Citas is null)
+            {
+                <div class="d-flex flex-column align-items-center">
+                    <span class="mb-3 fs-6">Cargando Propiedades...</span>
+                    <div>
+                        <div class="spinner-grow text-primary mx-1" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <div class="spinner-grow text-primary mx-1" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <div class="spinner-grow text-primary mx-1" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+                </div>
+            }
+            else if (!FilteredCitas.Any())
+            {
+                <div class="alert alert-info text-center" role="alert">
+                    No se encontraron citas en el rango de fechas seleccionado.
+                </div>
+            }
+            else
+            {
+                <div class="row">
+                    <small class="text-secondary mb-2">Total: @FilteredCitas.Count</small>
+                    @foreach (var cita in FilteredCitas)
+                    {
+                        <div class="col-12 col-lg-10 col-xl-8 mb-4">
+                            <div class="card cardCita h-100 shadow-sm d-flex flex-column">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <small class="badge @BadgeEstadoCita(cita.EstadoCita?.Nombre ?? string.Empty)">@cita.EstadoCita?.Nombre</small>
+                                        <small class="text-muted">Creada: @cita.FechaCreacion.ToString("dd/MM/yyyy")</small>
+                                    </div>
+                                    <div>
+                                        <p class="card-title"><strong>Cliente:</strong> @cita.Usuario?.Nombre @cita.Usuario?.Apellido</p>
+                                        <p class="card-title"><strong>Fecha de la Cita:</strong> @cita.FechaHora.ToString("dd/MM/yyyy")</p>
+                                        <p class="card-title"><strong>Hora de la Cita:</strong> @cita.FechaHora.ToString("hh:mm tt")</p>
+                                        <p class="card-title">
+                                            <strong>Propiedades a ver:</strong> @cita.CitaPropiedades.Count
+                                            <button type="button" class="btn-no-border text-primary mx-1 btn-sm" @onclick="() => VerPropiedades(cita)">
+                                                <i class="bi bi-eye"></i>
+                                            </button>
+                                        </p>
+                                        <p class="card-title"><strong>Costo de la Cita:</strong> <span class="fw-semibold text-success">@cita.Costo.ToString("C")</span></p>
+                                    </div>
+                                </div>
+                                <div class="card-footer bg-transparent border-0 text-end mt-auto">
+                                    <button type="button" class="btn btn-outline-primary btn-sm" @onclick="() => AbrirModalEditar(cita)">
+                                        <i class="bi bi-pencil-square"></i> Editar
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@if (mostrarModalPropiedades && citaSeleccionada != null)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Propiedades a visitar</h5>
+                    <button type="button" class="btn-close" @onclick="CerrarModalPropiedades"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        @foreach (var citaPropiedad in citaSeleccionada.CitaPropiedades)
+                        {
+                            var propiedad = citaPropiedad.Propiedad;
+                            if (propiedad != null)
+                            {
+                                <div class="col-12 col-md-6 mb-3">
+                                    <a href="/Propiedad/Detalle/@propiedad.PropiedadId" class="text-decoration-none">
+                                        <div class="card h-100 ultimas-card">
+                                            <img src="@(propiedad.Imagenes?.FirstOrDefault()?.UrlImagen ?? "https://via.placeholder.com/300x200")" class="card-img-top" style="height: 180px; object-fit: cover;" alt="@propiedad.Titulo">
+                                            <div class="card-body p-2">
+                                                <h6 class="card-title text-truncate">@propiedad.Titulo</h6>
+                                                <p class="card-text ultimas-card-price">@(propiedad.Moneda == "Dolar" ? "USD$" : "DOP$") @propiedad.Precio.ToString("N0")</p>
+                                            </div>
+                                        </div>
+                                    </a>
+                                </div>
+                            }
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@if (mostrarModalEditar && citaParaEditar != null)
+{
+    <div class="modal fade show" style="display: block;" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Editar Estado de la Cita</h5>
+                    <button type="button" class="btn-close" @onclick="CerrarModalEditar"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <p><strong>Cliente:</strong> @citaParaEditar.Usuario?.Nombre @citaParaEditar.Usuario?.Apellido</p>
+                        <p><strong>Fecha:</strong> @citaParaEditar.FechaHora.ToString("dd/MM/yyyy hh:mm tt")</p>
+                    </div>
+                    <div class="mb-3">
+                        <label for="estadoCita" class="form-label">Estado de la Cita</label>
+                        <InputSelect id="estadoCita" @bind-Value="citaParaEditar.EstadoCitaId" class="form-select">
+                            @foreach (var estado in estadosCita)
+                            {
+                                <option value="@estado.EstadoCitaId">@estado.Nombre</option>
+                            }
+                        </InputSelect>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="CerrarModalEditar">Cancelar</button>
+                    <button type="button" class="btn btn-success" @onclick="GuardarEstadoCita">
+                        @if (isLoading)
+                        {
+                            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"> </span>
+                    
+                            <span> Actualizando</span>
+                        }
+                        else
+                        {
+                            <span>Guardar Cambios</span>
+                        }
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-backdrop fade show"></div>
+}
+
+
+@code {
+    private List<Citas> Citas { get; set; } = new List<Citas>();
+    private Citas? citaSeleccionada;
+    private Citas? citaParaEditar;
+    private List<EstadoCitas> estadosCita = new List<EstadoCitas>();
+    private bool mostrarModalPropiedades = false;
+    private bool mostrarModalEditar = false;
+    private bool isLoading = false;
+
+    public DateTime Desde { get; set; } = DateTime.Now.AddDays(-30);
+    public DateTime Hasta { get; set; } = DateTime.Now.AddDays(30);
+
+    private List<Citas> FilteredCitas => Citas
+        .Where(c => c.FechaHora.Date >= Desde.Date && c.FechaHora.Date <= Hasta.Date)
+        .OrderByDescending(c => c.FechaHora)
+        .ToList();
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            Citas = await CitasService.Listar();
+            estadosCita = await CitasService.ListarEstados();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error al cargar datos: {ex.Message}");
+        }
+    }
+
+    private void VerPropiedades(Citas cita)
+    {
+        citaSeleccionada = cita;
+        mostrarModalPropiedades = true;
+    }
+
+    private void CerrarModalPropiedades()
+    {
+        mostrarModalPropiedades = false;
+        citaSeleccionada = null;
+    }
+
+    private void AbrirModalEditar(Citas cita)
+    {
+        citaParaEditar = cita;
+        mostrarModalEditar = true;
+    }
+
+    private void CerrarModalEditar()
+    {
+        mostrarModalEditar = false;
+        citaParaEditar = null;
+    }
+
+    private async Task GuardarEstadoCita()
+    {
+        isLoading = true;
+        if (citaParaEditar == null) return;
+
+        var actualizado = await CitasService.ActualizarEstado(citaParaEditar.CitaId, citaParaEditar.EstadoCitaId);
+
+        if (actualizado)
+        {
+            NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = "Éxito", Detail = "El estado de la cita ha sido actualizado.", Duration = 4000 });
+
+            var estadoActualizado = estadosCita.FirstOrDefault(e => e.EstadoCitaId == citaParaEditar.EstadoCitaId);
+            if (estadoActualizado != null)
+            {
+                citaParaEditar.EstadoCita = estadoActualizado;
+            }
+        }
+        else
+        {
+            NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Error", Detail = "No se pudo actualizar el estado de la cita.", Duration = 4000 });
+        }
+        isLoading = false;
+        CerrarModalEditar();
+        StateHasChanged();
+    }
+
+    public string BadgeEstadoCita(string estado)
+    {
+        return estado switch
+        {
+            "Pendiente" => "badge bg-secondary",
+            "Confirmada" => "badge bg-success",
+            "Cancelada" => "badge bg-danger",
+            "Completada" => "badge bg-primary",
+            _ => "badge bg-light text-dark"
+        };
+    }
+}

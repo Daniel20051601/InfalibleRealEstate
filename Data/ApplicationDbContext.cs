@@ -19,6 +19,9 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<SolicitudVenta> SolicitudesVenta { get; set; }
     public DbSet<SolicitudUnirse> SolicitudesUnirse { get; set; }
     public DbSet<Foros> Foros { get; set; }
+    public DbSet<Citas> Citas { get; set; }
+    public DbSet<EstadoCitas> EstadoCitas { get; set; }
+    public DbSet<CitasPropiedades> CitasPropiedades { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -82,6 +85,12 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             new EstadoUsuario { EstadoUsuarioId = 1, Nombre = "Activo", Descripcion = "El usuario está activo y puede acceder al sistema." },
             new EstadoUsuario { EstadoUsuarioId = 2, Nombre = "Inactivo", Descripcion = "El usuario no puede acceder al sistema." },
             new EstadoUsuario { EstadoUsuarioId = 3, Nombre = "Suspendido", Descripcion = "El usuario ha sido suspendido temporalmente." }
+        );
+        builder.Entity<EstadoCitas>().HasData(
+            new EstadoCitas { EstadoCitaId = 1, Nombre = "Pendiente"},
+            new EstadoCitas { EstadoCitaId = 2, Nombre = "Confirmada"},
+            new EstadoCitas { EstadoCitaId = 3, Nombre = "Cancelada" },
+            new EstadoCitas { EstadoCitaId = 4, Nombre = "Completada" }
         );
     }
 }

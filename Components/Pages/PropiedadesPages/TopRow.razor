@@ -24,18 +24,22 @@
                 <a href="/foros" class="btn menu-btn">Foros</a>
                 <a class="btn menu-btn">Cont&aacute;ctanos</a>  
                 <div class="dropdown">  
-                    <button class="btn btnPerson dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">  
+                    <button class="btn btnPerson text-white" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">  
                         <i class="bi bi-person"></i>  
                     </button>  
 
                     <AuthorizeView>  
                         <Authorized Context="authorizedContext">
                             <div class="dropdown-menu bg-light dropDowmHome dropdown-menu-end p-3 mt-3">
-                                <small class="text-center">
-                                    @($"{authorizedContext.User.FindFirst("nombre")?.Value} {authorizedContext.User.FindFirst("apellido")?.Value}")
+                                <div class="d-flex justify-content-center mb-2">
+                                    <small class="">
+                                        @($"{authorizedContext.User.FindFirst("nombre")?.Value} {authorizedContext.User.FindFirst("apellido")?.Value}")
                                     </small>
+                                    <hr class="text-dark"/>
+                                </div>
                                 <a class="dropdown-item dropdown-item-top" href="/perfil"><i class="bi bi-person-gear"></i> Perfil</a>
                                 <a class="dropdown-item dropdown-item-top" href="/carrito"><i class="bi bi-cart"></i> Carrito</a>
+                                <a class="dropdown-item dropdown-item-top" href="/citas/agendadas"><i class="bi bi-calendar4-week"></i> Citas Agendadas</a>
                                 <AuthorizeView Roles="Admin">  
                                     <Authorized Context="adminContext">
                                         <a class="dropdown-item dropdown-item-top" href="/Admin/Home">
