@@ -86,7 +86,7 @@ Ideal para:
 
 ---
 
-## Interfaz
+## Interfáz
 
 <img width="1350" height="633" alt="Captura de pantalla 2025-08-11 181833" src="https://github.com/user-attachments/assets/39e0a6a5-6174-4886-922d-1ce81b93f575" />
 <img width="1349" height="634" alt="image" src="https://github.com/user-attachments/assets/f9c430d6-7006-4f04-af53-99251f7b71a0" />
