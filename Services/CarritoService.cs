@@ -21,6 +21,34 @@ namespace InfalibleRealEstate.Services
             return carrito?.CarritoItems.ToList() ?? new List<CarritoItem>();
         }
 
+        public async Task<(List<CarritoItem> Items, int TotalCount)> ObtenerItemsCarritoPaginadoAsync(string usuarioId, int pagina, int tamanoPagina)
+        {
+            using var contexto = DbContext.CreateDbContext();
+            var carrito = await contexto.Carritos
+                .Include(c => c.CarritoItems)
+                    .ThenInclude(ci => ci.Propiedad)
+                        .ThenInclude(p => p.Detalle)
+                .Include(c => c.CarritoItems)
+                    .ThenInclude(ci => ci.Propiedad)
+                        .ThenInclude(p => p.Imagenes)
+                .FirstOrDefaultAsync(c => c.UsuarioId == usuarioId);
+
+            if (carrito == null || !carrito.CarritoItems.Any())
+            {
+                return (new List<CarritoItem>(), 0);
+            }
+
+            var totalItems = carrito.CarritoItems.Count;
+
+            var itemsPaginados = carrito.CarritoItems
+                .OrderBy(ci => ci.CarritoItemId)
+                .Skip((pagina - 1) * tamanoPagina)
+                .Take(tamanoPagina)
+                .ToList();
+
+            return (itemsPaginados, totalItems);
+        }
+
         public async Task<bool> Agregar(string usuarioId, int propiedadId)
         {
             using var contexto = DbContext.CreateDbContext();

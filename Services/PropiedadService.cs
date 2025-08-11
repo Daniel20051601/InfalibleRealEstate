@@ -126,6 +126,66 @@ public class PropiedadService(IDbContextFactory<ApplicationDbContext> DbContext,
             .ToListAsync();
     }
 
+    public async Task<(List<Propiedad> Propiedades, int TotalCount)> ListarPaginado(
+       int pagina,
+       int tamanoPagina,
+       string? filtro = null,
+       string? valorFiltro = null,
+       DateTime? desde = null,
+       DateTime? hasta = null)
+    {
+        await using var contexto = await DbContext.CreateDbContextAsync();
+        var query = contexto.Propiedades
+                            .Include(p => p.Detalle)
+                            .Include(p => p.Imagenes)
+                            .AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(valorFiltro))
+        {
+            var valorFiltroLower = valorFiltro.ToLower();
+            switch (filtro)
+            {
+                case "Titulo":
+                    query = query.Where(p => p.Titulo.ToLower().Contains(valorFiltroLower));
+                    break;
+                case "Ciudad":
+                    query = query.Where(p => p.Ciudad != null && p.Ciudad.ToLower().Contains(valorFiltroLower));
+                    break;
+                case "Transaccion":
+                    query = query.Where(p => p.TipoTransaccion != null && p.TipoTransaccion.ToLower().Contains(valorFiltroLower));
+                    break;
+            }
+        }
+
+        if (desde.HasValue && hasta.HasValue && desde.Value <= hasta.Value)
+        {
+            var desdeUtc = desde.Value.ToUniversalTime().Date;
+            var hastaUtc = hasta.Value.ToUniversalTime().Date.AddDays(1).AddTicks(-1);
+            query = query.Where(p => p.FechaPublicacion >= desdeUtc && p.FechaPublicacion <= hastaUtc);
+        }
+        else if (desde.HasValue)
+        {
+            var desdeUtc = desde.Value.ToUniversalTime().Date;
+            query = query.Where(p => p.FechaPublicacion >= desdeUtc);
+        }
+        else if (hasta.HasValue)
+        {
+            var hastaUtc = hasta.Value.ToUniversalTime().Date.AddDays(1).AddTicks(-1);
+            query = query.Where(p => p.FechaPublicacion <= hastaUtc);
+        }
+
+        var totalCount = await query.CountAsync();
+
+        var propiedades = await query
+            .OrderByDescending(p => p.FechaPublicacion)
+            .Skip((pagina - 1) * tamanoPagina)
+            .Take(tamanoPagina)
+            .ToListAsync();
+
+        return (propiedades, totalCount);
+    }
+
+
     public async Task<List<Propiedad>> GetUltimasPropiedadesAsync(int cantidad)
     {
         await using var contexto = await DbContext.CreateDbContextAsync();

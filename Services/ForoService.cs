@@ -53,6 +53,55 @@ namespace InfalibleRealEstate.Services
             return await contexto.Foros.AsNoTracking().OrderByDescending(f => f.FechaCreacion).ToListAsync();
         }
 
+        public async Task<(List<Foros> foros, int TotalCount)> ListarPaginado(int pagina, int tamanoPagina, string filtro, string valorFiltro, DateTime? desde, DateTime? hasta)
+        {
+            await using var contexto = await DbContext.CreateDbContextAsync();
+
+            var query = contexto.Foros.AsQueryable();
+
+            if(!string.IsNullOrEmpty(valorFiltro))
+            {
+                switch (filtro.ToLower())
+                {
+                    case "titulo":
+                        query = query.Where(f => f.Titulo.ToLower().Contains(valorFiltro));
+                        break;
+                    case "descripcion":
+                        query = query.Where(f => f.Descripcion.ToLower().Contains(valorFiltro));
+                        break;
+                }
+            }
+
+            if (desde.HasValue && hasta.HasValue && desde.Value <= hasta.Value)
+            {
+                var desdeUtc = desde.Value.ToUniversalTime().Date;
+                var hastaUtc = hasta.Value.ToUniversalTime().Date.AddDays(1).AddTicks(-1);
+                query = query.Where(p => p.FechaCreacion >= desdeUtc && p.FechaCreacion <= hastaUtc);
+            }
+            else if (desde.HasValue)
+            {
+                var desdeUtc = desde.Value.ToUniversalTime().Date;
+                query = query.Where(p => p.FechaCreacion >= desdeUtc);
+            }
+            else if (hasta.HasValue)
+            {
+                var hastaUtc = hasta.Value.ToUniversalTime().Date.AddDays(1).AddTicks(-1);
+                query = query.Where(p => p.FechaCreacion <= hastaUtc);
+            }
+
+
+            var totalCount = await query.CountAsync();
+
+            var foros = await query
+                .OrderByDescending(f => f.FechaCreacion)
+                .Skip((pagina - 1) * tamanoPagina)
+                .Take(tamanoPagina)
+                .AsNoTracking()
+                .ToListAsync();
+
+            return (foros, totalCount);
+        }
+
         public async Task<bool> Eliminar(int foroId)
         {
             await using var context = await DbContext.CreateDbContextAsync();
