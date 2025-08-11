@@ -5,6 +5,7 @@
 @inject UserManager<ApplicationUser> UserManager
 @rendermode InteractiveServer
 @inject UsuariosService usuariosService
+@inject NavigationManager NavigationManager
 
 @if (user is not null)
 {
@@ -46,7 +47,7 @@
                     <div class="itemPerfil_ mb-2">
                         <label for="notificacionesCheckbox" class="form-check-label"><strong>Recibir notificaciones de nuevas Propiedades</strong></label>
                         <InputCheckbox @bind-Value="suscripcionesPropiedades" class="form-check-input" id="notificacionesCheckbox" />
-                        
+
                     </div>
                     <div class="itemPerfil_ mb-2">
                         <label for="foroCheckbox" class="form-check-label"><strong>Recibir notificaciones de los nuevos Foros</strong></label>
@@ -67,11 +68,15 @@
                 </div>
             </div>
 
-            <div class="row card  shadow-sm mt-2 mb-3">
-                <div class="card-body text-secondary ">
-                    <button class="btn btn-outline-secondary fw-semibold btn-sm">
-                        <span class="bi bi-arrow-bar-left" aria-hidden="true"></span> Cerrar Sesión
-                    </button>
+            <div class="row card shadow-sm mt-2 mb-3">
+                <div class="card-body">
+                    <form action="Account/Logout" method="post">
+                        <AntiforgeryToken />
+                        <input type="hidden" name="ReturnUrl" value="@currentUrl" />
+                        <button type="submit" class="btn btn-outline-secondary fw-semibold btn-sm">
+                            <span class="bi bi-arrow-bar-left" aria-hidden="true"></span> Cerrar Sesión
+                        </button>
+                    </form>
                 </div>
             </div>
 
@@ -123,6 +128,9 @@ else
     public bool suscripcionesForo = false;
     public string? telefono { get; set; }
 
+    private string? currentUrl;
+
+
     protected override async Task OnInitializedAsync()
     {
         var authState = await authenticationStateProvider.GetAuthenticationStateAsync();
@@ -140,6 +148,15 @@ else
         {
             telefono = await UserManager.GetPhoneNumberAsync(user);
         }
-        
+
+        currentUrl = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
+        NavigationManager.LocationChanged += OnLocationChanged;
+
+    }
+
+    private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
+    {
+        currentUrl = NavigationManager.ToBaseRelativePath(e.Location);
+        StateHasChanged();
     }
 }
