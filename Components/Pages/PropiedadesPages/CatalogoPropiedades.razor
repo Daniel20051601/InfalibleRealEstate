@@ -3,6 +3,7 @@
 @inject PropiedadService PropiedadesServices
 @rendermode InteractiveServer
 @inject NavigationManager NavigationManager
+@using Microsoft.AspNetCore.WebUtilities
 
 <EditForm Model="filtros">
     <div class="catalog-container">
@@ -216,7 +217,7 @@
                         </div>
                     }
                 </div>
-                <!-- Paginación -->
+
                 <nav aria-label="Page navigation" class="mt-4">
                     <ul class="pagination justify-content-center">
                         <li class="page-item @(currentPage == 1 ? "disabled" : "")">
@@ -257,9 +258,19 @@
         filtros.PrecioMaximo = 40000000;
 
         var uri = NavigationManager.ToAbsoluteUri(NavigationManager.Uri);
-        if (QueryHelpers.ParseQuery(uri.Query).TryGetValue("t", out var tipo))
+        var query = QueryHelpers.ParseQuery(uri.Query);
+
+        if (query.TryGetValue("tipoTransaccion", out var tipo))
         {
             filtros.TipoTransaccion = tipo;
+        }
+        if (query.TryGetValue("categoriaId", out var catId) && int.TryParse(catId, out var categoriaId))
+        {
+            filtros.CategoriaId = categoriaId;
+        }
+        if (query.TryGetValue("precioMax", out var pMax) && decimal.TryParse(pMax, out var precioMaximo))
+        {
+            filtros.PrecioMaximo = precioMaximo;
         }
 
         await CargarPropiedades();
@@ -310,9 +321,9 @@
     private async Task LimpiarFiltros()
     {
         filtros = new FiltrosPropiedades
-        {
-            PrecioMaximo = 40000000
-        };
+            {
+                PrecioMaximo = 40000000
+            };
         currentPage = 1;
         await CargarPropiedades();
     }
