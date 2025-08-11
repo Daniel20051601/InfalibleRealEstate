@@ -336,13 +336,13 @@ else
 
 @code {
     private bool isLoading = true;
-    private List<SolicitudUnirse> solicitudesUnirse = new();
-    private List<SolicitudVenta> solicitudesVender = new();
+    private List<SolicitudesUnirse> solicitudesUnirse = new();
+    private List<SolicitudesVenta> solicitudesVender = new();
 
-    private SolicitudVenta? solicitudVentaSeleccionada;
-    private SolicitudUnirse? solicitudUnirseSeleccionada;
-    private SolicitudUnirse? solicitudUnirseParaVer;
-    private SolicitudVenta? solicitudVentaParaVer;
+    private SolicitudesVenta? solicitudVentaSeleccionada;
+    private SolicitudesUnirse? solicitudUnirseSeleccionada;
+    private SolicitudesUnirse? solicitudUnirseParaVer;
+    private SolicitudesVenta? solicitudVentaParaVer;
 
     private int currentPageUnirse = 1;
     private int pageSize = 5;
@@ -413,14 +413,14 @@ else
     }
 
 
-    private void AbrirModalVender(SolicitudVenta solicitud)
+    private void AbrirModalVender(SolicitudesVenta solicitud)
     {
         solicitudVentaSeleccionada = solicitud;
         solicitudUnirseSeleccionada = null;
         StateHasChanged();
     }
 
-    private void AbrirModalUnirse(SolicitudUnirse solicitud)
+    private void AbrirModalUnirse(SolicitudesUnirse solicitud)
     {
         solicitudUnirseSeleccionada = solicitud;
         solicitudVentaSeleccionada = null;
@@ -434,13 +434,13 @@ else
         StateHasChanged();
     }
 
-    private void AbrirModalVerUnirse(SolicitudUnirse solicitud)
+    private void AbrirModalVerUnirse(SolicitudesUnirse solicitud)
     {
         solicitudUnirseParaVer = solicitud;
         StateHasChanged();
     }
 
-    private void AbrirModalVerVender(SolicitudVenta solicitud)
+    private void AbrirModalVerVender(SolicitudesVenta solicitud)
     {
         solicitudVentaParaVer = solicitud;
         StateHasChanged();

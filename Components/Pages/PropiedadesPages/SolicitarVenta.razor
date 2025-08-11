@@ -100,8 +100,8 @@
 
 @code {
     public ApplicationUser? User { get; set; }
-    public SolicitudVenta solicitudVenta { get; set; } = new SolicitudVenta();
-    public List<Categoria> Categorias { get; set; } = new List<Categoria>();
+    public SolicitudesVenta solicitudVenta { get; set; } = new SolicitudesVenta();
+    public List<Categorias> Categorias { get; set; } = new List<Categorias>();
     public bool enviando { get; set; } = false;
 
     protected override async Task OnInitializedAsync()

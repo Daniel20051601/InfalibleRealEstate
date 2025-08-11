@@ -386,12 +386,12 @@
 }
 
 @code {
-    private List<Propiedad>? ultimasPropiedades;
+    private List<Propiedades>? ultimasPropiedades;
     private ElementReference carouselRef;
     private ApplicationUser? user;
     public bool mostrarModal { get; set; } = false;
 
-    private List<Categoria> categorias = new();
+    private List<Categorias> categorias = new();
     private int? selectedCategoriaId;
     private string? selectedTipoTransaccion = "Venta";
     private decimal selectedPrecioMaximo = 40000000;
@@ -406,8 +406,8 @@
         catch (Exception ex)
         {
             Console.WriteLine($"Error al cargar datos: {ex.Message}");
-            ultimasPropiedades = new List<Propiedad>();
-            categorias = new List<Categoria>();
+            ultimasPropiedades = new List<Propiedades>();
+            categorias = new List<Categorias>();
         }
     }
 
