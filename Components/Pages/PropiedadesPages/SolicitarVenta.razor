@@ -6,22 +6,23 @@
 @inject SolicitudesVentaService SolicitudesService
 @inject NavigationManager NavigationManager
 @inject IToastService ToastService
+@inject IJSRuntime JSRuntime
 
 <PageTitle>Vende</PageTitle>
 
 <div class="container my-4 mb-5">
 
-    <div class="row">
+    <div class="row align-items-start">
         <div class="col-lg-7 col">
             <div class="">
-                <h1 class="mb-2 fw-bold titulo-vende">Vende tu propiedad</h1>
+                <h2 class=" fw-bold titulo-underline-azul">Vende tu propiedad</h2>
             </div>
-            <div class="imgVende-container">
-                <img class="imgVende" src="https://scrgajdklzafafwrxrng.supabase.co/storage/v1/object/public/propiedades/ComponenteSolicitud/feliz-pareja-saludando-consultor-financiero.png" />
+            <div class="imgVende-container animate-slide-up">
+                <img class="imgVende" src="https://scrgajdklzafafwrxrng.supabase.co/storage/v1/object/public/propiedades/Seccion%20Vende/IlustracionDeVectoresMenosMargen.png" />
             </div>
 
-            <p class="text-muted vende-descripcion">
-                <span class="text-center">¿Quieres vender tu propiedad de forma rápida y segura?</span> <br />
+            <p class="text-muted vende-descripcion animate-slide-up">
+                <span class="text-justify">¿Quieres vender tu propiedad de forma rápida y segura?</span> <br />
                 En <span class="text-danger fw-bold">Infalible Real Estate</span> te ofrecemos asesoría personalizada, promoción profesional y acceso a compradores calificados.<br />
                 Nos encargamos de todo el proceso, desde la valoración hasta la firma, para que tú solo te ocupes de recibir los mejores resultados.<br />
                 Completa el formulario y descubre cómo podemos ayudarte a convertir tu inmueble en una oportunidad exitosa.<br />
@@ -29,9 +30,9 @@
             </p>
         </div>
 
-        <div class=" col-lg-5 col-md-5 p-4 card shadow-lg">
+        <div class=" col-lg-5 col-md-5 p-4 card shadow-lg animate-slide-up">
             <div class="d-flex justify-content-center">
-                <h4 class="mb-4 titulo-vende">Formulario de Venta</h4>
+                <h4 class="mb-4 titulo-vende fw-semibold">Formulario de Venta</h4>
 
             </div>
             <EditForm Model="solicitudVenta" OnValidSubmit="@Guardar">
@@ -148,6 +149,11 @@
                       $"Descripción: {solicitudVenta.Descripcion}\n";
         var url = $"https://wa.me/18098419551?text={Uri.EscapeDataString(mensaje)}";
         NavigationManager.NavigateTo(url, true);
+    }
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        JSRuntime.InvokeVoidAsync("initializeIntersectionObserver");
     }
 
 
