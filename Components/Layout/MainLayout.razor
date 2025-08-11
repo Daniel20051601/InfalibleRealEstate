@@ -1,5 +1,8 @@
 ﻿@using InfalibleRealEstate.Components.Pages.PropiedadesPages
 @inherits LayoutComponentBase
+@implements IDisposable
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JS
 
 <div class="page">
     <main>
@@ -12,6 +15,23 @@
 </div>
 
 <RadzenComponents @rendermode="InteractiveServer" />
+
+@code {
+    protected override void OnInitialized()
+    {
+        NavigationManager.LocationChanged += OnLocationChanged;
+    }
+
+    private async void OnLocationChanged(object? sender, Microsoft.AspNetCore.Components.Routing.LocationChangedEventArgs e)
+    {
+        await JS.InvokeVoidAsync("scrollToTop");
+    }
+
+    public void Dispose()
+    {
+        NavigationManager.LocationChanged -= OnLocationChanged;
+    }
+}
 
 
 
