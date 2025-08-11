@@ -11,14 +11,14 @@
 
 <div class="container my-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h3 class="titleCarrito fw-bold">Administrar Citas</h3>
+        <h5 class="text-secondary">Administrar Citas</h5>
         <div class="d-flex gap-2 align-items-center">
             <div class="form-floating">
-                <InputDate @bind-Value="Desde" class="form-control form-control-sm" id="fechaDesde" />
+                <InputDate @bind-Value="Desde" @bind-Value:after="OnDateChangedAsync" class="form-control form-control-sm" id="fechaDesde" />
                 <label for="fechaDesde">Desde</label>
             </div>
             <div class="form-floating">
-                <InputDate @bind-Value="Hasta" class="form-control form-control-sm" id="fechaHasta" />
+                <InputDate @bind-Value="Hasta" @bind-Value:after="OnDateChangedAsync" class="form-control form-control-sm" id="fechaHasta" />
                 <label for="fechaHasta">Hasta</label>
             </div>
         </div>
@@ -26,10 +26,10 @@
 
     <div class="row">
         <div class="col-12">
-            @if (Citas is null)
+            @if (CitasPaginadas is null)
             {
                 <div class="d-flex flex-column align-items-center">
-                    <span class="mb-3 fs-6">Cargando Propiedades...</span>
+                    <span class="mb-3 fs-6">Cargando Citas...</span>
                     <div>
                         <div class="spinner-grow text-primary mx-1" role="status">
                             <span class="visually-hidden">Loading...</span>
@@ -43,7 +43,7 @@
                     </div>
                 </div>
             }
-            else if (!FilteredCitas.Any())
+            else if (!CitasPaginadas.Any())
             {
                 <div class="alert alert-info text-center" role="alert">
                     No se encontraron citas en el rango de fechas seleccionado.
@@ -52,8 +52,8 @@
             else
             {
                 <div class="row">
-                    <small class="text-secondary mb-2">Total: @FilteredCitas.Count</small>
-                    @foreach (var cita in FilteredCitas)
+                    <small class="text-secondary mb-2">Total: @totalCitas</small>
+                    @foreach (var cita in CitasPaginadas)
                     {
                         <div class="col-12 col-lg-10 col-xl-8 mb-4">
                             <div class="card cardCita h-100 shadow-sm d-flex flex-column">
@@ -84,6 +84,25 @@
                         </div>
                     }
                 </div>
+                @if (totalPages > 1)
+                {
+                    <nav aria-label="Page navigation">
+                        <ul class="pagination justify-content-center">
+                            <li class="page-item @(currentPage == 1 ? "disabled" : "")">
+                                <button class="page-link" @onclick="() => CambiarPagina(currentPage - 1)">Anterior</button>
+                            </li>
+                            @for (int i = 1; i <= totalPages; i++)
+                            {
+                                <li class="page-item @(currentPage == i ? "active" : "")">
+                                    <button class="page-link" @onclick="() => CambiarPagina(i)">@i</button>
+                                </li>
+                            }
+                            <li class="page-item @(currentPage == totalPages ? "disabled" : "")">
+                                <button class="page-link" @onclick="() => CambiarPagina(currentPage + 1)">Siguiente</button>
+                            </li>
+                        </ul>
+                    </nav>
+                }
             }
         </div>
     </div>
@@ -172,33 +191,51 @@
 
 
 @code {
-    private List<Citas> Citas { get; set; } = new List<Citas>();
+    private List<Citas>? CitasPaginadas;
     private Citas? citaSeleccionada;
     private Citas? citaParaEditar;
-    private List<EstadoCitas> estadosCita = new List<EstadoCitas>();
+    private List<EstadoCitas> estadosCita = new();
     private bool mostrarModalPropiedades = false;
     private bool mostrarModalEditar = false;
     private bool isLoading = false;
 
+    private int currentPage = 1;
+    private int pageSize = 3;
+    private int totalPages = 0;
+    private int totalCitas = 0;
+
     public DateTime Desde { get; set; } = DateTime.Now.AddDays(-30);
     public DateTime Hasta { get; set; } = DateTime.Now.AddDays(30);
 
-    private List<Citas> FilteredCitas => Citas
-        .Where(c => c.FechaHora.Date >= Desde.Date && c.FechaHora.Date <= Hasta.Date)
-        .OrderByDescending(c => c.FechaHora)
-        .ToList();
-
     protected override async Task OnInitializedAsync()
     {
-        try
-        {
-            Citas = await CitasService.Listar();
-            estadosCita = await CitasService.ListarEstados();
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Error al cargar datos: {ex.Message}");
-        }
+        await CargarCitas();
+        estadosCita = await CitasService.ListarEstados();
+    }
+
+    private async Task CargarCitas()
+    {
+        CitasPaginadas = null;
+        StateHasChanged();
+
+        var (citas, total) = await CitasService.ListarPaginado(currentPage, pageSize, Desde, Hasta);
+        CitasPaginadas = citas;
+        totalCitas = total;
+        totalPages = (int)Math.Ceiling(totalCitas / (double)pageSize);
+        StateHasChanged();
+    }
+
+    private async Task OnDateChangedAsync()
+    {
+        currentPage = 1;
+        await CargarCitas();
+    }
+
+    private async Task CambiarPagina(int pagina)
+    {
+        if (pagina < 1 || pagina > totalPages && totalPages > 0) return;
+        currentPage = pagina;
+        await CargarCitas();
     }
 
     private void VerPropiedades(Citas cita)
@@ -235,12 +272,7 @@
         if (actualizado)
         {
             NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = "Éxito", Detail = "El estado de la cita ha sido actualizado.", Duration = 4000 });
-
-            var estadoActualizado = estadosCita.FirstOrDefault(e => e.EstadoCitaId == citaParaEditar.EstadoCitaId);
-            if (estadoActualizado != null)
-            {
-                citaParaEditar.EstadoCita = estadoActualizado;
-            }
+            await CargarCitas(); 
         }
         else
         {
@@ -248,7 +280,6 @@
         }
         isLoading = false;
         CerrarModalEditar();
-        StateHasChanged();
     }
 
     public string BadgeEstadoCita(string estado)
