@@ -4,83 +4,97 @@
 @inject CitasService CitasService
 @inject NavigationManager NavigationManager
 @inject NotificationService NotificationService
+@inject AuthenticationStateProvider AuthenticationStateProvider
 
 <PageTitle>Citas Agendadas</PageTitle>
 
-<div class="container mb-4">
-    <div class="d-flex justify-content-between align-items-center mt-4">
-        <h3 class="titleCarrito fw-bold "> Citas Agendadas</h3>
-        <div class="d-flex gap-2">
+<div class="container my-4">
+    <div class="d-flex justify-content-between align-items-center mt-4 mb-4">
+        <h3 class="titleCarrito fw-bold">Citas Agendadas</h3>
+        <div class="d-flex gap-2 align-items-center">
             <div class="form-floating">
-                <InputDate @bind-Value="Desde"
-                           class="form-control form-control-sm"
-                           id="fechaCita" />
-                <label for="fechaCita">Desde</label>
+                <InputDate @bind-Value="Desde" @bind-Value:after="OnDateChangedAsync" class="form-control form-control-sm" id="fechaDesde" />
+                <label for="fechaDesde">Desde</label>
             </div>
             <div class="form-floating">
-                <InputDate @bind-Value="Hasta"
-                           class="form-control form-control-sm"
-                           id="fechaCitaHasta" />
-                <label for="fechaCitaHasta">Hasta</label>
-
+                <InputDate @bind-Value="Hasta" @bind-Value:after="OnDateChangedAsync" class="form-control form-control-sm" id="fechaHasta" />
+                <label for="fechaHasta">Hasta</label>
             </div>
         </div>
-
     </div>
 
     <div class="row">
-        <div class="col-lg-8 col-md-7">
-            @if (Citas is null || Citas.Count == 0)
+        <div class="col-12">
+            @if (CitasPaginadas is null)
             {
                 <div class="d-flex flex-column align-items-center">
+                    <span class="mb-3 fs-6">Cargando Citas...</span>
                     <div>
-                        <div class="spinner-grow text-primary mx-1" role="status">
-                            <span class="visually-hidden">Loading...</span>
-                        </div>
-                        <div class="spinner-grow text-primary mx-1" role="status">
-                            <span class="visually-hidden">Loading...</span>
-                        </div>
                         <div class="spinner-grow text-primary mx-1" role="status">
                             <span class="visually-hidden">Loading...</span>
                         </div>
                     </div>
                 </div>
             }
+            else if (!CitasPaginadas.Any())
+            {
+                <div class="alert alert-info text-center" role="alert">
+                    No tienes citas agendadas en el rango de fechas seleccionado.
+                </div>
+            }
             else
             {
                 <div class="row">
-                    <small class="text-secondary mb-2">Total: @Citas.Count</small>
-                    @foreach (var cita in Citas)
+                    <small class="text-secondary mb-2">Total: @totalCitas</small>
+                    @foreach (var cita in CitasPaginadas)
                     {
-                        <div class="col-12 mb-4">
+                        <div class="col-12 col-lg-10 col-xl-8 mb-4">
                             <div class="card cardCita h-100 shadow-sm">
                                 <div class="card-body">
                                     <div class="d-flex justify-content-between align-items-center mb-2">
                                         <small class="badge @BadgeEstadoCita(cita.EstadoCita?.Nombre ?? string.Empty)">@cita.EstadoCita?.Nombre</small>
-                                        <small class="text-muted">Creada: @cita.FechaCreacion.ToString("yy/mm/dd")</small>
+                                        <small class="text-muted">Creada: @cita.FechaCreacion.ToString("dd/MM/yyyy")</small>
                                     </div>
                                     <div>
-                                        <p class="card-title"><strong>Fecha de la Cita: </strong>@cita.FechaHora.ToString("yy/MM/dd")</p>
-                                        <p class="card-title"><strong>Hora de la Cita: </strong>@cita.FechaHora.ToString("HH:mm")</p>
-                                        <p class="card-title"><strong>Propiedades a ver: </strong> @cita.CitaPropiedades.Count <button class=" btn-no-border text-primary mx-1  btn-sm " @onclick="()=> MostrarModalPropiedades(cita)"><i class="bi bi-eye"></i></button></p>
-                                        <p class="card-title"><strong>Costo de la Cita: </strong> <span class="fw-semibold text-success">@cita.Costo pesos</span></p>
-                                        <p class="card-text"></p>
+                                        <p class="card-title"><strong>Fecha de la Cita: </strong>@cita.FechaHora.ToString("dd/MM/yyyy")</p>
+                                        <p class="card-title"><strong>Hora de la Cita: </strong>@cita.FechaHora.ToString("hh:mm tt")</p>
+                                        <p class="card-title">
+                                            <strong>Propiedades a ver: </strong> @cita.CitaPropiedades.Count
+                                            <button class="btn-no-border text-primary mx-1 btn-sm" @onclick="() => MostrarModalPropiedades(cita)"><i class="bi bi-eye"></i></button>
+                                        </p>
+                                        <p class="card-title"><strong>Costo de la Cita: </strong> <span class="fw-semibold text-success">@cita.Costo.ToString("C")</span></p>
                                     </div>
-
                                 </div>
                             </div>
                         </div>
                     }
-
-
                 </div>
 
+                @if (totalPages > 1)
+                {
+                    <nav aria-label="Page navigation">
+                        <ul class="pagination justify-content-center">
+                            <li class="page-item @(currentPage == 1 ? "disabled" : "")">
+                                <button class="page-link" @onclick="() => CambiarPagina(currentPage - 1)">Anterior</button>
+                            </li>
+                            @for (int i = 1; i <= totalPages; i++)
+                            {
+                                <li class="page-item @(currentPage == i ? "active" : "")">
+                                    <button class="page-link" @onclick="() => CambiarPagina(i)">@i</button>
+                                </li>
+                            }
+                            <li class="page-item @(currentPage == totalPages ? "disabled" : "")">
+                                <button class="page-link" @onclick="() => CambiarPagina(currentPage + 1)">Siguiente</button>
+                            </li>
+                        </ul>
+                    </nav>
+                }
             }
         </div>
     </div>
 </div>
 
-@if (mostrarModalPropiedades)
+@if (mostrarModalPropiedades && citaSeleccionada != null)
 {
     <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
         <div class="modal-dialog modal-dialog-centered modal-lg">
@@ -116,39 +130,71 @@
     </div>
 }
 
-
 @code {
-    public List<Citas> Citas { get; set; } = new List<Citas>();
-    public bool ModalPropiedades { get; set; } = false;
-    public Citas citaSeleccionada { get; set; } = new Citas();
-
-    public DateTime Desde { get; set; } = DateTime.Now.AddDays(-30);
-    public DateTime Hasta { get; set; } = DateTime.Now;
-
+    private List<Citas>? CitasPaginadas;
+    private Citas? citaSeleccionada;
     private bool mostrarModalPropiedades = false;
 
+    private int currentPage = 1;
+    private int pageSize = 3;
+    private int totalPages = 0;
+    private int totalCitas = 0;
+
+    public DateTime? Desde { get; set; } = DateTime.UtcNow.AddDays(-30);
+    public DateTime? Hasta { get; set; } = DateTime.UtcNow.AddDays(30);
 
     protected override async Task OnInitializedAsync()
     {
-        try
-        {
-            Citas = await CitasService.Listar();
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Error al cargar las citas: {ex.Message}");
-        }
+        await CargarCitas();
     }
 
-    private void CerrarModalPropiedades()
+    private async Task CargarCitas()
     {
-        mostrarModalPropiedades = false;
+        CitasPaginadas = null;
+        StateHasChanged();
+
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+        var userId = user.Identity?.IsAuthenticated == true ? user.FindFirst(c => c.Type.Contains("nameidentifier"))?.Value : null;
+
+        if (userId is null)
+        {
+            NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Error", Detail = "No se pudo identificar al usuario.", Duration = 4000 });
+            return;
+        }
+
+        var (citas, total) = await CitasService.ListarPaginadoPorUsuarioAsync(userId, currentPage, pageSize, Desde, Hasta);
+        CitasPaginadas = citas;
+        totalCitas = total;
+        totalPages = (int)Math.Ceiling(totalCitas / (double)pageSize);
+        if (totalPages == 0) totalPages = 1;
+
+        StateHasChanged();
+    }
+
+    private async Task OnDateChangedAsync()
+    {
+        currentPage = 1;
+        await CargarCitas();
+    }
+
+    private async Task CambiarPagina(int pagina)
+    {
+        if (pagina < 1 || pagina > totalPages) return;
+        currentPage = pagina;
+        await CargarCitas();
     }
 
     private void MostrarModalPropiedades(Citas cita)
     {
         citaSeleccionada = cita;
         mostrarModalPropiedades = true;
+    }
+
+    private void CerrarModalPropiedades()
+    {
+        mostrarModalPropiedades = false;
+        citaSeleccionada = null;
     }
 
     public string BadgeEstadoCita(string estado)
@@ -159,7 +205,7 @@
             "Confirmada" => "badge bg-success",
             "Cancelada" => "badge bg-danger",
             "Completada" => "badge bg-primary",
-            _ => "badge bg-secondary"
+            _ => "badge bg-light text-dark"
         };
     }
 }
