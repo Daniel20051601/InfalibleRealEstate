@@ -2,7 +2,7 @@
 
 namespace InfalibleRealEstate.Models;
 
-public class Categoria
+public class Categorias
 {
     [Key]
     public int CategoriaId { get; set; }
@@ -13,6 +13,6 @@ public class Categoria
 
     public string? Descripcion { get; set; }
 
-    public virtual ICollection<Propiedad>? Propiedades { get; set; }
-    public virtual ICollection<SolicitudVenta> SolicitudesVenta { get; set; } = new List<SolicitudVenta>();
+    public virtual ICollection<Propiedades>? Propiedades { get; set; }
+    public virtual ICollection<SolicitudesVenta> SolicitudesVenta { get; set; } = new List<SolicitudesVenta>();
 }

@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace InfalibleRealEstate.Models;
 
-public class Carrito
+public class Carritos
 {
     [Key]
     public int CarritoId { get; set; }
@@ -14,6 +14,6 @@ public class Carrito
     [ForeignKey("UsuarioId")]
     public virtual ApplicationUser? Usuario { get; set; }
 
-    public virtual ICollection<CarritoItem> CarritoItems { get; set; } = new List<CarritoItem>();
+    public virtual ICollection<CarritoItems> CarritoItems { get; set; } = new List<CarritoItems>();
    
 }

@@ -28,6 +28,6 @@ namespace InfalibleRealEstate.Models
         public decimal? MetrosCuadrados { get; set; } = 0;
 
         [ForeignKey("PropiedadId")]
-        public Propiedad? Propiedad { get; set; }
+        public Propiedades? Propiedad { get; set; }
     }
 }

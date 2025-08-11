@@ -2,7 +2,7 @@
 
 namespace InfalibleRealEstate.Models;
 
-public class EstadoPropiedad
+public class EstadoPropiedades
 {
     [Key]
     public int EstadoPropiedadId { get; set; }
@@ -13,5 +13,5 @@ public class EstadoPropiedad
 
     public string? Descripcion { get; set; }
 
-    public ICollection<Propiedad>? Propiedades { get; set; }
+    public ICollection<Propiedades>? Propiedades { get; set; }
 }

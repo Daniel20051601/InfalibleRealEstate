@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace InfalibleRealEstate.Models;
 
-public class SuscripcionNoticia
+public class SuscripcionesNoticia
 {
     [Key]
     public int SuscripcionId { get; set; }

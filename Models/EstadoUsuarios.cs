@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace InfalibleRealEstate.Models;
 
-public class EstadoUsuario
+public class EstadoUsuarios
 {
     [Key]
     public int EstadoUsuarioId { get; set; } 
