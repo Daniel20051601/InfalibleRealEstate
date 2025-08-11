@@ -3,7 +3,7 @@
 @attribute [Authorize(Roles = "Admin")]
 @inject SolicitudesUnirseService SolicitudesUnirseService
 @inject SolicitudesVentaService SolicitudesVentaService
-@inject IToastService ToastService
+@inject NotificationService NotificationService
 @inject IJSRuntime JSRuntime
 @rendermode InteractiveServer
 
@@ -38,13 +38,13 @@ else
                     <InputSelect class="form-select" @bind-Value="FiltroUnirse">
                         <option value="Nombre">Nombre</option>
                         <option value="Email">Email</option>
-                        <option value="Rol">Rol</option>
+                        <option value="Profesion">Profesi&oacute;n</option>
                     </InputSelect>
                 </div>
                 <div class="col-md-5">
                     <div class="input-group" role="group">
-                        <input class="form-control" type="text" placeholder="Buscar..." />
-                        <button class="btn btn-outline-primary" type="button">Buscar</button>
+                        <input class="form-control" type="text" placeholder="Buscar..." @bind-value="InputTextUnirse" />
+                        <button class="btn btn-outline-primary" type="button" @onclick="BuscarSolicitudesUnirse">Buscar</button>
                     </div>
                 </div>
 
@@ -62,8 +62,8 @@ else
                             <th>Nombre</th>
                             <th>Apellido</th>
                             <th>Correo</th>
-                            <th>Teléfono</th>
-                            <th>Profesión</th>
+                            <th>Tel&eacute;fono</th>
+                            <th>Profesi&oacute;n</th>
                             <th>Fecha</th>
                             <th>Estado</th>
                             <th>Acciones</th>
@@ -92,6 +92,25 @@ else
                     </tbody>
                 </table>
             </div>
+            <div class="d-flex justify-content-between align-items-center mt-3">
+                <span>Mostrando @solicitudesUnirse.Count de @totalResultadosUnirse</span>
+                <nav>
+                    <ul class="pagination mb-0">
+                        <li class="page-item @(currentPageUnirse == 1 ? "disabled" : "")">
+                            <a class="page-link" href="#" @onclick="() => CambiarPaginaUnirse(currentPageUnirse - 1)" @onclick:preventDefault>Anterior</a>
+                        </li>
+                        @for (int i = 1; i <= totalPagesUnirse; i++)
+                        {
+                            <li class="page-item @(i == currentPageUnirse ? "active" : "")">
+                                <a class="page-link" href="#" @onclick="() => CambiarPaginaUnirse(i)" @onclick:preventDefault>@i</a>
+                            </li>
+                        }
+                        <li class="page-item @(currentPageUnirse == totalPagesUnirse ? "disabled" : "")">
+                            <a class="page-link" href="#" @onclick="() => CambiarPaginaUnirse(currentPageUnirse + 1)" @onclick:preventDefault>Siguiente</a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
         </div>
     </div>
 
@@ -105,13 +124,12 @@ else
                     <InputSelect class="form-select" @bind-Value="FiltroVender">
                         <option value="Nombre">Nombre</option>
                         <option value="Email">Email</option>
-                        <option value="Rol">Rol</option>
                     </InputSelect>
                 </div>
                 <div class="col-md-5">
                     <div class="input-group" role="group">
-                        <input class="form-control" type="text" placeholder="Buscar..." />
-                        <button class="btn btn-outline-primary" type="button">Buscar</button>
+                        <input class="form-control" type="text" placeholder="Buscar..." @bind-value="InputTextVender" />
+                        <button class="btn btn-outline-primary" type="button" @onclick="BuscarSolicitudesVender">Buscar</button>
                     </div>
                 </div>
 
@@ -129,8 +147,8 @@ else
                             <th>Nombre</th>
                             <th>Apellido</th>
                             <th>Correo</th>
-                            <th>Teléfono</th>
-                            <th>Categoría</th>
+                            <th>Tel&eacute;fono</th>
+                            <th>Categor&iacute;a</th>
                             <th>Fecha</th>
                             <th>Estado</th>
                             <th>Acciones</th>
@@ -157,6 +175,25 @@ else
                         }
                     </tbody>
                 </table>
+            </div>
+            <div class="d-flex justify-content-between align-items-center mt-3">
+                <span>Mostrando @solicitudesVender.Count de @totalResultadosVender</span>
+                <nav>
+                    <ul class="pagination mb-0">
+                        <li class="page-item @(currentPageVender == 1 ? "disabled" : "")">
+                            <a class="page-link" href="#" @onclick="() => CambiarPaginaVender(currentPageVender - 1)" @onclick:preventDefault>Anterior</a>
+                        </li>
+                        @for (int i = 1; i <= totalPagesVender; i++)
+                        {
+                            <li class="page-item @(i == currentPageVender ? "active" : "")">
+                                <a class="page-link" href="#" @onclick="() => CambiarPaginaVender(i)" @onclick:preventDefault>@i</a>
+                            </li>
+                        }
+                        <li class="page-item @(currentPageVender == totalPagesVender ? "disabled" : "")">
+                            <a class="page-link" href="#" @onclick="() => CambiarPaginaVender(currentPageVender + 1)" @onclick:preventDefault>Siguiente</a>
+                        </li>
+                    </ul>
+                </nav>
             </div>
         </div>
     </div>
@@ -241,13 +278,13 @@ else
                         <div class="col-md-6">
                             <p><strong>Nombre:</strong> @solicitudUnirseParaVer.Nombre @solicitudUnirseParaVer.Apellido</p>
                             <p><strong>Correo:</strong> @solicitudUnirseParaVer.CorreoElectronico</p>
-                            <p><strong>Teléfono:</strong> @solicitudUnirseParaVer.Telefono</p>
+                            <p><strong>Tel&eacute;fono:</strong> @solicitudUnirseParaVer.Telefono</p>
                             <p><strong>Fecha de Nacimiento:</strong> @solicitudUnirseParaVer.FechaNacimiento.ToShortDateString()</p>
                             <p><strong>Provincia:</strong> @solicitudUnirseParaVer.Provincia</p>
                         </div>
                         <div class="col-md-6">
                             <p><strong>Nivel de Estudios:</strong> @solicitudUnirseParaVer.NivelEstudios</p>
-                            <p><strong>Profesión:</strong> @solicitudUnirseParaVer.Profesion</p>
+                            <p><strong>Profesi&oacute;n:</strong> @solicitudUnirseParaVer.Profesion</p>
                             <p><strong>Trabaja Actualmente:</strong> @solicitudUnirseParaVer.TrabajaActualmente</p>
                             <p><strong>Fecha de Solicitud:</strong> @solicitudUnirseParaVer.FechaSolicitud.ToShortDateString()</p>
                         </div>
@@ -280,12 +317,12 @@ else
                 <div class="modal-body">
                     <p><strong>Nombre:</strong> @solicitudVentaParaVer.Nombre @solicitudVentaParaVer.Apellido</p>
                     <p><strong>Correo:</strong> @solicitudVentaParaVer.CorreoElectronico</p>
-                    <p><strong>Teléfono:</strong> @solicitudVentaParaVer.Telefono</p>
-                    <p><strong>Categoría de Propiedad:</strong> @solicitudVentaParaVer.Categoria?.NombreCategoria</p>
+                    <p><strong>Tel&eacute;fono:</strong> @solicitudVentaParaVer.Telefono</p>
+                    <p><strong>Categor&iacute;a de Propiedad:</strong> @solicitudVentaParaVer.Categoria?.NombreCategoria</p>
                     <p><strong>Fecha de Solicitud:</strong> @solicitudVentaParaVer.FechaSolicitud.ToShortDateString()</p>
                     <p><strong>Estado:</strong> @solicitudVentaParaVer.Estado</p>
                     <hr />
-                    <p><strong>Descripción:</strong></p>
+                    <p><strong>Descripci&oacute;n:</strong></p>
                     <p>@solicitudVentaParaVer.Descripcion</p>
                 </div>
                 <div class="modal-footer">
@@ -297,33 +334,84 @@ else
     <div class="modal-backdrop fade show"></div>
 }
 
-
 @code {
     private bool isLoading = true;
-    private List<SolicitudUnirse> solicitudesUnirse = new List<SolicitudUnirse>();
-    private List<SolicitudVenta> solicitudesVender = new List<SolicitudVenta>();
+    private List<SolicitudUnirse> solicitudesUnirse = new();
+    private List<SolicitudVenta> solicitudesVender = new();
 
     private SolicitudVenta? solicitudVentaSeleccionada;
     private SolicitudUnirse? solicitudUnirseSeleccionada;
     private SolicitudUnirse? solicitudUnirseParaVer;
     private SolicitudVenta? solicitudVentaParaVer;
 
-    public DateTime DesdeUnirse { get; set; } = DateTime.Now.AddMonths(-1);
-    public DateTime HastaUnirse { get; set; } = DateTime.Now;
+    private int currentPageUnirse = 1;
+    private int pageSize = 5;
+    private int totalPagesUnirse = 1;
+    private int totalResultadosUnirse = 0;
+    private string InputTextUnirse { get; set; } = string.Empty;
+    public DateTime? DesdeUnirse { get; set; } = DateTime.UtcNow.AddMonths(-1);
+    public DateTime? HastaUnirse { get; set; } = DateTime.UtcNow;
     public string FiltroUnirse { get; set; } = "Nombre";
 
-
-    public DateTime DesdeVender { get; set; } = DateTime.Now.AddMonths(-1);
-    public DateTime HastaVender { get; set; } = DateTime.Now;
+    private int currentPageVender = 1;
+    private int totalPagesVender = 1;
+    private int totalResultadosVender = 0;
+    private string InputTextVender { get; set; } = string.Empty;
+    public DateTime? DesdeVender { get; set; } = DateTime.UtcNow.AddMonths(-1);
+    public DateTime? HastaVender { get; set; } = DateTime.UtcNow;
     public string FiltroVender { get; set; } = "Nombre";
 
     protected override async Task OnInitializedAsync()
     {
         isLoading = true;
-        solicitudesUnirse = await SolicitudesUnirseService.ListarSolicitudesUnirse();
-        solicitudesVender = await SolicitudesVentaService.ListarSolicitudesVenta();
+        await Task.WhenAll(CargarSolicitudesUnirse(), CargarSolicitudesVender());
         isLoading = false;
     }
+
+    private async Task CargarSolicitudesUnirse()
+    {
+        var result = await SolicitudesUnirseService.ListarPaginado(currentPageUnirse, pageSize, FiltroUnirse, InputTextUnirse, DesdeUnirse, HastaUnirse);
+        solicitudesUnirse = result.Solicitudes;
+        totalResultadosUnirse = result.TotalCount;
+        totalPagesUnirse = (int)Math.Ceiling(totalResultadosUnirse / (double)pageSize);
+        if (totalPagesUnirse == 0) totalPagesUnirse = 1;
+    }
+
+    private async Task CargarSolicitudesVender()
+    {
+        var result = await SolicitudesVentaService.ListarPaginado(currentPageVender, pageSize, FiltroVender, InputTextVender, DesdeVender, HastaVender);
+        solicitudesVender = result.Solicitudes;
+        totalResultadosVender = result.TotalCount;
+        totalPagesVender = (int)Math.Ceiling(totalResultadosVender / (double)pageSize);
+        if (totalPagesVender == 0) totalPagesVender = 1;
+    }
+
+    private async Task BuscarSolicitudesUnirse()
+    {
+        currentPageUnirse = 1;
+        await CargarSolicitudesUnirse();
+    }
+
+    private async Task BuscarSolicitudesVender()
+    {
+        currentPageVender = 1;
+        await CargarSolicitudesVender();
+    }
+
+    private async Task CambiarPaginaUnirse(int page)
+    {
+        if (page < 1 || page > totalPagesUnirse) return;
+        currentPageUnirse = page;
+        await CargarSolicitudesUnirse();
+    }
+
+    private async Task CambiarPaginaVender(int page)
+    {
+        if (page < 1 || page > totalPagesVender) return;
+        currentPageVender = page;
+        await CargarSolicitudesVender();
+    }
+
 
     private void AbrirModalVender(SolicitudVenta solicitud)
     {
@@ -372,11 +460,11 @@ else
             var success = await SolicitudesVentaService.Guardar(solicitudVentaSeleccionada);
             if (success)
             {
-                ToastService.ShowSuccess("Estado de la solicitud de venta actualizado correctamente.");
+                NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = "Éxito", Detail = "Estado de la solicitud de venta actualizado correctamente.", Duration = 4000 });
             }
             else
             {
-                ToastService.ShowError("No se pudo actualizar el estado de la solicitud de venta.");
+                NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Error", Detail = "No se pudo actualizar el estado de la solicitud de venta.", Duration = 4000 });
             }
             CerrarModal();
         }
@@ -390,11 +478,11 @@ else
             var success = await SolicitudesUnirseService.Guardar(solicitudUnirseSeleccionada);
             if (success)
             {
-                ToastService.ShowSuccess("Estado de la solicitud para unirse actualizado correctamente.");
+                NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = "Éxito", Detail = "Estado de la solicitud para unirse actualizado correctamente.", Duration = 4000 });
             }
             else
             {
-                ToastService.ShowError("No se pudo actualizar el estado de la solicitud");
+                NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Error", Detail = "No se pudo actualizar el estado de la solicitud.", Duration = 4000 });
             }
 
             CerrarModal();
@@ -408,12 +496,12 @@ else
             var success = await SolicitudesVentaService.Eliminar(solicitudVentaSeleccionada.SolicitudVentaId);
             if (success)
             {
-                ToastService.ShowSuccess("Solicitud de venta eliminada correctamente.");
-                solicitudesVender.Remove(solicitudVentaSeleccionada);
+                NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = "Éxito", Detail = "Solicitud de venta eliminada correctamente.", Duration = 4000 });
+                await CargarSolicitudesVender();
             }
             else
             {
-                ToastService.ShowError("No se pudo eliminar la solicitud de venta.");
+                NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Error", Detail = "No se pudo eliminar la solicitud de venta.", Duration = 4000 });
             }
             CerrarModal();
         }
@@ -426,12 +514,12 @@ else
             var success = await SolicitudesUnirseService.Eliminar(solicitudUnirseSeleccionada.SolicitudUnirseId);
             if (success)
             {
-                ToastService.ShowSuccess("Solicitud para unirse eliminada correctamente.");
-                solicitudesUnirse.Remove(solicitudUnirseSeleccionada);
+                NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = "Éxito", Detail = "Solicitud para unirse eliminada correctamente.", Duration = 4000 });
+                await CargarSolicitudesUnirse();
             }
             else
             {
-                ToastService.ShowError("No se pudo eliminar la solicitud para unirse.");
+                NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Error", Detail = "No se pudo eliminar la solicitud para unirse.", Duration = 4000 });
             }
             CerrarModal();
         }
@@ -446,9 +534,9 @@ else
             "En Proceso" => "bg-primary",
             "Completada" => "bg-success",
             "Rechazada" => "bg-danger",
+            "En Revisión" => "bg-info text-dark",
+            "Aprobada" => "bg-success",
             _ => "bg-secondary"
         };
     }
-
-
 }
