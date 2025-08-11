@@ -97,16 +97,16 @@ else
                 <nav>
                     <ul class="pagination mb-0">
                         <li class="page-item @(currentPageUnirse == 1 ? "disabled" : "")">
-                            <a class="page-link" href="#" @onclick="() => CambiarPaginaUnirse(currentPageUnirse - 1)" @onclick:preventDefault>Anterior</a>
+                            <a class="page-link"  @onclick="() => CambiarPaginaUnirse(currentPageUnirse - 1)" @onclick:preventDefault>Anterior</a>
                         </li>
                         @for (int i = 1; i <= totalPagesUnirse; i++)
                         {
                             <li class="page-item @(i == currentPageUnirse ? "active" : "")">
-                                <a class="page-link" href="#" @onclick="() => CambiarPaginaUnirse(i)" @onclick:preventDefault>@i</a>
+                                <a class="page-link"  @onclick="() => CambiarPaginaUnirse(i)" @onclick:preventDefault>@i</a>
                             </li>
                         }
                         <li class="page-item @(currentPageUnirse == totalPagesUnirse ? "disabled" : "")">
-                            <a class="page-link" href="#" @onclick="() => CambiarPaginaUnirse(currentPageUnirse + 1)" @onclick:preventDefault>Siguiente</a>
+                            <a class="page-link"  @onclick="() => CambiarPaginaUnirse(currentPageUnirse + 1)" @onclick:preventDefault>Siguiente</a>
                         </li>
                     </ul>
                 </nav>
@@ -181,16 +181,16 @@ else
                 <nav>
                     <ul class="pagination mb-0">
                         <li class="page-item @(currentPageVender == 1 ? "disabled" : "")">
-                            <a class="page-link" href="#" @onclick="() => CambiarPaginaVender(currentPageVender - 1)" @onclick:preventDefault>Anterior</a>
+                            <a class="page-link" @onclick="() => CambiarPaginaVender(currentPageVender - 1)" @onclick:preventDefault>Anterior</a>
                         </li>
                         @for (int i = 1; i <= totalPagesVender; i++)
                         {
                             <li class="page-item @(i == currentPageVender ? "active" : "")">
-                                <a class="page-link" href="#" @onclick="() => CambiarPaginaVender(i)" @onclick:preventDefault>@i</a>
+                                <a class="page-link"  @onclick="() => CambiarPaginaVender(i)" @onclick:preventDefault>@i</a>
                             </li>
                         }
                         <li class="page-item @(currentPageVender == totalPagesVender ? "disabled" : "")">
-                            <a class="page-link" href="#" @onclick="() => CambiarPaginaVender(currentPageVender + 1)" @onclick:preventDefault>Siguiente</a>
+                            <a class="page-link"  @onclick="() => CambiarPaginaVender(currentPageVender + 1)" @onclick:preventDefault>Siguiente</a>
                         </li>
                     </ul>
                 </nav>
@@ -345,7 +345,7 @@ else
     private SolicitudesVenta? solicitudVentaParaVer;
 
     private int currentPageUnirse = 1;
-    private int pageSize = 5;
+    private int pageSize = 3;
     private int totalPagesUnirse = 1;
     private int totalResultadosUnirse = 0;
     private string InputTextUnirse { get; set; } = string.Empty;
