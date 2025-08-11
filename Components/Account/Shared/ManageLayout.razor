@@ -1,17 +1,20 @@
 ﻿@inherits LayoutComponentBase
 @layout InfalibleRealEstate.Components.Layout.MainLayout
 
-<h1>Manage your account</h1>
-
 <div>
-    <h2>Change your account settings</h2>
-    <hr />
-    <div class="row">
-        <div class="col-lg-3">
-            <ManageNavMenu />
+    <div class="container p-3 mt-3 mb-3">
+        <div class="d-flex flex-column text-start">
+            <h3 class="titleCarrito fw-bold mt-4"> Editar Perfil</h3>
         </div>
-        <div class="col-lg-9">
-            @Body
+        <hr />
+
+        <div class="row">
+            <div class="col-lg-3">
+                <ManageNavMenu />
+            </div>
+            <div class="col-lg-9">
+                @Body
+            </div>
         </div>
     </div>
 </div>
