@@ -7,14 +7,14 @@ using System.Text.Json;
 
 namespace InfalibleRealEstate.Services;
 
-public class SupabaseStorageService
+public class StorageService
 {
     private readonly HttpClient _httpClient;
     private readonly string _supabaseUrl;
     private readonly string _supabaseKey;
     private readonly string _bucket;
 
-    public SupabaseStorageService(HttpClient httpClient, IConfiguration configuration)
+    public StorageService(HttpClient httpClient, IConfiguration configuration)
     {
         _httpClient = httpClient;
         _supabaseUrl = configuration["Supabase:Url"]!;
@@ -22,16 +22,15 @@ public class SupabaseStorageService
         _bucket = configuration["Supabase:StorageBucket"]!;
     }
 
-    public async Task<List<string>> UploadFiles(IEnumerable<IBrowserFile> files)
+    public async Task<List<string>> UploadFiles(IEnumerable<(string FileName, string ContentType, byte[] Content)> files)
     {
         var urls = new List<string>();
 
         foreach (var file in files)
         {
-            var fileName = $"{Guid.NewGuid()}_{file.Name.Replace(" ", "_")}";
+            var fileName = $"{Guid.NewGuid()}_{file.FileName.Replace(" ", "_")}";
 
-            using var stream = file.OpenReadStream(maxAllowedSize: 10485760);
-            using var content = new StreamContent(stream);
+            using var content = new ByteArrayContent(file.Content);
             content.Headers.ContentType = new MediaTypeHeaderValue(file.ContentType);
 
             var request = new HttpRequestMessage(HttpMethod.Post, $"{_supabaseUrl}/storage/v1/object/{_bucket}/{fileName}")
