@@ -85,3 +85,16 @@ Ideal para:
 - Usuarios interesados en buscar, vender o alquilar propiedades de manera sencilla y organizada.
 
 ---
+
+## Interfaz
+
+<img width="1350" height="633" alt="Captura de pantalla 2025-08-11 181833" src="https://github.com/user-attachments/assets/39e0a6a5-6174-4886-922d-1ce81b93f575" />
+<img width="1349" height="634" alt="image" src="https://github.com/user-attachments/assets/f9c430d6-7006-4f04-af53-99251f7b71a0" />
+<img width="1350" height="633" alt="image" src="https://github.com/user-attachments/assets/5d1c2f58-2830-4aed-8455-43d0903f802f" />
+<img width="1345" height="631" alt="image" src="https://github.com/user-attachments/assets/ed96a656-fd7d-4f51-a1de-90e35c29559c" />
+<img width="1350" height="635" alt="image" src="https://github.com/user-attachments/assets/c2213fc3-6279-4d2b-8136-ee30d024b641" />
+<img width="1349" height="630" alt="image" src="https://github.com/user-attachments/assets/12dc21cc-b60b-4cb7-be4f-0ddaa6c9ea34" />
+<img width="1350" height="629" alt="image" src="https://github.com/user-attachments/assets/5c3f2513-bfb4-4769-adf7-7deb6f01e9ec" />
+
+
+
