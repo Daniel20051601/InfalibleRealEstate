@@ -179,7 +179,7 @@
 
 .search-box {
     border-radius: 24px;
-    width: 53vw;
+    width: 54vw;
 }
 
 @media (max-width: 767px) {
@@ -220,7 +220,7 @@
     flex-direction: column; 
     justify-content: center;
     align-items: center; 
-    border-radius: 8px; 
+    border-radius: 6px; 
     transition: background-color 0.2s ease, transform 0.2s ease; 
     padding: 32px;
 }
@@ -232,7 +232,7 @@
 
 
     .icon-item.active {
-        background-color: #e0f7ff; 
+        background-color: #fff; 
         border-color: #00bdf3; 
     }
 
@@ -250,12 +250,6 @@
     accent-color: #00bdf3;
 }
 
-
-/*.btn-primary {
-    background: rgb(0,204,255);
-    border: none;
-}
-*/
 .ultimas-publicaciones-section {
     padding: 24px 18px 12px 18px;
 }
@@ -301,7 +295,6 @@
 
     .ultimas-card:hover {
         box-shadow: 0 4px 16px rgba(0,0,0,0.2);
-        /*transform: scale(1.01);*/
     }
 
 .ultimas-card-img {
@@ -380,7 +373,6 @@
 }
 
 .filter-sidebar {
-    /*background: #f8f9fa;*/
     padding: 1rem;
     width: 25%;
     transition: all 0.3s ease;
@@ -474,9 +466,9 @@
     display: block;
     margin-left: auto;
     margin-right: auto;
-    object-fit: contain; /* Cambiamos a contain para mantener la calidad */
-    transform: translateZ(0); /* Ayuda con el rendering */
-    backface-visibility: hidden; /* Evita problemas de pixelación */
+    object-fit: contain; 
+    transform: translateZ(0); 
+    backface-visibility: hidden; 
 }
 
 
@@ -744,6 +736,11 @@
 
 /*Seccion de Equipo componente Nosotros*/
 
+.titulo-underline-azul {
+    display: inline-block;
+    border-bottom: 4px solid rgb(0,204,255);
+    padding-bottom: 4px;
+}
 .equipo-section {
     background: transparent;
 }
@@ -838,6 +835,31 @@
 .equipo-cards-row {
     -ms-overflow-style: none;
     scrollbar-width: none;
+
+
+}
+
+@keyframes slideUpFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(40px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-slide-up {
+    opacity: 0;
+    transform: translateY(40px);
+    transition: opacity 0.7s cubic-bezier(0.23, 1, 0.32, 1), transform 0.7s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.animate-slide-up.visible {
+    opacity: 1;
+    transform: translateY(0);
 }
 
 /*Componente Vende*/
@@ -912,15 +934,20 @@
 }
 
 /*Componente Foros*/
-/*Componente Foros*/
+.foro-card-img {
+    height: 250px;
+    object-fit: cover;
+}
 .foros-item {
     transition: box-shadow 0.2s, transform 0.2s;
 }
 
     .foros-item:hover {
-        box-shadow: 0 4px 16px rgba(0,0,0,0.2);
-        transform: translateY(-2px);
+        transform: scale(1.02);
+        z-index: 10;
+        box-shadow: 0 8px 16px rgba(0,0,0,0.2);
     }
+
 
 /*perfil*/
 a.aVolver,
@@ -986,4 +1013,80 @@ a.itemPerfil:focus {
     margin-left: auto;
     margin-right: auto;
     object-fit: contain;
+}
+
+/* Componente Contactanos */
+.map-container {
+    position: relative;
+    overflow: hidden;
+    width: 100%;
+    padding-top: 75%; 
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    margin-top: 1.5rem;
+}
+
+    .map-container iframe {
+        position: absolute;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        right: 0;
+        width: 100%;
+        height: 100%;
+        border: 0;
+    }
+
+.cardContactanos {
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+    .cardContactanos:hover {
+        transform: scale(1.01);
+        z-index: 2;
+    }
+
+    /*Footer*/
+.site-footer {
+    background-color: #1E1E1E;
+    padding: 45px 0 20px;
+    font-size: 15px;
+    line-height: 24px;
+    color: #fff;
+}
+
+.footer-logo {
+    max-height: 65px;
+}
+.footer-links a {
+    color: #fff;
+    text-decoration: none;
+    margin: 0 10px;
+}
+
+    .footer-links a:hover {
+        color: #f8f9fa; 
+    }
+
+.social-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    color: #fff; 
+    text-decoration: none;
+}
+
+    .social-icon i {
+        font-size: 20px;
+    }
+
+.copyright-text {
+    color: #fff; 
+    text-decoration: none;
+    font-size: .7rem;
+
+
 }

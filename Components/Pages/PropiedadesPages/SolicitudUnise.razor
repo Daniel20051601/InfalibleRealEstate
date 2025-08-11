@@ -5,29 +5,30 @@
 @inject SolicitudesUnirseService SolicitudesUnirseService
 @inject NavigationManager NavigationManager
 @inject IToastService ToastService
+@inject IJSRuntime JSRuntime
 
 <PageTitle>Unete</PageTitle>
 
 <div class="container my-4 mb-5">
 
-    <div class="row g-4 ">
+    <div class="row align-items-start">
         <div class="col-lg-7 col">
             <div class="">
-                <h1 class="mb-4 fw-bold titulo-vende">Unete al equipo</h1>
+                <h1 class="mb-4 fw-bold titulo-underline-azul">Unete al equipo</h1>
             </div>
-            <div class="imgVende-container">
-                <img class="imgVende" src="https://scrgajdklzafafwrxrng.supabase.co/storage/v1/object/public/propiedades/ComponenteSolicitud/co-trabajando-personas-trabajando-juntas.png" />
+            <div class="imgVende-container animate-slide-up">
+                <img class="imgVende" src="https://scrgajdklzafafwrxrng.supabase.co/storage/v1/object/public/propiedades/Seccion%20Forma%20Parte/IlustracionDeVectores.png" />
             </div>
-            <p class="text-muted vende-descripcion">
+            <p class="text-muted vende-descripcion animate-slide-up">
                 En <span class="text-danger fw-bold">Infalible Real Estate</span> valoramos el talento, la iniciativa y el trabajo en equipo. Únete a nosotros y forma parte de una empresa innovadora, donde cada día es una oportunidad para aprender, aportar ideas y alcanzar tus metas. ¡Impulsa tu carrera, conecta con profesionales destacados y sé protagonista de grandes historias de éxito!<br /><br />
                 Aquí tu crecimiento profesional es nuestra prioridad. Disfruta de un ambiente colaborativo, retos constantes y capacitación continua para que desarrolles todo tu potencial. Si buscas un lugar donde tus ideas sean escuchadas y tu esfuerzo reconocido, este es el equipo ideal para ti. ¡Atrévete a dar el siguiente paso y construye el futuro que mereces junto a nosotros!
             </p>
             
         </div>
 
-        <div class=" col-lg-5 col-md-5 p-4 card shadow-lg">
+        <div class=" col-lg-5 col-md-5 p-4 card shadow-lg animate-slide-up">
             <div class="d-flex justify-content-center">
-                <h4 class="mb-4 titulo-vende">Formulario de Solicitud</h4>
+                <h4 class="mb-4 titulo-vende fw-semibold">Formulario de Solicitud</h4>
 
             </div>
             <EditForm Model="solicitudUnirse" OnValidSubmit="@Guardar">
@@ -143,7 +144,7 @@
 
 @code {
     public ApplicationUser? User { get; set; }
-    public SolicitudUnirse solicitudUnirse { get; set; } = new SolicitudUnirse();
+    public SolicitudesUnirse solicitudUnirse { get; set; } = new SolicitudesUnirse();
     public bool enviando { get; set; } = false;
 
 
@@ -212,6 +213,10 @@
         NavigationManager.NavigateTo(url, true);
     }
 
+    protected override void OnAfterRender(bool firstRender)
+    {
+        JSRuntime.InvokeVoidAsync("initializeIntersectionObserver");
+    }
 
 }
 

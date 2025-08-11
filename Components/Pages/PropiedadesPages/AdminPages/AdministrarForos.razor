@@ -17,13 +17,13 @@
     <div class="row d-flex justify-content-center mb-2">
         <div class="col-md-2">
             <InputSelect class="form-select" @bind-Value="Filtro">
-                <option value="Titulo">Titulo</option>
+                <option value="Titulo">T&iacute;tulo</option>
                 <option value="Descripcion">Descripci&oacute;n</option>
             </InputSelect>
         </div>
         <div class="col-md-5">
             <div class="input-group" role="group">
-                <input class="form-control" type="text" placeholder="Buscar..." @bind-value="inputText"  />
+                <input class="form-control" type="text" placeholder="Buscar..." @bind-value="inputText" @oninput="OnSearchInput" />
                 <button class="btn btn-outline-primary" type="button" @onclick="BuscarForos">Buscar</button>
             </div>
         </div>
@@ -64,11 +64,11 @@
         <div class="row">
             @foreach (var foro in forosPaginados)
             {
-                <div class="col-12 mb-4">
+                <div class="col-12 mb-4 foros-item px-0">
                     <div class="card h-100 shadow-sm">
                         <div class="row g-0">
                             <div class="col-md-4">
-                                <img src="@(foro.ImagenUrl ?? "https://via.placeholder.com/300x200")"
+                                <img src="@foro.ImagenUrl"
                                      class="img-fluid rounded-start h-100"
                                      alt="@foro.Titulo"
                                      style="object-fit: cover; height:100px;">
@@ -85,8 +85,8 @@
                                             </p>
                                         </div>
                                     </div>
-                                    
-                                    
+
+
                                     <p class="card-text text-muted flex-grow-1">
                                         @(foro.Descripcion.Length > 150 ? foro.Descripcion.Substring(0, 150) + "..." : foro.Descripcion)
                                     </p>
@@ -94,10 +94,10 @@
                                         <a href="@foro.LinkForo" target="_blank" class="btn btn-sm btn-info text-white bi bi-box-arrow-up-right"> Ir al Foro</a>
                                         <div class="btn-group">
                                             <a title="Editar" class="btn btn-sm btn-outline-primary " href="/admin/foro/edit/@foro.ForoId">
-                                                <i class="bi bi-pencil"></i> 
+                                                <i class="bi bi-pencil"></i>
                                             </a>
                                             <button title="Eliminar" class="btn btn-sm btn-outline-danger" @onclick="() => AbrirModalEliminar(foro.ForoId)">
-                                                <i class="bi bi-trash"></i> 
+                                                <i class="bi bi-trash"></i>
                                             </button>
                                         </div>
                                     </div>
@@ -107,6 +107,24 @@
                     </div>
                 </div>
             }
+        </div>
+        <div class="d-flex justify-content-center">
+            <nav aria-label="Page navigation">
+                <ul class="pagination">
+                    <li class="page-item @(currentPage == 1 ? "disabled" : "")">
+                        <a class="page-link" href="javascript:void(0)" @onclick="() => CambiarPagina(currentPage - 1)">Anterior</a>
+                    </li>
+                    @for (int i = 1; i <= totalPages; i++)
+                    {
+                        <li class="page-item @(i == currentPage ? "active" : "")">
+                            <a class="page-link" href="javascript:void(0)" @onclick="() => CambiarPagina(i)">@i</a>
+                        </li>
+                    }
+                    <li class="page-item @(currentPage == totalPages ? "disabled" : "")">
+                        <a class="page-link" href="javascript:void(0)" @onclick="() => CambiarPagina(currentPage + 1)">Siguiente</a>
+                    </li>
+                </ul>
+            </nav>
         </div>
     }
 </div>
@@ -143,15 +161,13 @@
     <div class="modal-backdrop fade show"></div>
 }
 
-
 @code {
     private string inputText = string.Empty;
     private string Filtro { get; set; } = "Titulo";
-    private DateTime Desde { get; set; } = DateTime.Now.AddMonths(-1);
-    private DateTime Hasta { get; set; } = DateTime.Now;
+    private DateTime? Desde { get; set; } = DateTime.Now.AddMonths(-1);
+    private DateTime? Hasta { get; set; } = DateTime.Now;
     private int totalResultados = 0;
 
-    private List<Foros>? todosLosForos;
     private List<Foros>? forosPaginados;
     private int currentPage = 1;
     private int pageSize = 9;
@@ -171,40 +187,37 @@
         forosPaginados = null;
         StateHasChanged();
 
-        todosLosForos = await ForoService.Listar();
-        var forosFiltrados = todosLosForos;
-
-        if (!string.IsNullOrWhiteSpace(inputText))
-        {
-            forosFiltrados = Filtro switch
-            {
-                "Titulo" => forosFiltrados.Where(f => f.Titulo.Contains(inputText, StringComparison.OrdinalIgnoreCase)).ToList(),
-                "Descripcion" => forosFiltrados.Where(f => f.Descripcion.Contains(inputText, StringComparison.OrdinalIgnoreCase)).ToList(),
-                _ => forosFiltrados
-            };
-        }
-
-        if (Desde != default && Hasta != default && Desde <= Hasta)
-        {
-            forosFiltrados = forosFiltrados.Where(f => f.FechaCreacion.Date >= Desde.Date && f.FechaCreacion.Date <= Hasta.Date).ToList();
-        }
-
-        totalResultados = forosFiltrados.Count;
+        var resultado = await ForoService.ListarPaginado(currentPage, pageSize, Filtro, inputText, Desde, Hasta);
+        forosPaginados = resultado.foros;
+        totalResultados = resultado.TotalCount;
         totalPages = (int)Math.Ceiling(totalResultados / (double)pageSize);
-        forosPaginados = forosFiltrados.Skip((currentPage - 1) * pageSize).Take(pageSize).ToList();
-
-        if (!forosPaginados.Any() && totalResultados > 0)
-        {
-            currentPage = 1;
-            forosPaginados = forosFiltrados.Skip((currentPage - 1) * pageSize).Take(pageSize).ToList();
-        }
+        if (totalPages == 0) totalPages = 1;
 
         StateHasChanged();
     }
 
-    private async void BuscarForos()
+    private async Task OnSearchInput(ChangeEventArgs e)
+    {
+        inputText = e.Value?.ToString() ?? string.Empty;
+        if (string.IsNullOrEmpty(inputText))
+        {
+            await BuscarForos();
+        }
+    }
+
+    private async Task BuscarForos()
     {
         currentPage = 1;
+        await CargarForos();
+    }
+
+    private async Task CambiarPagina(int nuevaPagina)
+    {
+        if (nuevaPagina < 1 || nuevaPagina > totalPages)
+        {
+            return;
+        }
+        currentPage = nuevaPagina;
         await CargarForos();
     }
 
@@ -230,6 +243,10 @@
         if (eliminado)
         {
             ToastService.ShowSuccess("Foro eliminado correctamente.");
+            if (forosPaginados?.Count == 1 && currentPage > 1)
+            {
+                currentPage--;
+            }
             await CargarForos();
         }
         else

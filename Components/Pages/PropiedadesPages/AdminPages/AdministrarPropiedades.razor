@@ -16,7 +16,7 @@
     <div class="row d-flex justify-content-center mb-2">
         <div class="col-md-2">
             <InputSelect class="form-select" @bind-Value="Filtro">
-                <option value="Titulo">Titulo</option>
+                <option value="Titulo">T&iacute;tulo</option>
                 <option value="Ciudad">Ciudad</option>
                 <option value="Transaccion">Tipo de Transaccion</option>
             </InputSelect>
@@ -223,14 +223,13 @@
 }
 
 @code {
-    public string Filtro { get; set; } = "Nombre";
+    public string Filtro { get; set; } = "Titulo";
     public string inputText { get; set; } = string.Empty;
-    public DateTime Desde { get; set; }
-    public DateTime Hasta { get; set; }
+    public DateTime? Desde { get; set; } = DateTime.Now.AddMonths(-1);
+    public DateTime? Hasta { get; set; } = DateTime.Now;
     public bool isEliminando { get; set; } = false;
 
-    private List<Propiedad>? propiedades = new();
-    private List<Propiedad>? propiedadesPaginadas = new();
+    private List<Propiedades>? propiedadesPaginadas;
     private int currentPage = 1;
     private int pageSize = 12;
     private int totalPages = 1;
@@ -244,67 +243,44 @@
         await CargarPropiedades();
     }
 
-    public async void BuscarPropiedades()
+    private async Task OnSearchInput(ChangeEventArgs e)
+    {
+        inputText = e.Value?.ToString() ?? string.Empty;
+        currentPage = 1;
+        await CargarPropiedades();
+    }
+
+    public async Task BuscarPropiedades()
     {
         currentPage = 1;
         await CargarPropiedades();
-        StateHasChanged();
     }
 
     private async Task CargarPropiedades()
     {
         propiedadesPaginadas = null;
-        StateHasChanged();
 
-        var todasPropiedades = await PropiedadesService.Listar(p => true);
+        var (resultados, total) = await PropiedadesService.ListarPaginado(
+            currentPage,
+            pageSize,
+            Filtro,
+            inputText,
+            Desde,
+            Hasta);
 
-        if (!string.IsNullOrWhiteSpace(inputText))
-        {
-            switch (Filtro)
-            {
-                case "Titulo":
-                    todasPropiedades = todasPropiedades
-                        .Where(p => p.Titulo.Contains(inputText, StringComparison.OrdinalIgnoreCase))
-                        .ToList();
-                    break;
-                case "Ciudad":
-                    todasPropiedades = todasPropiedades
-                        .Where(p => p.Ciudad != null && p.Ciudad.Contains(inputText, StringComparison.OrdinalIgnoreCase))
-                        .ToList();
-                    break;
-                case "Transaccion":
-                    todasPropiedades = todasPropiedades
-                        .Where(p => p.TipoTransaccion != null && p.TipoTransaccion.Contains(inputText, StringComparison.OrdinalIgnoreCase))
-                        .ToList();
-                    break;
-            }
-        }
-
-        if (Desde != default && Hasta != default && Desde <= Hasta)
-        {
-            todasPropiedades = todasPropiedades
-                .Where(p => p.FechaPublicacion.Date >= Desde.Date && p.FechaPublicacion.Date <= Hasta.Date)
-                .ToList();
-        }
-
-        propiedades = todasPropiedades.ToList();
-        totalResultados = propiedades.Count;
+        propiedadesPaginadas = resultados;
+        totalResultados = total;
         totalPages = (int)Math.Ceiling((double)totalResultados / pageSize);
 
-        if (currentPage < 1) currentPage = 1;
-        if (currentPage > totalPages) currentPage = totalPages == 0 ? 1 : totalPages;
-
-        var resultadosPaginados = propiedades
-            .Skip((currentPage - 1) * pageSize)
-            .Take(pageSize)
-            .ToList();
-
-        if (!resultadosPaginados.Any())
+        if (currentPage > totalPages && totalPages > 0)
         {
-            await Task.Delay(1000);
+            currentPage = totalPages;
         }
-
-        propiedadesPaginadas = resultadosPaginados;
+        else if (currentPage < 1)
+        {
+            currentPage = 1;
+        }
+        
         StateHasChanged();
     }
 

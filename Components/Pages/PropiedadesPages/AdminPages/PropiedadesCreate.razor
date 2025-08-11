@@ -2,7 +2,7 @@
 @attribute [Authorize(Roles = "Admin")]
 @layout AdminLayout
 @inject CategoriaServices CategoriaServices
-@inject SupabaseStorageService SupabaseStorage
+@inject StorageService StorageService
 @inject NavigationManager NavigationManager
 @inject PropiedadService PropiedadesServices
 @inject IToastService ToastService
@@ -211,11 +211,11 @@
 }
 
 @code {
-    private Propiedad propiedad = Propiedad.CrearNueva(1);
+    private Propiedades propiedad = Propiedades.CrearNueva(1);
     private List<string> imagenesUrls = new();
-    private List<IBrowserFile> archivosSeleccionados = new();
+    private List<(string FileName, string ContentType, byte[] Content)> archivosSeleccionados = new();
     private bool cargandoImagenes = false;
-    private List<Categoria> categorias = new List<Categoria>();
+    private List<Categorias> categorias = new List<Categorias>();
     private List<string> imagenesPreview = new();
     private string? administradorId;
 
@@ -235,7 +235,7 @@
 
         categorias = await CategoriaServices.Listar(c => true);
         var categoriaId = categorias.Any() ? categorias.First().CategoriaId : 1;
-        propiedad = Propiedad.CrearNueva(categoriaId);
+        propiedad = Propiedades.CrearNueva(categoriaId);
     }
 
     private async Task CargarArchivosSeleccionados(InputFileChangeEventArgs e)
@@ -249,13 +249,14 @@
                 break;
             }
 
-            if (!archivosSeleccionados.Any(f => f.Name == file.Name && f.Size == file.Size))
+            if (!archivosSeleccionados.Any(f => f.FileName == file.Name))
             {
-                archivosSeleccionados.Add(file);
                 using var stream = file.OpenReadStream(1024 * 1024 * 15);
                 using var memoryStream = new MemoryStream();
                 await stream.CopyToAsync(memoryStream);
                 var buffer = memoryStream.ToArray();
+
+                archivosSeleccionados.Add((file.Name, file.ContentType, buffer));
 
                 var base64 = Convert.ToBase64String(buffer);
                 var imageDataUrl = $"data:{file.ContentType};base64,{base64}";
@@ -296,7 +297,7 @@
 
             if (guardado && archivosSeleccionados.Any())
             {
-                var urls = await SupabaseStorage.UploadFiles(archivosSeleccionados);
+                var urls = await StorageService.UploadFiles(archivosSeleccionados);
                 foreach (var url in urls)
                 {
                     var imagen = new ImagenPropiedad
@@ -314,7 +315,7 @@
                 ToastService.ShowSuccess("Propiedad creada exitosamente.");
                 NavigationManager.NavigateTo("/admin/administrar-propiedades");
                 var categoriaId = categorias.Any() ? categorias.First().CategoriaId : 1;
-                propiedad = Propiedad.CrearNueva(categoriaId);
+                propiedad = Propiedades.CrearNueva(categoriaId);
                 archivosSeleccionados.Clear();
                 imagenesUrls.Clear();
                 imagenesPreview.Clear();
@@ -338,7 +339,7 @@
     }
     public void Limpiar()
     {
-        propiedad = Propiedad.CrearNueva(1);
+        propiedad = Propiedades.CrearNueva(1);
         archivosSeleccionados.Clear();
         imagenesUrls.Clear();
         imagenesPreview.Clear();

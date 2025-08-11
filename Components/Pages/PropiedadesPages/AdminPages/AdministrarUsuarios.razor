@@ -3,11 +3,13 @@
 @layout AdminLayout
 @inject UsuariosService UserService
 @inject UserManager<ApplicationUser> UserManager
+@inject NotificationService NotificationService
+@rendermode InteractiveServer
 
 
 <PageTitle>Administrar Usuarios</PageTitle>
 
-@if(isLoading)
+@if (isLoading)
 {
     <div class="d-flex flex-column align-items-center">
         <span class="mb-3 fs-6">Cargando Usuarios...</span>
@@ -33,42 +35,46 @@ else
         <div class="card-body">
 
             <div class="row d-flex justify-content-center mb-2 mt-2">
-                <div class="col-md-2">
+                <div class="col-md-3">
                     <InputSelect class="form-select" @bind-Value="Filtro">
                         <option value="Nombre">Nombre</option>
                         <option value="Email">Email</option>
                         <option value="Rol">Rol</option>
                     </InputSelect>
                 </div>
-                <div class="col-md-5">
-                    <div class="input-group" role="group">
-                        <input class="form-control" type="text" placeholder="Buscar..." @bind-value="inputText" />
+                <div class="col-md-6">
+                    <div class="input-group">
+                        <input class="form-control" type="text" placeholder="Buscar..." @bind="inputText" />
                         <button class="btn btn-outline-primary" type="button" @onclick="BuscarUsuarios">Buscar</button>
                     </div>
                 </div>
-
-                <div class="col-md-2">
-                    <InputDate class="form-control" @bind-Value="Desde" placeholder="Desde" />
-                </div>
-                <div class="col-md-2">
-                    <InputDate class="form-control" @bind-Value="Hasta" placeholder="Hasta" />
-                </div>
             </div>
-            <div class="row mt-3">
-                <div class="col-md-12">
-                    <table class="table table-striped table-hover">
-                        <thead>
+            <div class="table-responsive mt-3">
+                <table class="table table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Apellido</th>
+                            <th>Email</th>
+                            <th>Tel&eacute;fono</th>
+                            <th>Rol</th>
+                            <th>Estado</th>
+                            <th>Editar</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (isFiltrando)
+                        {
                             <tr>
-                                <th>Nombre</th>
-                                <th>Apellido</th>
-                                <th>Email</th>
-                                <th>Tel&eacute;fono</th>
-                                <th>Rol</th>
-                                <th>Estado</th>
-                                <th>Editar</th>
+                                <td colspan="7" class="text-center">
+                                    <div class="spinner-border text-primary" role="status">
+                                        <span class="visually-hidden">Filtrando...</span>
+                                    </div>
+                                </td>
                             </tr>
-                        </thead>
-                        <tbody>
+                        }
+                        else
+                        {
                             @foreach (var user in Users)
                             {
                                 <tr>
@@ -83,15 +89,33 @@ else
                                     </td>
                                 </tr>
                             }
-                        </tbody>
-                    </table>
-                </div>
+                        }
+                        
+                    </tbody>
+                </table>
+            </div>
+            <div class="d-flex justify-content-between align-items-center mt-3">
+                <span>Mostrando @Users.Count de @totalResultados</span>
+                <nav>
+                    <ul class="pagination mb-0">
+                        <li class="page-item @(currentPage == 1 ? "disabled" : "")">
+                            <a class="page-link" href="#" @onclick="() => CambiarPagina(currentPage - 1)" @onclick:preventDefault>Anterior</a>
+                        </li>
+                        @for (int i = 1; i <= totalPages; i++)
+                        {
+                            <li class="page-item @(i == currentPage ? "active" : "")">
+                                <a class="page-link" href="#" @onclick="() => CambiarPagina(i)" @onclick:preventDefault>@i</a>
+                            </li>
+                        }
+                        <li class="page-item @(currentPage == totalPages ? "disabled" : "")">
+                            <a class="page-link" href="#" @onclick="() => CambiarPagina(currentPage + 1)" @onclick:preventDefault>Siguiente</a>
+                        </li>
+                    </ul>
+                </nav>
             </div>
         </div>
     </div>
 }
-
-
 
 @code {
     public List<ApplicationUser> Users { get; set; } = new List<ApplicationUser>();
@@ -99,14 +123,30 @@ else
 
     public string Filtro { get; set; } = "Nombre";
     public string inputText { get; set; } = string.Empty;
-    public DateTime Desde { get; set; } 
-    public DateTime Hasta { get; set; }
     public bool isLoading { get; set; } = false;
+    public bool isFiltrando { get; set; } = false;
+
+    private int currentPage = 1;
+    private int pageSize = 10;
+    private int totalPages = 1;
+    private int totalResultados = 0;
 
     protected override async Task OnInitializedAsync()
     {
         isLoading = true;
-        Users = await UserService.Listar(u => true);
+        await CargarUsuarios();
+        isLoading = false;
+    }
+
+    private async Task CargarUsuarios()
+    {
+
+        isFiltrando = true;
+        var result = await UserService.ListarPaginado(currentPage, pageSize, Filtro, inputText);
+        Users = result.Users;
+        totalResultados = result.TotalCount;
+        totalPages = (int)Math.Ceiling(totalResultados / (double)pageSize);
+        if (totalPages == 0) totalPages = 1;
 
         RolesPorUsuario.Clear();
         foreach (var user in Users)
@@ -114,16 +154,22 @@ else
             var roles = await UserManager.GetRolesAsync(user);
             RolesPorUsuario[user.Id] = roles.FirstOrDefault() ?? "Sin rol";
         }
+        isFiltrando = false;
 
-        if (!Users.Any())
-        {
-            await Task.Delay(1000); 
-        }
-        isLoading = false;
+
     }
 
-    private void BuscarUsuarios()
+    private async Task BuscarUsuarios()
     {
-        
+        currentPage = 1;
+        await CargarUsuarios();
+        StateHasChanged();
+    }
+
+    private async Task CambiarPagina(int page)
+    {
+        if (page < 1 || page > totalPages) return;
+        currentPage = page;
+        await CargarUsuarios();
     }
 }

@@ -2,7 +2,7 @@
 @attribute [Authorize(Roles = "Admin")]
 @layout AdminLayout
 @inject ForoService ForoService
-@inject SupabaseStorageService SupabaseStorage
+@inject StorageService StorageService
 @inject NavigationManager NavigationManager
 @inject IToastService ToastService
 @rendermode InteractiveServer
@@ -99,7 +99,7 @@ else
     public int Id { get; set; }
 
     private Foros? foro;
-    private IBrowserFile? archivoSeleccionado;
+    private (string FileName, string ContentType, byte[] Content)? archivoSeleccionado;
     private string? imagenPreview;
     private string? imagenUrlOriginal;
     private bool isGuardando = false;
@@ -121,15 +121,18 @@ else
 
     private async Task CargarArchivoSeleccionado(InputFileChangeEventArgs e)
     {
-        archivoSeleccionado = e.File;
-        if (archivoSeleccionado != null)
+        var file = e.File;
+        if (file != null)
         {
-            using var stream = archivoSeleccionado.OpenReadStream(1024 * 1024 * 10);
+            using var stream = file.OpenReadStream(1024 * 1024 * 10);
             using var memoryStream = new MemoryStream();
             await stream.CopyToAsync(memoryStream);
             var buffer = memoryStream.ToArray();
+
+            archivoSeleccionado = (file.Name, file.ContentType, buffer);
+
             var base64 = Convert.ToBase64String(buffer);
-            imagenPreview = $"data:{archivoSeleccionado.ContentType};base64,{base64}";
+            imagenPreview = $"data:{file.ContentType};base64,{base64}";
             StateHasChanged();
         }
     }
@@ -154,15 +157,15 @@ else
             {
                 if (!string.IsNullOrEmpty(imagenUrlOriginal))
                 {
-                    await SupabaseStorage.DeleteFile(imagenUrlOriginal);
+                    await StorageService.DeleteFile(imagenUrlOriginal);
                 }
 
-                var urls = await SupabaseStorage.UploadFiles(new[] { archivoSeleccionado });
+                var urls = await StorageService.UploadFiles(new[] { archivoSeleccionado.Value });
                 foro.ImagenUrl = urls.FirstOrDefault();
             }
             else if (string.IsNullOrEmpty(imagenPreview) && !string.IsNullOrEmpty(imagenUrlOriginal))
             {
-                await SupabaseStorage.DeleteFile(imagenUrlOriginal);
+                await StorageService.DeleteFile(imagenUrlOriginal);
                 foro.ImagenUrl = null;
             }
 

@@ -5,7 +5,7 @@ using InfalibleRealEstate.Data;
 
 namespace InfalibleRealEstate.Services;
 
-public class PropiedadService(IDbContextFactory<ApplicationDbContext> DbContext, SupabaseStorageService supabaseStorage)
+public class PropiedadService(IDbContextFactory<ApplicationDbContext> DbContext, StorageService supabaseStorage)
 {
     public async Task<bool> Existe(int PropiedadId)
     {
@@ -13,7 +13,7 @@ public class PropiedadService(IDbContextFactory<ApplicationDbContext> DbContext,
         return await contexto.Propiedades.AnyAsync(p => p.PropiedadId == PropiedadId);
     }
 
-    public async Task<bool> Insertar(Propiedad propiedad)
+    public async Task<bool> Insertar(Propiedades propiedad)
     {
         await using var contexto = await DbContext.CreateDbContextAsync();
 
@@ -28,7 +28,7 @@ public class PropiedadService(IDbContextFactory<ApplicationDbContext> DbContext,
         return await contexto.SaveChangesAsync() > 0;
     }
 
-    public async Task<bool> Modificar(Propiedad propiedad)
+    public async Task<bool> Modificar(Propiedades propiedad)
     {
         await using var contexto = await DbContext.CreateDbContextAsync();
 
@@ -60,7 +60,7 @@ public class PropiedadService(IDbContextFactory<ApplicationDbContext> DbContext,
         return await contexto.SaveChangesAsync() > 0;
     }
 
-    public async Task<bool> Guardar(Propiedad propiedad)
+    public async Task<bool> Guardar(Propiedades propiedad)
     {
         if (await Existe(propiedad.PropiedadId))
         {
@@ -72,7 +72,7 @@ public class PropiedadService(IDbContextFactory<ApplicationDbContext> DbContext,
         }
     }
 
-    public async Task<Propiedad?> Buscar(int PropiedadId)
+    public async Task<Propiedades?> Buscar(int PropiedadId)
     {
         await using var contexto = await DbContext.CreateDbContextAsync();
         return await contexto.Propiedades
@@ -112,7 +112,7 @@ public class PropiedadService(IDbContextFactory<ApplicationDbContext> DbContext,
         return await contexto.SaveChangesAsync() > 0;
     }
 
-    public async Task<List<Propiedad>> Listar(Expression<Func<Propiedad, bool>> criterio)
+    public async Task<List<Propiedades>> Listar(Expression<Func<Propiedades, bool>> criterio)
     {
         await using var contexto = await DbContext.CreateDbContextAsync();
         return await contexto.Propiedades
@@ -126,7 +126,67 @@ public class PropiedadService(IDbContextFactory<ApplicationDbContext> DbContext,
             .ToListAsync();
     }
 
-    public async Task<List<Propiedad>> GetUltimasPropiedadesAsync(int cantidad)
+    public async Task<(List<Propiedades> Propiedades, int TotalCount)> ListarPaginado(
+       int pagina,
+       int tamanoPagina,
+       string? filtro = null,
+       string? valorFiltro = null,
+       DateTime? desde = null,
+       DateTime? hasta = null)
+    {
+        await using var contexto = await DbContext.CreateDbContextAsync();
+        var query = contexto.Propiedades
+                            .Include(p => p.Detalle)
+                            .Include(p => p.Imagenes)
+                            .AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(valorFiltro))
+        {
+            var valorFiltroLower = valorFiltro.ToLower();
+            switch (filtro)
+            {
+                case "Titulo":
+                    query = query.Where(p => p.Titulo.ToLower().Contains(valorFiltroLower));
+                    break;
+                case "Ciudad":
+                    query = query.Where(p => p.Ciudad != null && p.Ciudad.ToLower().Contains(valorFiltroLower));
+                    break;
+                case "Transaccion":
+                    query = query.Where(p => p.TipoTransaccion != null && p.TipoTransaccion.ToLower().Contains(valorFiltroLower));
+                    break;
+            }
+        }
+
+        if (desde.HasValue && hasta.HasValue && desde.Value <= hasta.Value)
+        {
+            var desdeUtc = desde.Value.ToUniversalTime().Date;
+            var hastaUtc = hasta.Value.ToUniversalTime().Date.AddDays(1).AddTicks(-1);
+            query = query.Where(p => p.FechaPublicacion >= desdeUtc && p.FechaPublicacion <= hastaUtc);
+        }
+        else if (desde.HasValue)
+        {
+            var desdeUtc = desde.Value.ToUniversalTime().Date;
+            query = query.Where(p => p.FechaPublicacion >= desdeUtc);
+        }
+        else if (hasta.HasValue)
+        {
+            var hastaUtc = hasta.Value.ToUniversalTime().Date.AddDays(1).AddTicks(-1);
+            query = query.Where(p => p.FechaPublicacion <= hastaUtc);
+        }
+
+        var totalCount = await query.CountAsync();
+
+        var propiedades = await query
+            .OrderByDescending(p => p.FechaPublicacion)
+            .Skip((pagina - 1) * tamanoPagina)
+            .Take(tamanoPagina)
+            .ToListAsync();
+
+        return (propiedades, totalCount);
+    }
+
+
+    public async Task<List<Propiedades>> GetUltimasPropiedadesAsync(int cantidad)
     {
         await using var contexto = await DbContext.CreateDbContextAsync();
         return await contexto.Propiedades
@@ -181,7 +241,7 @@ public class PropiedadService(IDbContextFactory<ApplicationDbContext> DbContext,
         return await contexto.ImagenesPropiedad.CountAsync(i => i.PropiedadId == propiedadId);
     }
 
-    public async Task<List<EstadoPropiedad>> ListarEstados()
+    public async Task<List<EstadoPropiedades>> ListarEstados()
     {
         await using var contexto = await DbContext.CreateDbContextAsync();
         return await contexto.EstadosPropiedad.ToListAsync();

@@ -1,6 +1,7 @@
 ﻿using InfalibleRealEstate.Data;
 using InfalibleRealEstate.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Internal;
 
 namespace InfalibleRealEstate.Services;
 
@@ -13,14 +14,14 @@ public class SolicitudesVentaService(IDbContextFactory<ApplicationDbContext> DbC
     }
 
 
-    public async Task<bool> Insertar(SolicitudVenta solicitud)
+    public async Task<bool> Insertar(SolicitudesVenta solicitud)
     {
         await using var contexto = await DbContext.CreateDbContextAsync();
         contexto.SolicitudesVenta.Add(solicitud);
         return await contexto.SaveChangesAsync() > 0;
     }
 
-    public async Task<bool> ModificarEstado(SolicitudVenta solicitud, string Estado)
+    public async Task<bool> ModificarEstado(SolicitudesVenta solicitud, string Estado)
     {
         await using var contexto = await DbContext.CreateDbContextAsync();
         var solicitudExistente = await contexto.SolicitudesVenta
@@ -33,7 +34,7 @@ public class SolicitudesVentaService(IDbContextFactory<ApplicationDbContext> DbC
         return await contexto.SaveChangesAsync() > 0;
     }
 
-    public async Task<bool> Guardar(SolicitudVenta solicitud)
+    public async Task<bool> Guardar(SolicitudesVenta solicitud)
     {
         if (await Existe(solicitud.SolicitudVentaId))
             {
@@ -45,7 +46,7 @@ public class SolicitudesVentaService(IDbContextFactory<ApplicationDbContext> DbC
         }
     }
 
-    public async Task<SolicitudVenta?> Buscar(int solicitudId)
+    public async Task<SolicitudesVenta?> Buscar(int solicitudId)
     {
         await using var contexto = await DbContext.CreateDbContextAsync();
         return await contexto.SolicitudesVenta
@@ -55,7 +56,7 @@ public class SolicitudesVentaService(IDbContextFactory<ApplicationDbContext> DbC
             .FirstOrDefaultAsync(s => s.SolicitudVentaId == solicitudId);
     }
 
-    public async Task<List<SolicitudVenta>> ListarSolicitudesVenta()
+    public async Task<List<SolicitudesVenta>> ListarSolicitudesVenta()
     {
         await using var contexto = await DbContext.CreateDbContextAsync();
         return await contexto.SolicitudesVenta
@@ -63,6 +64,47 @@ public class SolicitudesVentaService(IDbContextFactory<ApplicationDbContext> DbC
             .Include(s => s.Usuario)
             .AsNoTracking()
             .ToListAsync();
+    }
+
+    public async Task<(List<SolicitudesVenta> Solicitudes, int TotalCount)> ListarPaginado(int pagina, int tamanoPagina, string filtro, string valorFiltro, DateTime? desde, DateTime? hasta)
+    {
+        await using var contexto = await DbContext.CreateDbContextAsync();
+
+        var query = contexto.SolicitudesVenta.Include(s => s.Categoria).AsQueryable();
+
+        if (!string.IsNullOrEmpty(valorFiltro))
+        {
+            switch (filtro?.ToLower())
+            {
+                case "nombre":
+                    query = query.Where(f => (f.Nombre + " " + f.Apellido).ToLower().Contains(valorFiltro));
+                    break;
+                case "email":
+                    query = query.Where(f => f.CorreoElectronico.ToLower().Contains(valorFiltro));
+                    break;
+            }
+        }
+
+        if (desde.HasValue)
+        {
+            query = query.Where(p => p.FechaSolicitud.Date >= desde.Value.Date);
+        }
+
+        if (hasta.HasValue)
+        {
+            query = query.Where(p => p.FechaSolicitud.Date <= hasta.Value.Date);
+        }
+
+        var totalCount = await query.CountAsync();
+
+        var solicitudes = await query
+            .OrderByDescending(f => f.FechaSolicitud)
+            .Skip((pagina - 1) * tamanoPagina)
+            .Take(tamanoPagina)
+            .AsNoTracking()
+            .ToListAsync();
+
+        return (solicitudes, totalCount);
     }
     public async Task<bool> Eliminar(int solicitudId)
     {

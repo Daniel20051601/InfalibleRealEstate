@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace InfalibleRealEstate.Models;
 
-public class Propiedad
+public class Propiedades
 {
     [Key]
     public int PropiedadId { get; set; }
@@ -36,7 +36,7 @@ public class Propiedad
     [Required(ErrorMessage = "Debe seleccionar una categoría.")]
     [Range(1, int.MaxValue, ErrorMessage = "Debe seleccionar una categoría válida.")]
     public int CategoriaId { get; set; } = 0;
-    public Categoria? Categoria { get; set; }
+    public Categorias? Categoria { get; set; }
 
     public string? AdministradorId { get; set; }
 
@@ -51,16 +51,16 @@ public class Propiedad
     [Required(ErrorMessage = "Debe seleccionar un estado para la propiedad.")]
     [Range(1, int.MaxValue, ErrorMessage = "Debe seleccionar un estado válido.")]
     public int EstadoPropiedadId { get; set; } = 0;
-    public EstadoPropiedad? EstadoPropiedad { get; set; }
+    public EstadoPropiedades? EstadoPropiedad { get; set; }
 
     public PropiedadDetalle? Detalle { get; set; }
     public ICollection<ImagenPropiedad>? Imagenes { get; set; }
 
     public virtual ICollection<CitasPropiedades> CitaPropiedades { get; set; } = new List<CitasPropiedades>();
 
-    public static Propiedad CrearNueva(int categoriaId = 1)
+    public static Propiedades CrearNueva(int categoriaId = 1)
     {
-        return new Propiedad
+        return new Propiedades
         {
             Titulo = "",
             Detalle = new PropiedadDetalle

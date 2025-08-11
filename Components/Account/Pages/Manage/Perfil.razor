@@ -1,17 +1,17 @@
 ﻿@page "/perfil"
+@layout MainLayout
 @attribute [Authorize]
 @inject AuthenticationStateProvider authenticationStateProvider
+@inject UserManager<ApplicationUser> UserManager
 @rendermode InteractiveServer
 @inject UsuariosService usuariosService
+@inject NavigationManager NavigationManager
 
 @if (user is not null)
 {
     <div class="container mt-3">
         <div class="p-3 mb-3">
             <div class="d-flex flex-column text-start">
-                <a href="/" class="aVolver">
-                    <i class="bi bi-arrow-left text-secondary   mx-2 mb-4">volver</i>
-                </a>
                 <h3 class="titleCarrito fw-bold mt-4"> Perfil</h3>
             </div>
             <hr />
@@ -19,7 +19,7 @@
             <div class="row card shadow-sm mt-2 mb-3">
                 <div class="card-header bg-white d-flex justify-content-between align-items-center">
                     <h5 class="mb-0">Información del Usuario</h5>
-                    <a class="btn btn-outline-secondary btn-sm" href="/perfil/editar">
+                    <a class="btn btn-outline-secondary btn-sm" href="/Account/Manage">
                         <i class="bi bi-pencil-square"></i>
                     </a>
                 </div>
@@ -28,8 +28,13 @@
                     <p><strong>Apellido:</strong> @user.Apellido</p>
                     <p><strong>Correo Electrónico:</strong> @user.Email</p>
 
-                    <p><strong>Teléfono:</strong> @(user.PhoneNumber = " " ?? "No especificado")</p>
-                    <p><strong>Estado de la cuenta:</strong> <span class="badge bg-success">@user.EstadoUsuario?.Nombre</span></p>
+                    <p><strong>Teléfono:</strong> @(string.IsNullOrWhiteSpace(telefono) ? "No especificado" : telefono)</p>
+                    <p>
+                        <strong>Estado de la cuenta:</strong>
+                        <span class="badge bg-success">
+                            @(user.EstadoUsuario?.Nombre ?? "No especificado")
+                        </span>
+                    </p>
                 </div>
             </div>
 
@@ -42,7 +47,7 @@
                     <div class="itemPerfil_ mb-2">
                         <label for="notificacionesCheckbox" class="form-check-label"><strong>Recibir notificaciones de nuevas Propiedades</strong></label>
                         <InputCheckbox @bind-Value="suscripcionesPropiedades" class="form-check-input" id="notificacionesCheckbox" />
-                        
+
                     </div>
                     <div class="itemPerfil_ mb-2">
                         <label for="foroCheckbox" class="form-check-label"><strong>Recibir notificaciones de los nuevos Foros</strong></label>
@@ -50,18 +55,28 @@
 
                     </div>
 
+                    <a href="/Account/Manage/TwoFactorAuthentication" class="itemPerfil">
+                        <p><strong>Autenticaci&oacute;n de dos factores</strong> <i class="bi bi-box-arrow-up-right"></i></p>
+                    </a>
+
                     <a href="/Account/Manage/ChangePassword" class="itemPerfil">
                         <p><strong>Olvid&eacute; mi contraseña</strong> <i class="bi bi-box-arrow-up-right"></i></p>
                     </a>
 
+
+
                 </div>
             </div>
 
-            <div class="row card  shadow-sm mt-2 mb-3">
-                <div class="card-body text-secondary ">
-                    <button class="btn btn-outline-secondary fw-semibold btn-sm">
-                        <span class="bi bi-arrow-bar-left" aria-hidden="true"></span> Cerrar Sesión
-                    </button>
+            <div class="row card shadow-sm mt-2 mb-3">
+                <div class="card-body">
+                    <form action="Account/Logout" method="post">
+                        <AntiforgeryToken />
+                        <input type="hidden" name="ReturnUrl" value="@currentUrl" />
+                        <button type="submit" class="btn btn-outline-secondary fw-semibold btn-sm">
+                            <span class="bi bi-arrow-bar-left" aria-hidden="true"></span> Cerrar Sesión
+                        </button>
+                    </form>
                 </div>
             </div>
 
@@ -111,6 +126,10 @@ else
     public ApplicationUser? user;
     public bool suscripcionesPropiedades = false;
     public bool suscripcionesForo = false;
+    public string? telefono { get; set; }
+
+    private string? currentUrl;
+
 
     protected override async Task OnInitializedAsync()
     {
@@ -125,5 +144,19 @@ else
                 user = await usuariosService.Buscar(userId);
             }
         }
+        if (user is not null)
+        {
+            telefono = await UserManager.GetPhoneNumberAsync(user);
+        }
+
+        currentUrl = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
+        NavigationManager.LocationChanged += OnLocationChanged;
+
+    }
+
+    private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
+    {
+        currentUrl = NavigationManager.ToBaseRelativePath(e.Location);
+        StateHasChanged();
     }
 }

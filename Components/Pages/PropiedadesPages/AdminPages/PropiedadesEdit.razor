@@ -2,7 +2,7 @@
 @attribute [Authorize(Roles = "Admin")]
 @layout AdminLayout
 @inject CategoriaServices CategoriaServices
-@inject SupabaseStorageService SupabaseStorage
+@inject StorageService StorageService
 @inject NavigationManager NavigationManager
 @inject PropiedadService PropiedadesServices
 @inject AuthenticationStateProvider AuthenticationStateProvider
@@ -250,11 +250,11 @@ else
     [Parameter]
     public int Id { get; set; }
 
-    public Propiedad? propiedad { get; set; }
+    public Propiedades? propiedad { get; set; }
 
-    private Dictionary<string, (IBrowserFile File, string PreviewUrl)> archivosSeleccionados = new();
-    private List<Categoria> categorias = new List<Categoria>();
-    private List<EstadoPropiedad> EstadoPropiedades = new List<EstadoPropiedad>();
+    private Dictionary<string, (string FileName, string ContentType, byte[] Content, string PreviewUrl)> archivosSeleccionados = new();
+    private List<Categorias> categorias = new List<Categorias>();
+    private List<EstadoPropiedades> EstadoPropiedades = new List<EstadoPropiedades>();
     private List<ImagenPropiedad> imagenesExistentes = new();
     private List<ImagenPropiedad> imagenesParaEliminar = new();
 
@@ -295,7 +295,7 @@ else
                 break;
             }
 
-            var fileKey = Guid.NewGuid().ToString(); // Clave única para cada archivo
+            var fileKey = Guid.NewGuid().ToString(); 
             using var stream = file.OpenReadStream(1024 * 1024 * 15);
             using var memoryStream = new MemoryStream();
             await stream.CopyToAsync(memoryStream);
@@ -304,7 +304,7 @@ else
             var base64 = Convert.ToBase64String(buffer);
             var imageDataUrl = $"data:{file.ContentType};base64,{base64}";
 
-            archivosSeleccionados.Add(fileKey, (file, imageDataUrl));
+            archivosSeleccionados.Add(fileKey, (file.Name, file.ContentType, buffer, imageDataUrl));
             totalImagenes++;
         }
     }
@@ -340,14 +340,16 @@ else
                 var eliminadaDb = await PropiedadesServices.EliminarImagen(imagen.ImagenId);
                 if (eliminadaDb)
                 {
-                    await SupabaseStorage.DeleteFile(imagen.UrlImagen);
+                    await StorageService.DeleteFile(imagen.UrlImagen);
                 }
             }
 
             if (archivosSeleccionados.Any())
             {
-                var filesToUpload = archivosSeleccionados.Values.Select(v => v.File).ToList();
-                var urls = await SupabaseStorage.UploadFiles(filesToUpload);
+                var filesToUpload = archivosSeleccionados.Values
+                    .Select(v => (v.FileName, v.ContentType, v.Content))
+                    .ToList();
+                var urls = await StorageService.UploadFiles(filesToUpload);
                 var ordenActual = (await PropiedadesServices.ContarImagenes(propiedad.PropiedadId));
 
                 foreach (var url in urls)

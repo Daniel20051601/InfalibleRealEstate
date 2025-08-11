@@ -5,21 +5,18 @@
 @inject UsuariosService UsuariosService
 @inject CarritoService CarritoService
 @inject NavigationManager Navigation
-@inject IToastService ToastService
+@inject NotificationService NotificationService
 
 <PageTitle>Carrito</PageTitle>
 
 <div class="container my-3">
     <div class="d-flex flex-column text-start">
-                <a href="/" class="aVolver">
-                    <i class="bi bi-arrow-left text-secondary   mx-2 mb-4">volver</i>
-                </a>
         <h3 class="titleCarrito fw-bold mt-4"> Carrito</h3>
-            </div>
+    </div>
     <div class="row">
         <div class="col-lg-8 col-md-7">
-            @if(carritoItems is null){
-
+            @if (paginatedCarritoItems is null)
+            {
                 <div class="d-flex flex-column align-items-center">
                     <div>
                         <div class="spinner-grow text-primary mx-1" role="status">
@@ -34,14 +31,14 @@
                     </div>
                 </div>
             }
-            else if (carritoItems.Count == 0)
+            else if (!paginatedCarritoItems.Any())
             {
-                <div class="alert alert-info text-center">Tu carrito está vacío.</div>
+                <div class="alert alert-info text-center">Tu carrito est&aacute; vac&iacute;o.</div>
             }
             else
             {
                 <div class="row">
-                    @foreach (var item in carritoItems)
+                    @foreach (var item in paginatedCarritoItems)
                     {
                         var propiedad = item.Propiedad;
                         if (propiedad != null)
@@ -74,9 +71,8 @@
                                                     </span>
                                                     <button class="btn btn-outline-danger btn-sm"
                                                             @onclick="() => EliminarItem(item.PropiedadId)"
-                                                            title="Eliminar"
->
-                                                        <i class="bi bi-trash"></i> 
+                                                            title="Eliminar">
+                                                        <i class="bi bi-trash"></i>
                                                     </button>
                                                 </div>
                                             </div>
@@ -87,50 +83,46 @@
                         }
                     }
                 </div>
+
+                @if (totalPages > 1)
+                {
+                    <nav aria-label="Page navigation">
+                        <ul class="pagination justify-content-center">
+                            <li class="page-item @(currentPage == 1 ? "disabled" : "")">
+                                <button class="page-link" @onclick="() => CambiarPagina(currentPage - 1)">Anterior</button>
+                            </li>
+                            @for (int i = 1; i <= totalPages; i++)
+                            {
+                                <li class="page-item @(currentPage == i ? "active" : "")">
+                                    <button class="page-link" @onclick="() => CambiarPagina(i)">@i</button>
+                                </li>
+                            }
+                            <li class="page-item @(currentPage == totalPages ? "disabled" : "")">
+                                <button class="page-link" @onclick="() => CambiarPagina(currentPage + 1)">Siguiente</button>
+                            </li>
+                        </ul>
+                    </nav>
+                }
             }
         </div>
 
         <div class="col-lg-4 col-md-5 mb-4">
             <div class="card shadow-sm p-3">
                 <div class=" mb-3">
-                    <h5><span class="fw-bold">Propiedades Agregadas:</span> @(carritoItems?.Count ?? 0)</h5>
-                    <h5><span class="fw-bold"> Total:</span>
-                        @{
-                            var moneda = carritoItems?.FirstOrDefault(i => i.Propiedad != null)?.Propiedad.Moneda ?? "DOP$";
-                            var total = carritoItems?.Where(i => i.Propiedad != null).Sum(i => i.Propiedad.Precio) ?? 0;
-                        }
-                        @(moneda == "Dolar" ? "USD$" : "DOP$")  @total.ToString("N2")
-                    </h5>
-                    
+                    <h5><span class="fw-bold">Propiedades Agregadas:</span> @(fullCarritoItems?.Count ?? 0)</h5>
                 </div>
                 <button class="btn btn-success w-100 mb-2 fw-semibold"
                         @onclick="EnviarPorWhatsapp">
                     <i class="bi bi-whatsapp"></i> Enviar Carrito
                 </button>
                 <button class="btn btn-primary w-100 fw-semibold"
-                         @onclick="@(()=> MostrarModalCita = true)">
+                        @onclick="@(() => MostrarModalCita = true)">
                     <i class="bi bi-calendar4-week"></i> Solicitar Cita
                 </button>
             </div>
         </div>
     </div>
 
-    <div class="mt-4 mb-5">
-        <h3 class="">Tambien te puede interesar</h3>
-        <div class="d-flex flex-column align-items-center">
-            <div>
-                <div class="spinner-grow text-primary mx-1" role="status">
-                    <span class="visually-hidden">Loading...</span>
-                </div>
-                <div class="spinner-grow text-primary mx-1" role="status">
-                    <span class="visually-hidden">Loading...</span>
-                </div>
-                <div class="spinner-grow text-primary mx-1" role="status">
-                    <span class="visually-hidden">Loading...</span>
-                </div>
-            </div>
-        </div>
-    </div>
 </div>
 
 @if (MostrarModalCita)
@@ -144,7 +136,7 @@
                     <button type="button" class="btn-close" @onclick="() => MostrarModalCita = false" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <CrearCita CarritoItems="carritoItems" UsuarioId="@user?.Id" OnClose="CerrarModalCita" />
+                    <CrearCita CarritoItems="fullCarritoItems" UsuarioId="@user?.Id" OnClose="CerrarModalCita" />
                 </div>
             </div>
         </div>
@@ -152,13 +144,16 @@
 }
 
 
-
-
 @code {
     public ApplicationUser? user { get; set; }
-    public List<CarritoItem>? carritoItems { get; set; }
-    public List<Propiedad> propiedades { get; set; } = new List<Propiedad>();
+    private List<CarritoItems>? paginatedCarritoItems { get; set; }
+    private List<CarritoItems>? fullCarritoItems { get; set; }
     public bool MostrarModalCita { get; set; } = false;
+
+    private int currentPage = 1;
+    private int pageSize = 3;
+    private int totalPages = 1;
+    private int totalItems = 0;
 
     protected override async Task OnInitializedAsync()
     {
@@ -172,11 +167,34 @@
             if (!string.IsNullOrEmpty(userId))
             {
                 user = await UsuariosService.Buscar(userId);
+                await CargarCarrito();
             }
         }
+    }
 
-        carritoItems = await CarritoService.ObtenerItemsCarrito(user?.Id ?? string.Empty);
+    private async Task CargarCarrito()
+    {
+        if (user is null) return;
 
+        paginatedCarritoItems = null;
+        StateHasChanged();
+
+        var result = await CarritoService.ObtenerItemsCarritoPaginadoAsync(user.Id, currentPage, pageSize);
+        paginatedCarritoItems = result.Items;
+        totalItems = result.TotalCount;
+        totalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
+        if (totalPages == 0) totalPages = 1;
+
+        fullCarritoItems = await CarritoService.ObtenerItemsCarrito(user.Id);
+
+        StateHasChanged();
+    }
+
+    private async Task CambiarPagina(int page)
+    {
+        if (page < 1 || page > totalPages) return;
+        currentPage = page;
+        await CargarCarrito();
     }
 
     private void CerrarModalCita()
@@ -186,8 +204,10 @@
 
     private void EnviarPorWhatsapp()
     {
+        if (fullCarritoItems is null || !fullCarritoItems.Any()) return;
+
         var mensaje = "*Hola estoy interesado en estas Propiedades:*\n";
-        foreach (var item in carritoItems)
+        foreach (var item in fullCarritoItems)
         {
             var p = item.Propiedad;
             if (p != null)
@@ -195,7 +215,10 @@
                 mensaje += $"\n- *{p.Titulo}*\nPrecio: {p.Precio:N2} {(p.Moneda == "Dolar" ? "$USD" : "$DOP")}\n{p.Ciudad}\nhttps://ejemplo:7031/Propiedad/Detalle/{p.PropiedadId}\n";
             }
         }
-        mensaje += $"Total: {carritoItems.Sum(i => i.Propiedad.Precio):N2} {(carritoItems.FirstOrDefault()?.Propiedad.Moneda ?? "DOP$")}";
+        var total = fullCarritoItems.Sum(i => i.Propiedad?.Precio ?? 0);
+        var moneda = fullCarritoItems.FirstOrDefault()?.Propiedad?.Moneda ?? "DOP";
+        mensaje += $"Total: {total:N2} {(moneda == "Dolar" ? "$USD" : "$DOP")}";
+
         var url = $"https://wa.me/18098419551?text={Uri.EscapeDataString(mensaje)}";
         Navigation.NavigateTo(url, false);
     }
@@ -205,12 +228,12 @@
         var guardado = await CarritoService.Eliminar(user?.Id ?? string.Empty, PropiedadId);
         if (guardado)
         {
-            ToastService.ShowSuccess("Item eliminado del carrito.");
-            carritoItems = await CarritoService.ObtenerItemsCarrito(user?.Id ?? string.Empty);
-            StateHasChanged();
+            NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = "Éxito", Detail = "Item eliminado del carrito.", Duration = 4000 });
+            if (paginatedCarritoItems?.Count == 1 && currentPage > 1)
+            {
+                currentPage--;
+            }
+            await CargarCarrito();
         }
-
     }
-
 }
-

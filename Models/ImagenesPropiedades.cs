@@ -17,5 +17,5 @@ public class ImagenPropiedad
     [Required]
     public int Orden { get; set; }
 
-    public Propiedad? Propiedad { get; set; }
+    public Propiedades? Propiedad { get; set; }
 }

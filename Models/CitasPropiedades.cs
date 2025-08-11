@@ -18,5 +18,5 @@ public class CitasPropiedades
     public int PropiedadId { get; set; }
 
     [ForeignKey("PropiedadId")]
-    public virtual Propiedad? Propiedad { get; set; }
+    public virtual Propiedades? Propiedad { get; set; }
 }

@@ -5,6 +5,10 @@
 @inject CarritoService carritoService
 @inject AuthenticationStateProvider authenticationStateProvider
 @inject UsuariosService UsuariosService
+@inject IJSRuntime JSRuntime
+@inject NavigationManager NavigationManager
+@inject CategoriaServices CategoriaServices
+@using Microsoft.AspNetCore.WebUtilities
 
 
 <PageTitle>Infalible Real Estate</PageTitle>
@@ -20,61 +24,46 @@
                         <div class="tab-pane fade show active " id="tab-buy">
 
                             <div class="icon-list d-flex overflow-auto justify-content-between mb-4 iconBg ">
-                                <div class="icon-item text-center flex-shrink-0 me-3 p-2">
+                                <div class="icon-item text-center flex-shrink-0 me-3 p-2 @(selectedCategoriaId == null ? "active" : "")" @onclick="() => SelectCategoria(null)">
                                     <i class="bi bi-grid fs-4"></i>
                                     <small class="d-block textZ">Todos</small>
                                 </div>
-                                <div class="icon-item text-center flex-shrink-0 me-3">
-                                    <i class="bi bi-building fs-4"></i>
-                                    <small class="d-block textZ">Apartamentos</small>
-                                </div>
-                                <div class="icon-item text-center flex-shrink-0 me-3">
-                                    <i class="bi bi-house fs-4"></i>
-                                    <small class="d-block textZ">Casas</small>
-                                </div>
-                                <div class="icon-item text-center flex-shrink-0 me-3">
-                                    <i class="bi bi-tree fs-4"></i>
-                                    <small class="d-block textZ">Solares</small>
-                                </div>
-                                <div class="icon-item text-center flex-shrink-0 me-3">
-                                    <i class="bi bi-building-up fs-4"></i>
-                                    <small class="d-block textZ">Penthouse</small>
-                                </div>
-                                <div class="icon-item text-center flex-shrink-0 me-3">
-                                    <i class="bi bi-house-door fs-4"></i>
-                                    <small class="d-block textZ">Villas</small>
-                                </div>
-                                <div class="icon-item text-center flex-shrink-0">
-                                    <i class="bi bi-shop fs-4"></i>
-                                    <small class="d-block textZ">Locales</small>
-                                </div>
+                                @foreach (var categoria in categorias)
+                                {
+                                    <div class="icon-item text-center flex-shrink-0 me-3 p-2 @(selectedCategoriaId == categoria.CategoriaId ? "active" : "")" @onclick="() => SelectCategoria(categoria.CategoriaId)">
+                                        <i class="bi @GetIconForCategory(categoria.NombreCategoria) fs-4"></i>
+                                        @if (categoria.NombreCategoria == "Local Comercial")
+                                        {
+                                            <small class="d-block textZ">Local</small>
+                                        }
+                                        else
+                                        {
+                                            <small class="d-block textZ">@categoria.NombreCategoria</small>
+                                        }
+    
+                                    </div>
+                                }
                             </div>
                             <div class="d-flex justify-content-between mb-3">
                                 <div class="">
                                     <div class="btn-group btn-group-sm" role="group">
-                                        <button type="button" class="btn btn-outline-info">Venta</button>
-                                        <button type="button" class="btn btn-outline-info">Alquiler</button>
-                                    </div>
-                                </div>
-                                <div class="">
-                                    <div class="btn-group btn-group-sm" role="group">
-                                        <button type="button" class="btn btn-outline-info">RD$</button>
-                                        <button type="button" class="btn btn-outline-info">US$</button>
+                                        <button type="button" class="btn @(selectedTipoTransaccion == "Venta" ? "btn-info" : "btn-outline-info")" @onclick='() => SelectTipoTransaccion("Venta")'>Venta</button>
+                                        <button type="button" class="btn @(selectedTipoTransaccion == "Alquiler" ? "btn-info" : "btn-outline-info")" @onclick='() => SelectTipoTransaccion("Alquiler")'>Alquiler</button>
                                     </div>
                                 </div>
                             </div>
 
 
                             <div class="mb-1">
-                                <input type="range" class="form-range" min="0" max="40000000" step="1000000">
+                                <input type="range" class="form-range" min="0" max="40000000" step="1000000" @bind="selectedPrecioMaximo" @bind:event="oninput">
                             </div>
                             <div class="mb-3 text-center">
-                                <small class="text-muted">RD$ 0 hasta RD$40,000,000</small>
+                                <small class="text-muted">Desde $ 0 hasta $ @selectedPrecioMaximo.ToString("N0")</small>
                             </div>
                             <div class="d-flex justify-content-center">
-                                <a href="/Propiedad/Catalogo" class="btn btn-primary btn-sm">
+                                <button @onclick="BuscarPropiedades" class="btn btn-info py-2 px-4 rounded-pill">
                                     <i class="bi bi-search"></i> Buscar
-                                </a>
+                                </button>
                             </div>
 
 
@@ -90,7 +79,7 @@
     </div>
 </section>
 
-<section class="ultimas-publicaciones-section container">
+<section class="ultimas-publicaciones-section container animate-slide-up">
     <div class="d-flex justify-content-center">
         <div class="ultimas-header-inner w-100">
             <div class="d-flex align-items-center mb-4 px-3">
@@ -211,7 +200,7 @@
     </div>
 </section>
 
-<section class="servicios-section mt-3">
+<section class="servicios-section mt-3 animate-slide-up">
     <div class="container">
         <div class="text-center">
             <div class="servicios-content">
@@ -230,13 +219,13 @@
                         <p class="servicio-descripcion ">
                             Servicios de asesoría inmobiliaria muy completo:<br>
                             Compra, Venta, y Renta de bienes inmuebles,<br>
-                            acompañamiento en la gestión de transacciones.
+                            acompañamiento en la gesti&oacute;n de transacciones.
                         </p>
                     </div>
 
                     <div class="servicio-item  col-md-6">
                         <img class="serviciosImg mb-1" src="https://scrgajdklzafafwrxrng.supabase.co/storage/v1/object/public/propiedades/SeccionServicios/Ilustraciones/InversionRojo.png" />
-                        <h3 class="servicio-titulo text-cyan">ELABORACIÓN DE PROCESO<br>DE INVERSIÓN</h3>
+                        <h3 class="servicio-titulo text-cyan">ELABORACIÓN DE PROCESO<br>DE INVERSI&Oacute;N</h3>
                         <p class="servicio-descripcion">
                             Asesoría de inversión y planificación patrimonial<br>
                             para hacer crecer tus ingresos.
@@ -250,7 +239,7 @@
                         <h3 class="servicio-titulo text-cyan ">SERVICIOS LEGALES Y<br>NOTARIALES</h3>
                         <p class="servicio-descripcion ">
                             Acompañamiento y asesoramiento a cargo de un equipo<br>
-                            de profesionales del derecho, además de contar<br>
+                            de profesionales del derecho, adem&aacute;s de contar<br>
                             con la garantía y seguridad en cada acto que<br>
                             instrumentan nuestros notarios públicos.
                         </p>
@@ -258,11 +247,11 @@
 
                     <div class="servicio-item col-md-6">
                         <img class="serviciosImg mb-1" src="https://scrgajdklzafafwrxrng.supabase.co/storage/v1/object/public/propiedades/SeccionServicios/Ilustraciones/PromocionRojo.170Z.png" />
-                        <h3 class="servicio-titulo mb-2  text-cyan">PROMOCIÓN Y ACOMPAÑAMIENTO</h3>
+                        <h3 class="servicio-titulo mb-2  text-cyan">PROMOCI&Oacute;N Y ACOMPAÑAMIENTO</h3>
                         <p class="servicio-descripcion ">
                             Agilizamos las transacciones comerciales de bienes<br>
-                            raíces, apoyándonos en una herramienta poderosa, la<br>
-                            publicidad a través de diferentes canales de promoción.
+                            ra&iacute;ces, apoy&aacute;ndonos en una herramienta poderosa, la<br>
+                            publicidad a trav&eacute;s de diferentes canales de promoci&oacute;n.
                         </p>
                     </div>
                 </div>
@@ -272,25 +261,25 @@
     </div>
 </section>
 
-<section class="mb-3">
+<section class="mb-3 animate-slide-up">
     <div class="articulos-section py-5" style="background-color: #1E1E1E;">
         <div class="container">
             <div class="d-flex flex-column align-items-center justify-content-center text-center">
                 <h2 class="mb-3 fw-semibold text-white">Sobre nosotros</h2>
                 <p class="mb-4 text-white" style="max-width: 900px;">
                     En Infalible Real Estate, transformamos espacios en oportunidades y
-                    propiedades en hogares. Nos dedicamos con pasión a conectar personas con
+                    propiedades en hogares. Nos dedicamos con pasi&oacute;n a conectar personas con
                     lugares donde puedan construir su historia, invertir con confianza o simplemente
-                    comenzar un nuevo capítulo. Con sede en San Francisco de Macorís, ofrecemos un servicio
-                    cercano, profesional y honesto, acompañándote en cada paso del proceso. Porque más que vender inmuebles, ubicamos tus sueños.
+                    comenzar un nuevo cap&iacute;tulo. Con sede en San Francisco de Macor&iacute;s, ofrecemos un servicio
+                    cercano, profesional y honesto, acompañ&aacute;ndote en cada paso del proceso. Porque m&acute;s que vender inmuebles, ubicamos tus sueños.
                 </p>
-                <a href="/unete" class="btn btn-light px-4 py-2 rounded-pill">¡Únete al equ&iacute;po!</a>
+                <a href="/nosotros" class="btn btn-light px-4 py-2 rounded-pill">¡Conoce m&aacute;s!</a>
             </div>
         </div>
     </div>
 </section>
 
-<section class="mb-3 sectionCanalYoutube">
+<section class="mb-3 sectionCanalYoutube animate-slide-up">
     <div class="container text-center py-5">
         <h2 class="fw-bold">
             Visita Nuestro
@@ -298,7 +287,7 @@
         </h2>
         <div>
             <p class="mb-2">
-                Descubre nuestro canal de YouTube, donde puedes ver los videos de todas nuestras propiedades. ¡Suscríbete y mantente al día con las últimas actualizaciones!
+                Descubre nuestro canal de YouTube, donde puedes ver los videos de todas nuestras propiedades. ¡Suscr&iacute;bete y mantente al d&iacute;a con las &uacute;ltimas actualizaciones!
             </p>
         </div>
         <div>
@@ -315,7 +304,7 @@
 
 </section>
 
-<section class="equipo-section mb-5">
+<section class="equipo-section mb-5 animate-slide-up">
     <div class="container">
         <div class="equipo-content">
             <div class="equipo-header mb-4">
@@ -327,30 +316,30 @@
         </div>
 
         <div class="catalog-cards-row mb-4">
-            <div class="catalog-card catalog-card-large">
+            <div class="catalog-card catalog-card-large" style="cursor: pointer;" @onclick='() => NavigateToCatalog("Casas")'>
                 <img class="catalog-card-img" src="https://scrgajdklzafafwrxrng.supabase.co/storage/v1/object/public/propiedades/SeccionCatalogo/Casa.jpg" alt="Card image">
                 <div class="catalog-card-overlay"></div>
                 <div class="catalog-card-content">
                     <h2 class="catalog-card-title">Casas</h2>
                 </div>
             </div>
-            <div class="catalog-card catalog-card-small">
+            <div class="catalog-card catalog-card-small" style="cursor: pointer;" @onclick='() => NavigateToCatalog("Proyectos")'>
                 <img class="catalog-card-img" src="https://scrgajdklzafafwrxrng.supabase.co/storage/v1/object/public/propiedades/SeccionCatalogo/proyectos.jpg" alt="Card image">
                 <div class="catalog-card-overlay"></div>
                 <div class="catalog-card-content">
-                    <h2 class="catalog-card-title">Proyectos</h2>
+                    <h2 class="catalog-card-title">Apartamento</h2>
                 </div>
             </div>
         </div>
         <div class="catalog-cards-row mb-4">
-            <div class="catalog-card catalog-card-small">
+            <div class="catalog-card catalog-card-small" style="cursor: pointer;" @onclick='() => NavigateToCatalog("Villas")'>
                 <img class="catalog-card-img" src="https://scrgajdklzafafwrxrng.supabase.co/storage/v1/object/public/propiedades/SeccionCatalogo/Villas.jpg" alt="Card image">
                 <div class="catalog-card-overlay"></div>
                 <div class="catalog-card-content">
                     <h2 class="catalog-card-title">Villas</h2>
                 </div>
             </div>
-            <div class="catalog-card catalog-card-large">
+            <div class="catalog-card catalog-card-large" style="cursor: pointer;" @onclick='() => NavigateToCatalog("Penthouses")'>
                 <img class="catalog-card-img" src="https://scrgajdklzafafwrxrng.supabase.co/storage/v1/object/public/propiedades/SeccionCatalogo/penthouse.jpg" alt="Card image">
                 <div class="catalog-card-overlay"></div>
                 <div class="catalog-card-content">
@@ -360,14 +349,14 @@
 
         </div>
         <div class="catalog-cards-row mb-4">
-            <div class="catalog-card catalog-card-large">
+            <div class="catalog-card catalog-card-large" style="cursor: pointer;" @onclick='() => NavigateToCatalog("Terrenos")'>
                 <img class="catalog-card-img" src="https://scrgajdklzafafwrxrng.supabase.co/storage/v1/object/public/propiedades/SeccionCatalogo/terrenos.jpg" alt="Card image">
                 <div class="catalog-card-overlay"></div>
                 <div class="catalog-card-content">
                     <h2 class="catalog-card-title">Terrenos</h2>
                 </div>
             </div>
-            <div class="catalog-card catalog-card-small">
+            <div class="catalog-card catalog-card-small" style="cursor: pointer;" @onclick='() => NavigateToCatalog("Locales comerciales")'>
                 <img class="catalog-card-img" src="https://scrgajdklzafafwrxrng.supabase.co/storage/v1/object/public/propiedades/SeccionCatalogo/Locales.jpg" alt="Card image">
                 <div class="catalog-card-overlay"></div>
                 <div class="catalog-card-content">
@@ -375,9 +364,9 @@
                 </div>
             </div>
         </div>
-        <div class="d-grid gap-2 col-4 mx-auto">
-            <a href="/Propiedad/Catalogo" class="btn btn-primary btn-lg p-3">
-                Cat&aacute;logo completo
+        <div class="d-flex justify-content-center">
+            <a href="/Propiedad/Catalogo" class="btn btn-info rounded-pill p-3">
+                <i class="bi bi-collection"></i> Cat&aacute;logo completo
             </a>
         </div>
     </div>
@@ -397,28 +386,112 @@
 }
 
 @code {
-    private List<Propiedad>? ultimasPropiedades;
+    private List<Propiedades>? ultimasPropiedades;
     private ElementReference carouselRef;
     private ApplicationUser? user;
     public bool mostrarModal { get; set; } = false;
+
+    private List<Categorias> categorias = new();
+    private int? selectedCategoriaId;
+    private string? selectedTipoTransaccion = "Venta";
+    private decimal selectedPrecioMaximo = 40000000;
 
     protected override async Task OnInitializedAsync()
     {
         try
         {
             ultimasPropiedades = await PropiedadesService.GetUltimasPropiedadesAsync(5);
+            categorias = await CategoriaServices.Listar(c => true);
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error al cargar propiedades: {ex.Message}");
-            ultimasPropiedades = new List<Propiedad>();
+            Console.WriteLine($"Error al cargar datos: {ex.Message}");
+            ultimasPropiedades = new List<Propiedades>();
+            categorias = new List<Categorias>();
         }
     }
+
     private void CerrarModalCita()
     {
         mostrarModal = false;
     }
 
+    private void SelectCategoria(int? categoriaId)
+    {
+        selectedCategoriaId = categoriaId;
+    }
+
+    private void SelectTipoTransaccion(string? tipo)
+    {
+        selectedTipoTransaccion = tipo;
+    }
+
+    private void BuscarPropiedades()
+    {
+        var queryParams = new Dictionary<string, string?>();
+
+        if (selectedCategoriaId.HasValue)
+        {
+            queryParams["categoriaId"] = selectedCategoriaId.Value.ToString();
+        }
+        if (!string.IsNullOrEmpty(selectedTipoTransaccion))
+        {
+            queryParams["tipoTransaccion"] = selectedTipoTransaccion;
+        }
+        if (selectedPrecioMaximo < 40000000)
+        {
+            queryParams["precioMax"] = selectedPrecioMaximo.ToString();
+        }
+
+        var uri = QueryHelpers.AddQueryString("/Propiedad/Catalogo", queryParams);
+        NavigationManager.NavigateTo(uri);
+    }
+
+    private void NavigateToCatalog(string categoryDisplayName)
+    {
+        string? categoryNameToSearch = categoryDisplayName switch
+        {
+            "Casas" => "Casa",
+            "Penthouses" => "Penthouse",
+            "Villas" => "Villa",
+            "Terrenos" => "Terreno",
+            "Locales comerciales" => "Local Comercial",
+            "Proyectos" => "Apartamento",
+            _ => null
+        };
+
+        if (string.IsNullOrEmpty(categoryNameToSearch))
+        {
+            NavigationManager.NavigateTo("/Propiedad/Catalogo");
+            return;
+        }
+
+        var categoria = categorias.FirstOrDefault(c => c.NombreCategoria.Equals(categoryNameToSearch, StringComparison.OrdinalIgnoreCase));
+
+        var queryParams = new Dictionary<string, string?>();
+
+        if (categoria != null)
+        {
+            queryParams["categoriaId"] = categoria.CategoriaId.ToString();
+        }
+
+        var uri = QueryHelpers.AddQueryString("/Propiedad/Catalogo", queryParams);
+        NavigationManager.NavigateTo(uri);
+    }
+
+    private string GetIconForCategory(string categoryName)
+    {
+        return categoryName switch
+        {
+            "Apartamento" => "bi-building",
+            "Casa" => "bi-house",
+            "Penthouse" => "bi-building-up",
+            "Villa" => "bi-house-door",
+            "Terreno" => "bi-tree",
+            "Local Comercial" => "bi-shop",
+            _ => "bi-grid"
+        };
+    }
 
     private async Task AgregarAlCarrito(int propiedadId)
     {
@@ -453,7 +526,9 @@
         }
     }
 
+    protected override void OnAfterRender(bool firstRender)
+    {
+        JSRuntime.InvokeVoidAsync("initializeIntersectionObserver");
+    }
+
 }
-
-
-

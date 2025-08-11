@@ -22,7 +22,7 @@
                 <a href="/vende" class="btn menu-btn">Vende</a>
                 <a href="/unete" class="btn menu-btn">Forma Parte</a>
                 <a href="/foros" class="btn menu-btn">Foros</a>
-                <a class="btn menu-btn">Cont&aacute;ctanos</a>  
+                <a href="/contactanos" class="btn menu-btn">Cont&aacute;ctanos</a>
                 <div class="dropdown">  
                     <button class="btn btnPerson text-white" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">  
                         <i class="bi bi-person"></i>  
@@ -47,13 +47,7 @@
                                         </a>  
                                     </Authorized>  
                                 </AuthorizeView>  
-                                <form action="Account/Logout" method="post">  
-                                    <AntiforgeryToken />  
-                                    <input type="hidden" name="ReturnUrl" value="@currentUrl" />
-                                    <button type="submit" class="dropdown-item dropdown-item-top">
-                                        <span class="bi bi-arrow-bar-left" aria-hidden="true"></span> Cerrar Sesión  
-                                    </button>  
-                                </form>  
+                                 
                             </div>  
                         </Authorized>  
 

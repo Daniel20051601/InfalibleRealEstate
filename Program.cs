@@ -22,9 +22,9 @@ builder.Services.AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuth
 
 builder.Services.AddScoped<PropiedadService>();
 builder.Services.AddScoped<CategoriaServices>();
-builder.Services.AddScoped<SupabaseStorageService>();
+builder.Services.AddScoped<StorageService>();
 builder.Services.AddScoped<UsuariosService>();
-builder.Services.AddHttpClient<SupabaseStorageService>();
+builder.Services.AddHttpClient<StorageService>();
 builder.Services.AddScoped<CarritoService>();
 builder.Services.AddScoped<SolicitudesVentaService>();
 builder.Services.AddScoped<SolicitudesUnirseService>();

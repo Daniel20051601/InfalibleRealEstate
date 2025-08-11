@@ -95,9 +95,54 @@ public class UsuariosService(ApplicationDbContext context, UserManager<Applicati
             .ToListAsync();
     }
 
+    public async Task<(List<ApplicationUser> Users, int TotalCount)> ListarPaginado(int pagina, int tamanoPagina, string filtro, string valorFiltro)
+    {
+        var query = context.Users.Include(u => u.EstadoUsuario).AsQueryable();
+
+        if (!string.IsNullOrEmpty(valorFiltro))
+        {
+            var valorFiltroLower = valorFiltro.ToLower();
+            switch (filtro.ToLower())
+            {
+                case "nombre":
+                    query = query.Where(u => (u.Nombre + " " + u.Apellido).ToLower().Contains(valorFiltroLower));
+                    break;
+                case "email":
+                    query = query.Where(u => u.Email != null && u.Email.ToLower().Contains(valorFiltroLower));
+                    break;
+                case "rol":
+                    var role = await roleManager.Roles.FirstOrDefaultAsync(r => r.Name != null && r.Name.ToLower() == valorFiltroLower);
+                    if (role != null)
+                    {
+                        var userIdsInRole = await context.UserRoles
+                            .Where(ur => ur.RoleId == role.Id)
+                            .Select(ur => ur.UserId)
+                            .ToListAsync();
+                        query = query.Where(u => userIdsInRole.Contains(u.Id));
+                    }
+                    else
+                    {
+                        return (new List<ApplicationUser>(), 0);
+                    }
+                    break;
+            }
+        }
+        var totalCount = await query.CountAsync();
+
+        var users = await query
+            .OrderBy(u => u.Nombre)
+            .Skip((pagina - 1) * tamanoPagina)
+            .Take(tamanoPagina)
+            .AsNoTracking()
+            .ToListAsync();
+
+        return (users, totalCount);
+    }
+
     public async Task<ApplicationUser?> Buscar(string userId)
     {
         return await context.Users
+            .Include(u => u.EstadoUsuario)
             .AsNoTracking()
             .FirstOrDefaultAsync(u => u.Id == userId);
     }
@@ -107,7 +152,7 @@ public class UsuariosService(ApplicationDbContext context, UserManager<Applicati
         return await context.Users.CountAsync();
     }
 
-    public async Task<List<EstadoUsuario>> ListarEstados()
+    public async Task<List<EstadoUsuarios>> ListarEstados()
     {
         return await context.EstadosUsuarios
             .AsNoTracking()

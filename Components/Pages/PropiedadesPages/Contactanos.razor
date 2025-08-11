@@ -1,0 +1,68 @@
+﻿@page "/contactanos"
+@rendermode InteractiveServer
+@inject IJSRuntime JSRuntime
+
+<div class="container my-4 mb-5">
+
+    <div class="row">
+        <div class="col-12">
+            <h1 class="mb-4 fw-bold titulo-underline-azul">Cont&aacute;ctanos</h1>
+        </div>
+    </div>
+
+    <div class="row align-items-stretch">
+        <div class="col-lg-7 mb-4 mb-lg-0 p-0">
+            <div class="map-container animate-slide-up h-100">
+                <iframe src="https://www.google.com/maps/embed?pb=!1m14!1m12!1m3!1d236.84322812587885!2d-70.25884414480626!3d19.295934760568024!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!5e0!3m2!1ses-419!2sdo!4v1754793301274!5m2!1ses-419!2sdo"
+                        frameborder="0" scrolling="no" marginheight="0" marginwidth="0">
+                </iframe>
+            </div>
+        </div>
+
+        <div class="col-lg-5 mt-4 cardContactanos">
+            <div class="p-4 card shadow-lg animate-slide-up">
+                <div class="d-flex justify-content-center">
+                    <h4 class="mb-4 titulo-vende fw-semibold">Informaci&oacute;n de Contacto</h4>
+                </div>
+
+                <div class="contact-info">
+                    <div class="d-flex align-items-center mb-3">
+                        <i class="bi bi-geo-alt-fill fs-4 text-danger me-3"></i>
+                        <div>
+                            <h6 class="mb-0">Direcci&oacute;n</h6>
+                            <p class="mb-0 text-muted">Calle Santa Ana esq. Castillo, San Francisco de Macor&iacute;s, Rep&uacute;blica Dominicana</p>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-center mb-3">
+                        <i class="bi bi-telephone-fill fs-4 text-danger me-3"></i>
+                        <div>
+                            <h6 class="mb-0">Tel&eacute;fono</h6>
+                            <p class="mb-0 text-muted">+1 (809) 123-4567</p>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-center mb-3">
+                        <i class="bi bi-envelope-fill fs-4 text-danger me-3"></i>
+                        <div>
+                            <h6 class="mb-0">Correo Electr&oacute;nico</h6>
+                            <p class="mb-0 text-muted">contacto@infaliblerealestate.com</p>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-clock-fill fs-4 text-danger me-3"></i>
+                        <div>
+                            <h6 class="mb-0">Horario de Atenci&oacute;n</h6>
+                            <p class="mb-0 text-muted">Lunes a S&aacute;bados: 8:00 AM - 6:00 PM</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    protected override void OnAfterRender(bool firstRender)
+    {
+        JSRuntime.InvokeVoidAsync("initializeIntersectionObserver");
+    }
+}

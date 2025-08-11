@@ -3,6 +3,10 @@
 @inject PropiedadService PropiedadesServices
 @rendermode InteractiveServer
 @inject NavigationManager NavigationManager
+@inject CarritoService carritoService
+@inject AuthenticationStateProvider authenticationStateProvider
+@inject NotificationService NotificationService
+@using Microsoft.AspNetCore.WebUtilities
 
 <EditForm Model="filtros">
     <div class="catalog-container">
@@ -132,7 +136,7 @@
                     @foreach (var propiedad in propiedadesPaginadas)
                     {
                         <div class="col-sm-6 col-md-4 col-lg-4 col-xl-4 mb-4 ultimas-card-col">
-                            <a href="/Propiedad/Detalle/@propiedad.PropiedadId">
+                            <a href="/Propiedad/Detalle/@propiedad.PropiedadId" class="text-decoration-none">
                                 <div class="card ultimas-card h-100">
                                     @if (propiedad.Imagenes?.Any() == true)
                                     {
@@ -146,11 +150,6 @@
                                             <i class="bi bi-house text-muted" style="font-size: 3rem;"></i>
                                         </div>
                                     }
-                                    <button type="button"
-                                            class="btn btn-fav position-absolute top-0 end-0 m-2"
-                                            title="Agregar al carrito">
-                                        <i class="bi bi-cart"></i>
-                                    </button>
                                     <div class="card-body p-3">
                                         <div class="d-flex justify-content-between mb-2">
                                             <small class="text-secondary">@propiedad.TipoTransaccion</small>
@@ -213,10 +212,16 @@
                                     </div>
                                 </div>
                             </a>
+                            <button type="button"
+                                    class="btn btn-fav position-absolute top-0 end-0 m-2"
+                                    title="Agregar al carrito"
+                                    @onclick="() => AgregarAlCarrito(propiedad.PropiedadId)" @onclick:stopPropagation>
+                                <i class="bi bi-cart"></i>
+                            </button>
                         </div>
                     }
                 </div>
-                <!-- Paginación -->
+
                 <nav aria-label="Page navigation" class="mt-4">
                     <ul class="pagination justify-content-center">
                         <li class="page-item @(currentPage == 1 ? "disabled" : "")">
@@ -238,11 +243,27 @@
     </div>
 </EditForm>
 
+@if (mostrarModal)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="display: block; background-color: rgba(0, 0, 0, 0.5);">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-body ">
+                    <InfalibleRealEstate.Components.Pages.PropiedadesPages.ModalIniciaSesion @bind-mostrarModal="mostrarModal" />
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+
 @code {
-    private List<Categoria> categorias = new();
-    private List<Propiedad>? propiedades = new();
-    private List<Propiedad>? propiedadesPaginadas = new();
+    private List<Categorias> categorias = new();
+    private List<Propiedades>? propiedades = new();
+    private List<Propiedades>? propiedadesPaginadas = new();
     private bool showFilters = true;
+    public bool mostrarModal { get; set; } = false;
+
 
     private FiltrosPropiedades filtros = new();
 
@@ -257,9 +278,19 @@
         filtros.PrecioMaximo = 40000000;
 
         var uri = NavigationManager.ToAbsoluteUri(NavigationManager.Uri);
-        if (QueryHelpers.ParseQuery(uri.Query).TryGetValue("t", out var tipo))
+        var query = QueryHelpers.ParseQuery(uri.Query);
+
+        if (query.TryGetValue("tipoTransaccion", out var tipo))
         {
             filtros.TipoTransaccion = tipo;
+        }
+        if (query.TryGetValue("categoriaId", out var catId) && int.TryParse(catId, out var categoriaId))
+        {
+            filtros.CategoriaId = categoriaId;
+        }
+        if (query.TryGetValue("precioMax", out var pMax) && decimal.TryParse(pMax, out var precioMaximo))
+        {
+            filtros.PrecioMaximo = precioMaximo;
         }
 
         await CargarPropiedades();
@@ -310,9 +341,9 @@
     private async Task LimpiarFiltros()
     {
         filtros = new FiltrosPropiedades
-        {
-            PrecioMaximo = 40000000
-        };
+            {
+                PrecioMaximo = 40000000
+            };
         currentPage = 1;
         await CargarPropiedades();
     }
@@ -395,6 +426,39 @@
         {
             currentPage = page;
             await CargarPropiedades();
+        }
+    }
+
+    private async Task AgregarAlCarrito(int propiedadId)
+    {
+        var authState = await authenticationStateProvider.GetAuthenticationStateAsync();
+        var claimsUser = authState.User;
+
+        if (claimsUser.Identity is not null && claimsUser.Identity.IsAuthenticated)
+        {
+            var userId = claimsUser.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+
+            if (!string.IsNullOrEmpty(userId))
+            {
+                bool guardado = await carritoService.Agregar(userId, propiedadId);
+
+                if (guardado)
+                {
+                    NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = "Éxito", Detail = "Propiedad agregada al carrito.", Duration = 4000 });
+                }
+                else
+                {
+                    NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Warning, Detail = "La propiedad ya está en el carrito.", Duration = 4000, ShowProgress = true, CloseOnClick = true });
+                }
+            }
+            else
+            {
+                mostrarModal = true;
+            }
+        }
+        else
+        {
+            mostrarModal = true;
         }
     }
 
