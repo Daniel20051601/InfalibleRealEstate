@@ -13,21 +13,21 @@ namespace InfalibleRealEstate.Services
             return await contexto.SolicitudesUnirse.AnyAsync(s => s.SolicitudUnirseId == solicitudUnirseId);
         }
 
-        public async Task<bool> Insertar(SolicitudUnirse solicitud)
+        public async Task<bool> Insertar(SolicitudesUnirse solicitud)
         {
             await using var contexto = await DbContext.CreateDbContextAsync();
             contexto.SolicitudesUnirse.Add(solicitud);
             return await contexto.SaveChangesAsync() > 0;
         }
 
-        public async Task<bool> Modificar(SolicitudUnirse solicitud)
+        public async Task<bool> Modificar(SolicitudesUnirse solicitud)
         {
             await using var contexto = await DbContext.CreateDbContextAsync();
             contexto.SolicitudesUnirse.Update(solicitud);
             return await contexto.SaveChangesAsync() > 0;
         }
 
-        public async Task<bool> Guardar(SolicitudUnirse solicitud)
+        public async Task<bool> Guardar(SolicitudesUnirse solicitud)
         {
             if (await Existe(solicitud.SolicitudUnirseId))
             {
@@ -39,7 +39,7 @@ namespace InfalibleRealEstate.Services
             }
         }
 
-        public async Task<SolicitudUnirse?> Buscar(int solicitudId)
+        public async Task<SolicitudesUnirse?> Buscar(int solicitudId)
         {
             await using var contexto = await DbContext.CreateDbContextAsync();
             return await contexto.SolicitudesUnirse
@@ -48,7 +48,7 @@ namespace InfalibleRealEstate.Services
                 .FirstOrDefaultAsync(s => s.SolicitudUnirseId == solicitudId);
         }
 
-        public async Task<List<SolicitudUnirse>> ListarSolicitudesUnirse()
+        public async Task<List<SolicitudesUnirse>> ListarSolicitudesUnirse()
         {
             await using var contexto = await DbContext.CreateDbContextAsync();
             return await contexto.SolicitudesUnirse
@@ -57,7 +57,7 @@ namespace InfalibleRealEstate.Services
                 .ToListAsync();
         }
 
-        public async Task<(List<SolicitudUnirse> Solicitudes, int TotalCount)> ListarPaginado(int pagina, int tamanoPagina, string filtro, string valorFiltro, DateTime? desde, DateTime? hasta)
+        public async Task<(List<SolicitudesUnirse> Solicitudes, int TotalCount)> ListarPaginado(int pagina, int tamanoPagina, string filtro, string valorFiltro, DateTime? desde, DateTime? hasta)
         {
             await using var contexto = await DbContext.CreateDbContextAsync();
 

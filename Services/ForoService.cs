@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore.Internal;
 
 namespace InfalibleRealEstate.Services;
 
-public class ForoService(IDbContextFactory<ApplicationDbContext> DbContext, SupabaseStorageService supabaseStorage)
+public class ForoService(IDbContextFactory<ApplicationDbContext> DbContext, StorageService supabaseStorage)
 {
     public async Task<bool> Existe(int foroId)
     {

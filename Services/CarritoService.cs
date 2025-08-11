@@ -6,7 +6,7 @@ namespace InfalibleRealEstate.Services;
 
 public class CarritoService(IDbContextFactory<ApplicationDbContext> DbContext)
 {
-    public async Task<List<CarritoItem>> ObtenerItemsCarrito(string usuarioId)
+    public async Task<List<CarritoItems>> ObtenerItemsCarrito(string usuarioId)
     {
         using var contexto = DbContext.CreateDbContext();
         var carrito = await contexto.Carritos
@@ -18,10 +18,10 @@ public class CarritoService(IDbContextFactory<ApplicationDbContext> DbContext)
                     .ThenInclude(p => p.Imagenes)
             .FirstOrDefaultAsync(c => c.UsuarioId == usuarioId);
 
-        return carrito?.CarritoItems.ToList() ?? new List<CarritoItem>();
+        return carrito?.CarritoItems.ToList() ?? new List<CarritoItems>();
     }
 
-    public async Task<(List<CarritoItem> Items, int TotalCount)> ObtenerItemsCarritoPaginadoAsync(string usuarioId, int pagina, int tamanoPagina)
+    public async Task<(List<CarritoItems> Items, int TotalCount)> ObtenerItemsCarritoPaginadoAsync(string usuarioId, int pagina, int tamanoPagina)
     {
         using var contexto = DbContext.CreateDbContext();
         var carrito = await contexto.Carritos
@@ -35,7 +35,7 @@ public class CarritoService(IDbContextFactory<ApplicationDbContext> DbContext)
 
         if (carrito == null || !carrito.CarritoItems.Any())
         {
-            return (new List<CarritoItem>(), 0);
+            return (new List<CarritoItems>(), 0);
         }
 
         var totalItems = carrito.CarritoItems.Count;
@@ -58,7 +58,7 @@ public class CarritoService(IDbContextFactory<ApplicationDbContext> DbContext)
 
         if (carrito == null)
         {
-            carrito = new Carrito { UsuarioId = usuarioId, CarritoItems = new List<CarritoItem>() };
+            carrito = new Carritos { UsuarioId = usuarioId, CarritoItems = new List<CarritoItems>() };
             contexto.Carritos.Add(carrito);
         }
 
@@ -67,7 +67,7 @@ public class CarritoService(IDbContextFactory<ApplicationDbContext> DbContext)
             return false;
         }
 
-        carrito.CarritoItems.Add(new CarritoItem { PropiedadId = propiedadId });
+        carrito.CarritoItems.Add(new CarritoItems { PropiedadId = propiedadId });
         await contexto.SaveChangesAsync();
         return true;
     }

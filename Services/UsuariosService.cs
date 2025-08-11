@@ -152,7 +152,7 @@ public class UsuariosService(ApplicationDbContext context, UserManager<Applicati
         return await context.Users.CountAsync();
     }
 
-    public async Task<List<EstadoUsuario>> ListarEstados()
+    public async Task<List<EstadoUsuarios>> ListarEstados()
     {
         return await context.EstadosUsuarios
             .AsNoTracking()

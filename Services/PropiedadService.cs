@@ -5,7 +5,7 @@ using InfalibleRealEstate.Data;
 
 namespace InfalibleRealEstate.Services;
 
-public class PropiedadService(IDbContextFactory<ApplicationDbContext> DbContext, SupabaseStorageService supabaseStorage)
+public class PropiedadService(IDbContextFactory<ApplicationDbContext> DbContext, StorageService supabaseStorage)
 {
     public async Task<bool> Existe(int PropiedadId)
     {
@@ -13,7 +13,7 @@ public class PropiedadService(IDbContextFactory<ApplicationDbContext> DbContext,
         return await contexto.Propiedades.AnyAsync(p => p.PropiedadId == PropiedadId);
     }
 
-    public async Task<bool> Insertar(Propiedad propiedad)
+    public async Task<bool> Insertar(Propiedades propiedad)
     {
         await using var contexto = await DbContext.CreateDbContextAsync();
 
@@ -28,7 +28,7 @@ public class PropiedadService(IDbContextFactory<ApplicationDbContext> DbContext,
         return await contexto.SaveChangesAsync() > 0;
     }
 
-    public async Task<bool> Modificar(Propiedad propiedad)
+    public async Task<bool> Modificar(Propiedades propiedad)
     {
         await using var contexto = await DbContext.CreateDbContextAsync();
 
@@ -60,7 +60,7 @@ public class PropiedadService(IDbContextFactory<ApplicationDbContext> DbContext,
         return await contexto.SaveChangesAsync() > 0;
     }
 
-    public async Task<bool> Guardar(Propiedad propiedad)
+    public async Task<bool> Guardar(Propiedades propiedad)
     {
         if (await Existe(propiedad.PropiedadId))
         {
@@ -72,7 +72,7 @@ public class PropiedadService(IDbContextFactory<ApplicationDbContext> DbContext,
         }
     }
 
-    public async Task<Propiedad?> Buscar(int PropiedadId)
+    public async Task<Propiedades?> Buscar(int PropiedadId)
     {
         await using var contexto = await DbContext.CreateDbContextAsync();
         return await contexto.Propiedades
@@ -112,7 +112,7 @@ public class PropiedadService(IDbContextFactory<ApplicationDbContext> DbContext,
         return await contexto.SaveChangesAsync() > 0;
     }
 
-    public async Task<List<Propiedad>> Listar(Expression<Func<Propiedad, bool>> criterio)
+    public async Task<List<Propiedades>> Listar(Expression<Func<Propiedades, bool>> criterio)
     {
         await using var contexto = await DbContext.CreateDbContextAsync();
         return await contexto.Propiedades
@@ -126,7 +126,7 @@ public class PropiedadService(IDbContextFactory<ApplicationDbContext> DbContext,
             .ToListAsync();
     }
 
-    public async Task<(List<Propiedad> Propiedades, int TotalCount)> ListarPaginado(
+    public async Task<(List<Propiedades> Propiedades, int TotalCount)> ListarPaginado(
        int pagina,
        int tamanoPagina,
        string? filtro = null,
@@ -186,7 +186,7 @@ public class PropiedadService(IDbContextFactory<ApplicationDbContext> DbContext,
     }
 
 
-    public async Task<List<Propiedad>> GetUltimasPropiedadesAsync(int cantidad)
+    public async Task<List<Propiedades>> GetUltimasPropiedadesAsync(int cantidad)
     {
         await using var contexto = await DbContext.CreateDbContextAsync();
         return await contexto.Propiedades
@@ -241,7 +241,7 @@ public class PropiedadService(IDbContextFactory<ApplicationDbContext> DbContext,
         return await contexto.ImagenesPropiedad.CountAsync(i => i.PropiedadId == propiedadId);
     }
 
-    public async Task<List<EstadoPropiedad>> ListarEstados()
+    public async Task<List<EstadoPropiedades>> ListarEstados()
     {
         await using var contexto = await DbContext.CreateDbContextAsync();
         return await contexto.EstadosPropiedad.ToListAsync();
